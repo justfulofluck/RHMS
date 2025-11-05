@@ -4,8 +4,7 @@ from .forms import HospitalRegistrationForm
 from rest_framework import viewsets, permissions ,decorators, response, status
 from doctors.models import Doctor
 from .models import Department, Treatment, Hospital
-from .serializers import HospitalRegisterSerializer
-from .serializers import DepartmentSerializer, TreatmentSerializer
+from .serializers import DepartmentSerializer, TreatmentSerializer, HospitalRegisterSerializer
 from doctors.serializers import DoctorSerializer
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital
 from rest_framework.permissions import IsAuthenticated

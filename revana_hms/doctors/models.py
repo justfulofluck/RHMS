@@ -1,6 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
+from django.conf import settings
 from hospitals.models import Hospital, Department, Treatment
+
+User = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
 
 class Doctor(models.Model):
     STATUS_PENDING = 'pending'

@@ -27,7 +27,7 @@ from rest_framework.routers import DefaultRouter
 from doctors.views import DoctorViewSet
 from appointments.views import AppointmentViewSet, DoctorAvailabilityViewSet
 from hospitals.views import DepartmentViewSet, TreatmentViewSet
-
+from core.views import test_auth
 
 router = DefaultRouter()
 router.register(r'doctors', DoctorViewSet, basename='doctor')
@@ -37,6 +37,7 @@ router.register(r'departments', DepartmentViewSet, basename='department')
 router.register(r'treatments', TreatmentViewSet, basename='treatment')
 
 urlpatterns = [
+    path('api/test-auth/', test_auth),
     path('admin/', admin.site.urls),
     path('api/', include('hospitals.api_urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
