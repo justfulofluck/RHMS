@@ -1,0 +1,38 @@
+API documntation:
+
+> to get user token for sueradmin:
+curl -X POST http://192.168.1.208:8040/api/token/   -H "Content-Type: application/json"   -d '{"username": "bgtuser", "password": "bgt@123"}'
+
+
+> to register hospital:
+curl -X POST http://127.0.0.1:8040/api/hospitals/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "City Care Hospital",
+    "registration_number": "REG123",
+    "email": "admin@citycare.com",
+    "address": "MG Road, Vadodara",
+    "phone_number": "9876543210",
+    "city": "Vadodara"
+  }'
+
+> to see hospital list
+curl http://192.168.1.208:8040/api/hospitals/
+
+> To approve hospital
+curl -X POST http://192.168.1.208:8040/api/admin/hospitals/1/approve/ \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYxOTA5MjI5LCJpYXQiOjE3NjE5MDg5MjksImp0aSI6ImE1NTkxYTJmZjA2MzRkMTk5ZWE5YmIwMjQxNzI1NWYyIiwidXNlcl9pZCI6IjEifQ.uAp4_s67J23ZaZ-kGsWc8b_vdg1H7SY8S-rAHSWDSdg" \
+  -H "Content-Type: application/json"
+
+
+> Reset Mail:
+curl -X POST http://127.0.0.1:8000/api/accounts/password-reset/ \
+  -H "Content-Type: application/json" \
+  -d '{"email": "blueglobalcloud@gmail.com"}'
+
+> Confirm Reset Mail:
+curl -X POST http://127.0.0.1:8000/api/accounts/password-reset-confirm/ \
+  -H "Content-Type: application/json" \
+  -d '{"uid": "<uid>", "token": "<token>", "new_password": "newsecurepass123"}'
+
+
