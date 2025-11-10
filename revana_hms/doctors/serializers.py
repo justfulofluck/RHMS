@@ -1,7 +1,39 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Doctor
+from .models import Doctor, DoctorAvailability
 
+
+class DoctorAvailabilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorAvailability
+        fields = ['id', 'date', 'start_time', 'end_time', 'is_available']
+
+    def validate(self, data):
+        doctor = self.context['request'].user.doctor
+        date = data['date']
+        start = data['stat_time']
+        end = data['end_time']
+
+        #time range validation
+        if start >= end:
+            raise serializers.ValidationError("Start time must be before end Time")
+        
+
+        #slot Conflit
+
+        conflicts = DoctorAvailability.objects.filter(
+            doctor=doctor,
+            data=date,
+            start_time__lt=end,
+            end_time_gt=start
+        )
+        if self.instance:
+            conflicts = conflicts.exclude(id=self.instance.id)
+        
+        if conflicts.exists():
+            raise serializers.ValidationError("This slot overlaps with an existing availability")
+        
+        return data
 
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:

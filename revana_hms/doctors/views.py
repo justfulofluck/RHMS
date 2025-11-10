@@ -1,6 +1,21 @@
 from rest_framework import viewsets, permissions, decorators, response, status
-from .models import Doctor
-from .serializers import DoctorSerializer
+from .models import Doctor, DoctorAvailability
+from .serializers import DoctorSerializer, DoctorAvailabilitySerializer
+
+
+class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
+    queryset = DoctorAvailability.objects.all()
+    serializer_class = DoctorAvailabilitySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if hasattr(user, 'doctor'):
+            return DoctorAvailability.objects.filter(doctor=user.doctor)
+        return DoctorAvailability.objects.none()
+
+    def perform_create(self, serializer):
+        serializer.save(doctor=self.request.user.doctor)
 
 
 class DoctorViewSet(viewsets.ModelViewSet):
@@ -41,3 +56,7 @@ class DoctorViewSet(viewsets.ModelViewSet):
         return qs.none()
 
 
+class PublicAvailabilityViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = DoctorAvailability.objects.filter(is_available=True)
+    serializer_class = DoctorAvailabilitySerializer
+    permission_classes = [permissions.AllowAny]

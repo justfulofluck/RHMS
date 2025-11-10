@@ -24,13 +24,15 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from rest_framework.routers import DefaultRouter
-from doctors.views import DoctorViewSet
-from appointments.views import AppointmentViewSet, DoctorAvailabilityViewSet
+from doctors.views import DoctorViewSet, DoctorAvailabilityViewSet, PublicAvailabilityViewSet
+from appointments.views import AppointmentViewSet, DoctorAvailabilityViewSet, CalendarView, MobileBookingView
 from hospitals.views import DepartmentViewSet, TreatmentViewSet
 from core.views import test_auth
 
 router = DefaultRouter()
 router.register(r'doctors', DoctorViewSet, basename='doctor')
+router.register(r'availability', DoctorAvailabilityViewSet, basename='availability')
+router.register(r'public-availability', PublicAvailabilityViewSet, basename='public-availability')
 router.register(r'appointments', AppointmentViewSet, basename='appointment')
 router.register(r'doctor-availabilities', DoctorAvailabilityViewSet, basename='doctor-availability')
 router.register(r'departments', DepartmentViewSet, basename='department')
@@ -45,4 +47,7 @@ urlpatterns = [
     path('api/accounts/', include('accounts.urls')),
     path('api/', include(router.urls)),
     path('api/appointments/', include('appointments.urls')),
+    path('calendar/', CalendarView.as_view(), name='calendar-view'),
+    path('mobile/book/', MobileBookingView.as_view(), name='mobile-booking'),
+    path('', include('web.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
