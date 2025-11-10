@@ -39,16 +39,7 @@ class HospitalAdmin(models.Model):
     def __str__(self):
         return f"{self.user.get_full_name()} - Admin"
 
-# class HospitalAdmin(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     hospital = models.OneToOneField(Hospital, on_delete=models.CASCADE, related_name='admin')
 
-#     class Meta:
-#         db_table = 'rhms_hospital_admins'
-
-#     def __str__(self):
-#         return f'{self.user.username} -> {self.hospital.name}'
-        
 
 class Department(models.Model):
     hospital = models.ForeignKey('hospitals.Hospital', on_delete=models.CASCADE, related_name="departments")
@@ -66,11 +57,6 @@ class Treatment(models.Model):
     def __str__(self):
         return f"{self.name} - {self.department.name} ({self.hospital.name})"
 
-    
-# class HospitalAdmin(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="hospital_admin")
-#     Hospital = models.OneToOneField("hospital", on_delete=models.CASCADE, related_name="admin")
 
-#     def __str__(self):
-#         return f"{self.user.username} - {self.Hospital.name}"
+
     

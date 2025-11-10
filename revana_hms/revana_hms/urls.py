@@ -29,6 +29,7 @@ from appointments.views import AppointmentViewSet, DoctorAvailabilityViewSet, Ca
 from hospitals.views import DepartmentViewSet, TreatmentViewSet
 from core.views import test_auth
 
+
 router = DefaultRouter()
 router.register(r'doctors', DoctorViewSet, basename='doctor')
 router.register(r'availability', DoctorAvailabilityViewSet, basename='availability')
