@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     'doctors',
     'patients',
     'core',
-    'web',
+    'frontend',
 ]
 
 MIDDLEWARE = [

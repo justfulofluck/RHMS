@@ -49,5 +49,5 @@ urlpatterns = [
     path('api/appointments/', include('appointments.urls')),
     path('calendar/', CalendarView.as_view(), name='calendar-view'),
     path('mobile/book/', MobileBookingView.as_view(), name='mobile-booking'),
-    path('', include('web.urls')),
+    path('', include('frontend.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
