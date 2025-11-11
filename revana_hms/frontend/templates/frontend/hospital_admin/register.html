@@ -98,8 +98,78 @@
   <div class="register-card">
     <h4>Hospital Registration</h4>
     <p>Fill in the details to register your hospital</p>
+    
+   <!-- Include Bootstrap CSS (if not already included in base.html) -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+/>
+
+<style>
+  /* Custom message alert styling */
+  .alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: auto;
+    z-index: 1050;
+  }
+
+  .alert {
+    border-radius: 10px;
+    font-weight: 500;
+    background:#fef6df;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<!-- Django Messages Section -->
+{% if messages %}
+  <div class="alert-container">
+    {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="bi 
+          {% if message.tags == 'success' %}bi-check-circle-fill text-success{% endif %}
+          {% if message.tags == 'error' or message.tags == 'danger' %}bi-x-circle-fill text-danger{% endif %}
+          {% if message.tags == 'warning' %}bi-exclamation-triangle-fill text-warning{% endif %}
+          {% if message.tags == 'info' %}bi-info-circle-fill text-info{% endif %}
+        "></i>
+        <span class="ms-2">{{ message }}</span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Bootstrap JS (if not included yet) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+/>
+
  
-    <form method="POST" novalidate>
+  <form method="POST" novalidate>
       {% csrf_token %}
  
       <!-- Hospital Name -->
@@ -141,7 +211,18 @@
           {{ form.hospital_type|add_class:"form-select" }}
         </div>
       </div>
- 
+
+    
+      <!-- Upload Hospital Logo -->
+<div class="mb-3">
+  <div class="input-group">
+    <span class="input-group-text"><i class="bi bi-upload"></i></span>
+    {{ form.logo|add_class:"form-control" }}
+  </div>
+</div>
+
+
+
       <!-- Operating Hours -->
       <div class="mb-3">
         <div class="input-group">

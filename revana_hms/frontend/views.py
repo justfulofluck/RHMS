@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from hospitals.models import Hospital
+from hospitals.models import Hospital, Treatment, Department
 from accounts.forms.hospital_admin import HospitalAdminRegistrationForm, DoctorRegistrationForm
 from .decorators import role_required
 from accounts.models import DoctorProfile
@@ -48,9 +48,10 @@ def user_login(request):
 
 def register_hospital(request):
     if request.method == 'POST':
-        form = HospitalRegistrationForm(request.POST)
+        form = HospitalRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
+            logo = request.FILES.get('logo')
             if data['password'] != data['confirm_password']:
                 messages.error(request, "Passwords do not match.")
             else:
@@ -71,8 +72,11 @@ def register_hospital(request):
                     state=data['state'],
                     country=data['country'],
                     hospital_type=data['hospital_type'],
-                    hours=data['hours']
+                    hours=data['hours'],
+                    logo=logo
                 )
+                print(form.errors)
+
                 hospital.save()
 
                 messages.success(request, "Hospital registered successfully.")
@@ -152,4 +156,25 @@ def doctor_dashboard(request):
     return render(request, 'doctor/dashboard.html', {
         'appointments': appointments,
         'availabilities': availabilities
+    })
+
+@login_required
+@role_required('hospital_admin', 'superadmin')
+def hospital_admin_dashboard(request):
+    hospital = Hospital.objects.get(user=request.user)
+
+    departments = Department.objects.filter(hospital=hospital)
+    treatments = Treatment.objects.filter(hospital=hospital)
+    doctors = Doctor.objects.filter(hospital=hospital)
+    appointments = Appointment.objects.filter(
+        hospital=hospital,
+        appointment_date__gte=timezone.now()
+    ).order_by('appointment_date')
+
+    return render(request, 'hospital_admin/dashboard.html', {
+        'hospital': hospital,
+        'departments': departments,
+        'treatments': treatments,
+        'doctors': doctors,
+        'appointments': appointments
     })

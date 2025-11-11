@@ -14,6 +14,8 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.User'
+#LOGIN_URL = '/login/'
+
 
 # REST Framework
 REST_FRAMEWORK = {
