@@ -3,6 +3,10 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Hospital
+import json
 from hospitals.models import Hospital, Treatment, Department
 from accounts.forms.hospital_admin import HospitalAdminRegistrationForm, DoctorRegistrationForm
 from .decorators import role_required
@@ -10,7 +14,8 @@ from accounts.models import DoctorProfile
 from appointments.models import Appointment, DoctorAvailability, Doctor
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import HospitalRegistrationForm
+from hospitals.forms import HospitalRegistrationForm
+
 
 User = get_user_model()
 
@@ -45,46 +50,44 @@ def user_login(request):
 
     return render(request, 'frontend/login.html', {'form': form})
 
+def hospital_register_page(request):
+    return render(request, 'frontend/hospital_admin/register.html')
 
-def register_hospital(request):
+@csrf_exempt  # for testing; later use CSRF token
+def register_hospital_ajax(request):
     if request.method == 'POST':
-        form = HospitalRegistrationForm(request.POST, request.FILES)
-        if form.is_valid():
-            data = form.cleaned_data
-            logo = request.FILES.get('logo')
-            if data['password'] != data['confirm_password']:
-                messages.error(request, "Passwords do not match.")
-            else:
-                user = User.objects.create_user(
-                    username=data['email'],
-                    email=data['email'],
-                    password=data['password']
-                )
-                user.save()
+        data = json.loads(request.body)
 
-                hospital = Hospital.objects.create(
-                    user=user,
-                    name=data['name'],
-                    registration_number=data['registration_number'],
-                    contact_number=data['contact_number'],
-                    address=data['address'],
-                    city=data['city'],
-                    state=data['state'],
-                    country=data['country'],
-                    hospital_type=data['hospital_type'],
-                    hours=data['hours'],
-                    logo=logo
-                )
-                print(form.errors)
+        name = data.get('name')
+        phone_number = data.get('phone_number')
+        email = data.get('email')
+        address = data.get('address')
+        city = data.get('city')
+        state = data.get('state')
+        country = data.get('country')
+        hospital_type = data.get('hospital_type')
+        hours = data.get('hours')
+        password = data.get('password')
 
-                hospital.save()
+        if not (name and phone_number and email and password):
+            return JsonResponse({'status': 'error', 'message': 'Required fields missing'}, status=400)
 
-                messages.success(request, "Hospital registered successfully.")
-                return redirect('login')  # or dashboard
-    else:
-        form = HospitalRegistrationForm()
+        hospital = Hospital.objects.create(
+            name=name,
+            phone_number=phone_number,
+            email=email,
+            address=address,
+            city=city,
+            state=state,
+            country=country,
+            hospital_type=hospital_type,
+            hours=hours,
+            password=password  # later hash this
+        )
 
-    return render(request, 'frontend/hospital_admin/register.html', {'form': form})
+        return JsonResponse({'status': 'success', 'message': 'Hospital registered successfully', 'hospital_id': hospital.id})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 def register_doctor(request):
     if request.method == 'POST':

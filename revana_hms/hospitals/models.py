@@ -2,6 +2,11 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 
+HOSPITAL_TYPES = [
+    ('general', 'General'),
+    ('multispeciality', 'Multispeciality'),
+]
+
 
 class Hospital(models.Model):
     STATUS_PENDING = 'pending'
@@ -20,8 +25,13 @@ class Hospital(models.Model):
     address = models.TextField()
     phone_number = models.CharField(max_length=20)
     city = models.CharField(max_length=100)
+    state = models.CharField(max_length=50, default='Gujarat')
+    country = models.CharField(max_length=50, default='India')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
+    hospital_type = models.CharField(max_length=50, choices=HOSPITAL_TYPES, default='general')
+    hours = models.CharField(max_length=100, default='9:00 AM - 5:00 PM')
+
 
     class Meta:
         db_table = 'rhms_hospitals'

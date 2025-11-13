@@ -17,7 +17,7 @@ class TreatmentInline(admin.TabularInline):
 
 @admin.register(Hospital)
 class HospitalAdminModel(admin.ModelAdmin):
-    list_display = ('name', 'email', 'city', 'status', 'created_at', 'logo_preview', 'get_admin')
+    list_display = ('name', 'email', 'city', 'status', 'country','created_at', 'logo_preview', 'get_admin')
     list_filter = ('status', 'city')
     search_fields = ('name', 'registration_number', 'email')
     actions = ('approve_selected', 'reject_selected')
