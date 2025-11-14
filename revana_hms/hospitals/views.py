@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from .forms import HospitalRegistrationForm
 from rest_framework import viewsets, permissions ,decorators, response, status
 from doctors.models import Doctor
 from .models import Department, Treatment, Hospital
@@ -9,21 +8,20 @@ from doctors.serializers import DoctorSerializer
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
+from hospitals.utils import approve_hospital
+from django.http import JsonResponse
+from .utils import approve_hospital
 
+def approve_hospital_view(request, hospital_id):
+    approve_hospital(hospital_id)
+    return JsonResponse({'status': 'success', 'message': 'Hospital approved successfully'})
 
+def reject_hospital_view(request, hospital_id):
+    hospital = Hospital.objects.get(id=hospital_id)
+    hospital.status = Hospital.STATUS_REJECTED
+    hospital.save()
+    return JsonResponse({'status': 'success', 'message': 'Hospital rejected successfully'})
 
-def register_hospital_view(request):
-    if request.method == 'POST':
-        form = HospitalRegistrationForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect(reverse('hospitals:thank_you'))
-    else:
-        form = HospitalRegistrationForm()
-    return render(request, 'hospitals/register.html', {'form': form})
-
-def thank_you_view(request):
-    return render(request, 'hospitals/thank_you.html')
 
 class HospitalViewSet(ModelViewSet):
     queryset = Hospital.objects.all()

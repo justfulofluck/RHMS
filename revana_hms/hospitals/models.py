@@ -40,8 +40,6 @@ class Hospital(models.Model):
         return self.name
     
 
-from django.conf import settings
-
 class HospitalAdmin(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1)
     hospital = models.ForeignKey('hospitals.Hospital', on_delete=models.CASCADE, default=1)

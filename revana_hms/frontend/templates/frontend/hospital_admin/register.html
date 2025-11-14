@@ -11,13 +11,16 @@
     <input type="text" id="name" placeholder="Hospital Name" required><br><br>
     <input type="text" id="phone_number" placeholder="Phone Number" required><br><br>
     <input type="email" id="email" placeholder="Email" required><br><br>
+    <label for="registration_number">Registration Number:</label>
+    <input type="text" id="registration_number" name="registration_number" required>
     <input type="text" id="address" placeholder="Address"><br><br>
     <input type="text" id="city" placeholder="City"><br><br>
     <input type="text" id="state" placeholder="State"><br><br>
     <input type="text" id="country" placeholder="Country"><br><br>
     <input type="text" id="hospital_type" placeholder="Hospital Type"><br><br>
     <input type="text" id="hours" placeholder="Operating Hours"><br><br>
-    <input type="password" id="password" placeholder="Password" required><br><br>
+    <label for="logo">Hospital Logo:</label>
+    <input type="file" id="logo" name="logo" accept="image/*">
     <button type="submit">Register</button>
   </form>
 
@@ -28,17 +31,18 @@
       e.preventDefault();
 
       const payload = {
-        name: document.getElementById('name').value,
-        phone_number: document.getElementById('phone_number').value,
-        email: document.getElementById('email').value,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        country: document.getElementById('country').value,
-        hospital_type: document.getElementById('hospital_type').value,
-        hours: document.getElementById('hours').value,
-        password: document.getElementById('password').value,
+        name: document.getElementById("name").value,
+        registration_number: document.getElementById("registration_number").value, // ✅ added
+        email: document.getElementById("email").value,
+        phone_number: document.getElementById("phone_number").value,
+        address: document.getElementById("address").value,
+        city: document.getElementById("city").value,
+        state: document.getElementById("state").value,
+        country: document.getElementById("country").value,
+        hospital_type: document.getElementById("hospital_type").value,
+        hours: document.getElementById("hours").value,
       };
+
 
       // const response = await fetch('/frontend/hospital/register/', 
       const response = await fetch('/api/register-hospital/', {

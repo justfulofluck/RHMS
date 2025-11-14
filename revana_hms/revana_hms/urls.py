@@ -41,6 +41,7 @@ router.register(r'treatments', TreatmentViewSet, basename='treatment')
 
 urlpatterns = [
     path('api/test-auth/', test_auth),
+    path('hospitals/', include('hospitals.urls')),
     path('admin/', admin.site.urls),
     path('api/', include('hospitals.api_urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

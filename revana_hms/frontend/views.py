@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Hospital
 import json
 from hospitals.models import Hospital, Treatment, Department
 from accounts.forms.hospital_admin import HospitalAdminRegistrationForm, DoctorRegistrationForm
@@ -14,7 +13,7 @@ from accounts.models import DoctorProfile
 from appointments.models import Appointment, DoctorAvailability, Doctor
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
-from hospitals.forms import HospitalRegistrationForm
+
 
 
 User = get_user_model()
@@ -53,40 +52,29 @@ def user_login(request):
 def hospital_register_page(request):
     return render(request, 'frontend/hospital_admin/register.html')
 
-@csrf_exempt  # for testing; later use CSRF token
+@csrf_exempt
 def register_hospital_ajax(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-
-        name = data.get('name')
-        phone_number = data.get('phone_number')
-        email = data.get('email')
-        address = data.get('address')
-        city = data.get('city')
-        state = data.get('state')
-        country = data.get('country')
-        hospital_type = data.get('hospital_type')
-        hours = data.get('hours')
-        password = data.get('password')
-
-        if not (name and phone_number and email and password):
-            return JsonResponse({'status': 'error', 'message': 'Required fields missing'}, status=400)
+        logo = request.FILES.get('logo')
 
         hospital = Hospital.objects.create(
-            name=name,
-            phone_number=phone_number,
-            email=email,
-            address=address,
-            city=city,
-            state=state,
-            country=country,
-            hospital_type=hospital_type,
-            hours=hours,
-            password=password  # later hash this
+            name=data.get('name'),
+            registration_number=data.get('registration_number'), 
+            email=data.get('email'),
+            phone_number=data.get('phone_number'),
+            address=data.get('address'),
+            city=data.get('city'),
+            state=data.get('state', 'Gujarat'),
+            country=data.get('country', 'India'),
+            hospital_type=data.get('hospital_type', 'general'),
+            hours=data.get('hours', '9:00 AM - 5:00 PM'),
+            logo=logo,
+            status=Hospital.STATUS_PENDING
         )
 
-        return JsonResponse({'status': 'success', 'message': 'Hospital registered successfully', 'hospital_id': hospital.id})
 
+        return JsonResponse({'status': 'success', 'message': 'Hospital registration submitted. Awaiting approval.'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 def register_doctor(request):
