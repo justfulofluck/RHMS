@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import json
 from hospitals.models import Hospital, Treatment, Department
 from accounts.forms.hospital_admin import HospitalAdminRegistrationForm, DoctorRegistrationForm
 from .decorators import role_required
@@ -14,14 +13,13 @@ from appointments.models import Appointment, DoctorAvailability, Doctor
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
 
-
-
 User = get_user_model()
 
+# 🔐 Login view using raw POST
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        password = request.post.get('password')
+        password = request.POST.get('password')  # ✅ fixed typo
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
@@ -30,6 +28,7 @@ def login_view(request):
             messages.error(request, 'Invalid credentials')
     return render(request, 'frontend/login.html')
 
+# 🔐 Login view using Django's AuthenticationForm
 def user_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -49,41 +48,42 @@ def user_login(request):
 
     return render(request, 'frontend/login.html', {'form': form})
 
+# 🏥 Hospital registration page
 def hospital_register_page(request):
     return render(request, 'frontend/hospital_admin/register.html')
 
+# 🏥 AJAX hospital registration with FormData support
 @csrf_exempt
 def register_hospital_ajax(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        logo = request.FILES.get('logo')
+        try:
+            hospital = Hospital.objects.create(
+                name=request.POST.get('name'),
+                registration_number=request.POST.get('registration_number'),
+                email=request.POST.get('email'),
+                phone_number=request.POST.get('phone_number'),
+                address=request.POST.get('address'),
+                city=request.POST.get('city'),
+                state=request.POST.get('state', 'Gujarat'),
+                country=request.POST.get('country', 'India'),
+                hospital_type=request.POST.get('hospital_type', 'general'),
+                hours=request.POST.get('hours', '9:00 AM - 5:00 PM'),
+                logo=request.FILES.get('logo'),
+                status=Hospital.STATUS_PENDING
+            )
+            return JsonResponse({'status': 'success', 'message': 'Hospital registration submitted. Awaiting approval.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-        hospital = Hospital.objects.create(
-            name=data.get('name'),
-            registration_number=data.get('registration_number'), 
-            email=data.get('email'),
-            phone_number=data.get('phone_number'),
-            address=data.get('address'),
-            city=data.get('city'),
-            state=data.get('state', 'Gujarat'),
-            country=data.get('country', 'India'),
-            hospital_type=data.get('hospital_type', 'general'),
-            hours=data.get('hours', '9:00 AM - 5:00 PM'),
-            logo=logo,
-            status=Hospital.STATUS_PENDING
-        )
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
 
-
-        return JsonResponse({'status': 'success', 'message': 'Hospital registration submitted. Awaiting approval.'})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
-
+# 👨‍⚕️ Doctor registration
 def register_doctor(request):
     if request.method == 'POST':
         form = DoctorRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
 
-            # Create User
             user = User.objects.create_user(
                 email=data['email'],
                 password=data['password'],
@@ -91,7 +91,6 @@ def register_doctor(request):
                 role='doctor'
             )
 
-            # Create doctor profile
             DoctorProfile.objects.create(
                 user=user,
                 gender=data['gender'],
@@ -124,31 +123,7 @@ def register_doctor(request):
 
     return render(request, 'doctor/register.html', {'form': form})
 
-@role_required('hospital_admin')
-@login_required
-def hospital_admin_dashboard(request):
-    return render(request, 'hospital_admin/dashboard.html')
-
-@role_required('doctor')
-@login_required
-def doctor_dashboard(request):
-    doctor = Doctor.objects.get(user=request.user)
-
-    appointments = Appointment.objects.filter(
-        doctor=doctor,
-        appointment_date__gte=timezone.now()
-    ).order_by('appointment_date')
-
-    availabilities = DoctorAvailability.objects.filter(
-        doctor=doctor,
-        date__gte=timezone.now().date()
-    ).order_by('date', 'start_time')
-
-    return render(request, 'doctor/dashboard.html', {
-        'appointments': appointments,
-        'availabilities': availabilities
-    })
-
+# 🏥 Hospital admin dashboard
 @login_required
 @role_required('hospital_admin', 'superadmin')
 def hospital_admin_dashboard(request):
@@ -168,4 +143,25 @@ def hospital_admin_dashboard(request):
         'treatments': treatments,
         'doctors': doctors,
         'appointments': appointments
+    })
+
+# 👨‍⚕️ Doctor dashboard
+@role_required('doctor')
+@login_required
+def doctor_dashboard(request):
+    doctor = Doctor.objects.get(user=request.user)
+
+    appointments = Appointment.objects.filter(
+        doctor=doctor,
+        appointment_date__gte=timezone.now()
+    ).order_by('appointment_date')
+
+    availabilities = DoctorAvailability.objects.filter(
+        doctor=doctor,
+        date__gte=timezone.now().date()
+    ).order_by('date', 'start_time')
+
+    return render(request, 'doctor/dashboard.html', {
+        'appointments': appointments,
+        'availabilities': availabilities
     })

@@ -7,20 +7,24 @@
 <body>
   <h2>Hospital Registration</h2>
 
-  <form id="hospitalForm">
-    <input type="text" id="name" placeholder="Hospital Name" required><br><br>
-    <input type="text" id="phone_number" placeholder="Phone Number" required><br><br>
-    <input type="email" id="email" placeholder="Email" required><br><br>
+  <form id="hospitalForm" method="post" enctype="multipart/form-data">
+    <input type="text" id="name" name="name" placeholder="Hospital Name" required><br><br>
+    <input type="text" id="phone_number" name="phone_number" placeholder="Phone Number" required><br><br>
+    <input type="email" id="email" name="email" placeholder="Email" required><br><br>
+
     <label for="registration_number">Registration Number:</label>
-    <input type="text" id="registration_number" name="registration_number" required>
-    <input type="text" id="address" placeholder="Address"><br><br>
-    <input type="text" id="city" placeholder="City"><br><br>
-    <input type="text" id="state" placeholder="State"><br><br>
-    <input type="text" id="country" placeholder="Country"><br><br>
-    <input type="text" id="hospital_type" placeholder="Hospital Type"><br><br>
-    <input type="text" id="hours" placeholder="Operating Hours"><br><br>
+    <input type="text" id="registration_number" name="registration_number" required><br><br>
+
+    <input type="text" id="address" name="address" placeholder="Address"><br><br>
+    <input type="text" id="city" name="city" placeholder="City"><br><br>
+    <input type="text" id="state" name="state" placeholder="State"><br><br>
+    <input type="text" id="country" name="country" placeholder="Country"><br><br>
+    <input type="text" id="hospital_type" name="hospital_type" placeholder="Hospital Type"><br><br>
+    <input type="text" id="hours" name="hours" placeholder="Operating Hours"><br><br>
+
     <label for="logo">Hospital Logo:</label>
-    <input type="file" id="logo" name="logo" accept="image/*">
+    <input type="file" id="logo" name="logo" accept="image/*"><br><br>
+
     <button type="submit">Register</button>
   </form>
 
@@ -30,29 +34,21 @@
     document.getElementById('hospitalForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const payload = {
-        name: document.getElementById("name").value,
-        registration_number: document.getElementById("registration_number").value, // ✅ added
-        email: document.getElementById("email").value,
-        phone_number: document.getElementById("phone_number").value,
-        address: document.getElementById("address").value,
-        city: document.getElementById("city").value,
-        state: document.getElementById("state").value,
-        country: document.getElementById("country").value,
-        hospital_type: document.getElementById("hospital_type").value,
-        hours: document.getElementById("hours").value,
-      };
+      const form = document.getElementById("hospitalForm");
+      const formData = new FormData(form); // includes all fields + logo
 
+      try {
+        const response = await fetch("/api/register-hospital/", {
+          method: "POST",
+          body: formData
+        });
 
-      // const response = await fetch('/frontend/hospital/register/', 
-      const response = await fetch('/api/register-hospital/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-      document.getElementById('response').innerText = data.message;
+        const data = await response.json();
+        document.getElementById("response").innerText = data.message;
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("response").innerText = "Something went wrong!";
+      }
     });
   </script>
 </body>
