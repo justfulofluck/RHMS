@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Registration</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom, #b6b0ac, #864d26);
+      font-family: "Poppins", sans-serif;
+    }
+
+    .register-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      padding: 40px 35px;
+      width: 480px;
+      max-width: 95%;
+    }
+
+    .register-card h2 {
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #864d26;
+    }
+
+    .register-card p {
+      text-align: center;
+      color: #777;
+      font-size: 0.9rem;
+      margin-bottom: 25px;
+    }
+
+    .form-control, .form-select {
+      border-radius: 8px;
+      height: 45px;
+      font-size: 0.95rem;
+    }
+
+    textarea.form-control {
+      height: auto;
+    }
+
+    .btn-register {
+      background-color: #c68d72;
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      width: 100%;
+      padding: 10px;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .btn-register:hover {
+      background-color: #864d26;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="register-card">
+    <h2>Patient Registration</h2>
+    <p>Please fill in the details to register as a patient</p>
+
+    <form id="patientForm">
+      <!-- Name -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person"></i></span>
+          <input type="text" id="name" class="form-control" placeholder="Full Name" required>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <input type="email" id="email" class="form-control" placeholder="Email" required>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock"></i></span>
+          <input type="password" id="password" class="form-control" placeholder="Password" required>
+        </div>
+      </div>
+
+      <!-- Age & Gender -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+            <input type="number" id="age" class="form-control" placeholder="Age" required>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+            <select id="gender" class="form-select" required>
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+         <input 
+    type="text" 
+    name="phone" 
+    id="phone" 
+    placeholder="Phone Number" 
+    required 
+    maxlength="10" 
+    pattern="\d{10}" 
+    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);" 
+>
+ </div>
+      </div>
+
+      <!-- Address -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+          <textarea id="address" class="form-control" placeholder="Address" required></textarea>
+        </div>
+      </div>
+
+     
+
+      <button type="submit" class="btn-register">Register</button>
+      <div class="text-center mt-3">
+    <p>Already registered? 
+        <a href="/patients/login-page/" style="color:#864d26; font-weight:600; text-decoration:none;">
+            Login here
+        </a>
+    </p>
+</div>
+    </form>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastMessage">Successfully registered!</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.getElementById('patientForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const data = {
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value,
+      age: document.getElementById('age').value,
+      gender: document.getElementById('gender').value,
+      phone: document.getElementById('phone').value,
+      address: document.getElementById('address').value,
+    };
+
+    try {
+      const response = await fetch("/patients/register/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const res = await response.json();
+      const toastEl = document.getElementById('liveToast');
+      const toastMessage = document.getElementById('toastMessage');
+
+      if (response.status === 201) {
+        toastMessage.textContent = "✅ Patient registered successfully!";
+        toastEl.classList.remove('text-bg-danger');
+        toastEl.classList.add('text-bg-success');
+        document.getElementById('patientForm').reset();
+        new bootstrap.Toast(toastEl).show();
+
+        // 👇 Redirect to login page after success
+        setTimeout(() => {
+          window.location.href = "/patients/login-page/";
+        }, 2000);
+      } else {
+        toastMessage.textContent = "⚠️ " + (res.message || "Error while registering!");
+        toastEl.classList.remove('text-bg-success');
+        toastEl.classList.add('text-bg-danger');
+        new bootstrap.Toast(toastEl).show();
+      }
+    } catch (err) {
+      const toastEl = document.getElementById('liveToast');
+      const toastMessage = document.getElementById('toastMessage');
+      toastMessage.textContent = "❌ Server error. Please try again!";
+      toastEl.classList.remove('text-bg-success');
+      toastEl.classList.add('text-bg-danger');
+      new bootstrap.Toast(toastEl).show();
+    }
+  });
+</script>
+
+</body>
+</html>
