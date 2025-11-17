@@ -12,4 +12,11 @@ urlpatterns = [
     # 👉 NEW: Patient Dashboard Route
    
     path('dashboard/', views.patient_dashboard, name='patient_dashboard'),
+
+    path('edit-profile/', views.update_profile, name='edit_profile'),
+
+    path('update-profile/', views.update_profile, name='update_profile'),
+
+
+
 ]
