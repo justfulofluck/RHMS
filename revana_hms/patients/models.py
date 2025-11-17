@@ -1,28 +1,23 @@
 from django.db import models
-from accounts.models import User  # or wherever your User model is
+from django.contrib.auth import get_user_model
 from hospitals.models import Hospital
-from accounts.models import User
-from django.conf import settings
+
+User = get_user_model()
 
 class Patient(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    hospital = models.ForeignKey('hospitals.Hospital', on_delete=models.CASCADE)
+    GENDER_CHOICES = [
+        ("Male", "Male"),
+        ("Female", "Female"),
+        ("Other", "Other"),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True)
     age = models.PositiveIntegerField()
-    gender = models.CharField(max_length=10)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     phone = models.CharField(max_length=15)
     address = models.TextField()
     medical_history = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.get_full_name()} ({self.hospital.name})"
-# class Patient(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
-#     age = models.PositiveIntegerField()
-#     gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
-#     phone = models.CharField(max_length=15)
-#     address = models.TextField()
-#     medical_history = models.TextField(blank=True, null=True)
-
-#     def __str__(self):
-#         return f"{self.user.get_full_name()} ({self.hospital.name})"
+        return self.user.first_name
