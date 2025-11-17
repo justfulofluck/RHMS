@@ -12,12 +12,13 @@ class Patient(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True)
+    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True, blank=True)
     age = models.PositiveIntegerField()
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     phone = models.CharField(max_length=15)
     address = models.TextField()
     medical_history = models.TextField(blank=True, null=True)
+    photo = models.ImageField(upload_to="patients/photos/", blank=True, null=True)
 
     def __str__(self):
         return self.user.first_name
