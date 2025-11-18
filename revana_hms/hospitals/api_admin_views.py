@@ -1,12 +1,9 @@
+# hospitals/api_admin_views.py
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.core.mail import send_mail
-from django.contrib.auth import get_user_model
-import secrets
-from .models import Hospital, HospitalAdmin
-
-User = get_user_model()
+from .models import Hospital
+from .utils import approve_hospital_and_notify
 
 
 class IsSuperAdmin(permissions.BasePermission):
@@ -26,37 +23,15 @@ class ApprovalHospitalAPI(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Approve hospital
+        # Approve and save
         hospital.status = Hospital.STATUS_APPROVED
         hospital.save()
 
-        # Create or update hospital admin user
-        user, created = User.objects.get_or_create(
-            username=hospital.email,
-            defaults={
-                'email': hospital.email,
-                'is_staff': True,
-                'is_superuser': False,
-            }
-        )
-        password = secrets.token_urlsafe(10)
-        user.set_password(password)
-        user.save()
-
-        HospitalAdmin.objects.update_or_create(user=user, hospital=hospital)
-
-        # Send email with credentials
-        send_mail(
-            subject='Hospital Approved',
-            message=(
-                f'Dear {hospital.name},\n\n'
-                f'Your hospital has been approved.\n'
-                f'Login: /admin/\n'
-                f'Username: {hospital.email}\n'
-                f'Password: {password}\n'
-            ),
-            from_email=None,
-            recipient_list=[hospital.email],
-        )
-
-        return Response({'message': 'Hospital approved and credentials sent'})
+        # Notify (creates user, links admin, sends email)
+        try:
+            approve_hospital_and_notify(hospital)
+            return Response({'message': 'Hospital approved and credentials sent'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            # approve_hospital_and_notify itself catches email exceptions,
+            # but if something else bubbles up, we handle it here.
+            return Response({'message': 'Hospital approved, but notification failed', 'error': str(e)}, status=status.HTTP_200_OK)

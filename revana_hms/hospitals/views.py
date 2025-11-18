@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.generic import TemplateView
 from rest_framework import viewsets, permissions ,decorators, response, status
 from doctors.models import Doctor
 from .models import Department, Treatment, Hospital
@@ -8,12 +9,15 @@ from doctors.serializers import DoctorSerializer
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
-from hospitals.utils import approve_hospital
 from django.http import JsonResponse
-from .utils import approve_hospital
+from hospitals.utils import approve_hospital_and_notify  # Only if actually used in views
+
+
+class RegisterView(TemplateView):
+    template_name = 'register.html' 
 
 def approve_hospital_view(request, hospital_id):
-    approve_hospital(hospital_id)
+    approve_hospital_and_notify (hospital_id)
     return JsonResponse({'status': 'success', 'message': 'Hospital approved successfully'})
 
 def reject_hospital_view(request, hospital_id):

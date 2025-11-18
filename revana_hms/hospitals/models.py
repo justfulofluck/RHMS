@@ -45,7 +45,9 @@ class HospitalAdmin(models.Model):
     hospital = models.ForeignKey('hospitals.Hospital', on_delete=models.CASCADE, default=1)
 
     def __str__(self):
-        return f"{self.user.get_full_name()} - Admin"
+        #return f"{self.user.get_full_name()} - Admin"
+        #return f"{self.user.username} - Admin"
+        return f"{self.user.email} - Admin"
 
 
 

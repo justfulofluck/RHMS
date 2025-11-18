@@ -1,8 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from datetime import timedelta
-
+from datetime import timedelta 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -99,13 +98,25 @@ DATABASES = {
 }
 
 # Email
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ['true', '1', 'yes']
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+# # EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+# EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+# EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ['true', '1', 'yes']
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+# DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'blueglobalcloud@gmail.com'
+EMAIL_HOST_PASSWORD = 'pjooewfxcxhtldod'
+DEFAULT_FROM_EMAIL = 'blueglobalcloud@gmail.com'
+
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -125,8 +136,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-# Optional: if you have custom static files
-# STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'static']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
