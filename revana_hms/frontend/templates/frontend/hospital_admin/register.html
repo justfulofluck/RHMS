@@ -1,12 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hospital Registration</title>
-</head>
-<body>
-  <h2>Hospital Registration</h2>
 
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom, #b6b0ac, #864d26);
+      font-family: "Poppins", sans-serif;
+    }
+
+    .register-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      padding: 40px 35px;
+      width: 520px;
+      max-width: 95%;
+    }
+
+    .register-card h2 {
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #864d26;
+    }
+
+    .register-card p {
+      text-align: center;
+      color: #777;
+      font-size: 0.9rem;
+      margin-bottom: 25px;
+    }
+
+    .form-control, .form-select {
+      border-radius: 8px;
+      height: 45px;
+      font-size: 0.95rem;
+    }
+
+    textarea.form-control {
+      height: auto;
+    }
+
+    .btn-register {
+      background-color: #c68d72;
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      width: 100%;
+      padding: 10px;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .btn-register:hover {
+      background-color: #864d26;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+  </style>
+</head>
+
+<body>
+
+<<<<<<< HEAD
   <form id="hospitalForm" method="post" enctype="multipart/form-data">
     <input type="text" id="name" name="name" placeholder="Hospital Name" required><br><br>
     <input type="text" id="phone_number" name="phone_number" placeholder="Phone Number" required><br><br>
@@ -27,13 +100,111 @@
 
     <button type="submit">Register</button>
   </form>
+=======
+  <div class="register-card">
+    <h2>Hospital Registration</h2>
+    <p>Please fill the details to register a hospital</p>
+>>>>>>> origin/main
 
-  <p id="response"></p>
+    <form id="hospitalForm">
+
+      <!-- Hospital Name -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-hospital-fill"></i></span>
+          <input type="text" id="name" class="form-control" placeholder="Hospital Name" required>
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+          <input type="text" id="phone_number" class="form-control" placeholder="Phone Number" required maxlength="10"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);">
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <input type="email" id="email" class="form-control" placeholder="Email" required>
+        </div>
+      </div>
+
+      <!-- Registration Number -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-file-earmark-text"></i></span>
+          <input type="text" id="registration_number" class="form-control" placeholder="Registration Number" required>
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+          <input type="text" id="address" class="form-control" placeholder="Address">
+        </div>
+      </div>
+
+      <!-- City -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-building"></i></span>
+          <input type="text" id="city" class="form-control" placeholder="City">
+        </div>
+      </div>
+
+      <!-- State -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-geo"></i></span>
+          <input type="text" id="state" class="form-control" placeholder="State">
+        </div>
+      </div>
+
+      <!-- Country -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-globe-asia-australia"></i></span>
+          <input type="text" id="country" class="form-control" placeholder="Country">
+        </div>
+      </div>
+
+      <!-- Hospital Type -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-diagram-3"></i></span>
+          <input type="text" id="hospital_type" class="form-control" placeholder="Hospital Type">
+        </div>
+      </div>
+
+      <!-- Operating Hours -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-clock"></i></span>
+          <input type="text" id="hours" class="form-control" placeholder="Operating Hours (e.g., 9 AM - 7 PM)">
+        </div>
+      </div>
+
+      <!-- Logo Upload -->
+      <div class="mb-3">
+        <label class="form-label">Hospital Logo:</label>
+        <input type="file" id="logo" class="form-control" accept="image/*">
+      </div>
+
+      <button type="submit" class="btn-register">Register Hospital</button>
+
+    </form>
+  </div>
 
   <script>
-    document.getElementById('hospitalForm').addEventListener('submit', async function(e) {
+    document.getElementById('hospitalForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
+<<<<<<< HEAD
       const form = document.getElementById("hospitalForm");
       const formData = new FormData(form); // includes all fields + logo
 
@@ -49,7 +220,31 @@
         console.error("Error:", error);
         document.getElementById("response").innerText = "Something went wrong!";
       }
+=======
+      const payload = {
+        name: document.getElementById("name").value,
+        registration_number: document.getElementById("registration_number").value,
+        email: document.getElementById("email").value,
+        phone_number: document.getElementById("phone_number").value,
+        address: document.getElementById("address").value,
+        city: document.getElementById("city").value,
+        state: document.getElementById("state").value,
+        country: document.getElementById("country").value,
+        hospital_type: document.getElementById("hospital_type").value,
+        hours: document.getElementById("hours").value,
+      };
+
+      const response = await fetch('/api/register-hospital/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      alert(data.message);
+>>>>>>> origin/main
     });
   </script>
+
 </body>
 </html>

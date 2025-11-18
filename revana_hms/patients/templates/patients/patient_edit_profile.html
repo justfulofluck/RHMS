@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(to bottom, #c9beb7, #8c6239, #c9beb7);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .card {
+            border-radius: 15px;
+            padding: 25px;
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-save {
+            background: #8c6239;
+            color: #fff;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+
+        .btn-save:hover {
+            background: #6f4b2a;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container mt-5">
+    <div class="card mx-auto" style="max-width: 500px;">
+
+        <h3 class="mb-4 text-center">Edit Profile</h3>
+
+        <!-- FORM START -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- FULL NAME -->
+            <label class="form-label">Full Name</label>
+            <input 
+                class="form-control mb-3" 
+                type="text" 
+                name="name" 
+                value="{{ user.first_name }}"
+                placeholder="Enter Full Name"
+            >
+
+            <!-- PROFILE PHOTO -->
+            <label class="form-label">Profile Photo</label>
+            <input 
+                class="form-control mb-3" 
+                type="file" 
+                name="profile_picture"
+            >
+
+            <!-- SAVE BUTTON -->
+            <button class="btn-save w-100">Save Changes</button>
+        </form>
+        <!-- FORM END -->
+
+    </div>
+</div>
+
+</body>
+</html>
