@@ -1,6 +1,6 @@
 import json
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -8,24 +8,31 @@ from .models import Patient
 
 User = get_user_model()
 
-
 # ----------------------------------------------------
-# ✅ Patient Dashboard
+# Patient Dashboard
 # ----------------------------------------------------
 @login_required
 def patient_dashboard(request):
-    return render(request, 'patients/patient_dashboard.html')
+    try:
+        patient = Patient.objects.get(user=request.user)
+    except Patient.DoesNotExist:
+        patient = None
+
+    return render(request, 'patients/patient_dashboard.html', {
+        "patient": patient,
+        "user": request.user
+    })
 
 
 # ----------------------------------------------------
-# ✅ Render Registration Page
+# Render Registration Page
 # ----------------------------------------------------
 def patient_register_page(request):
     return render(request, "patients/register.html")
 
 
 # ----------------------------------------------------
-# ✅ Handle Patient Registration (API)
+# Handle Patient Registration (API)
 # ----------------------------------------------------
 @csrf_exempt
 def register_patient(request):
@@ -41,7 +48,6 @@ def register_patient(request):
             phone = data.get("phone")
             address = data.get("address")
 
-            # Validation
             if not email:
                 return JsonResponse({"message": "Email is required."}, status=400)
 
@@ -53,7 +59,7 @@ def register_patient(request):
             user.first_name = name
             user.save()
 
-            # Create Patient Profile
+            # Create Patient record
             Patient.objects.create(
                 user=user,
                 age=age or 0,
@@ -74,14 +80,14 @@ def register_patient(request):
 
 
 # ----------------------------------------------------
-# ✅ Render Login Page
+# Render Login Page
 # ----------------------------------------------------
 def login_page(request):
     return render(request, "patients/login.html")
 
 
 # ----------------------------------------------------
-# ✅ Handle Login Request (API)
+# Handle Login API
 # ----------------------------------------------------
 @csrf_exempt
 def login_user(request):
@@ -106,39 +112,25 @@ def login_user(request):
 
 
 # ----------------------------------------------------
-# ✅ Update Profile (Logged-in User)
+# Edit Profile
 # ----------------------------------------------------
 @login_required
-@csrf_exempt
-def update_profile(request):
+def patient_edit_profile(request):
+    patient = request.user.patient  # If you have Patient model linked with OneToOne
+
     if request.method == "POST":
-        try:
-            patient = Patient.objects.get(user=request.user)
+        name = request.POST.get("name")
+        photo = request.FILES.get("profile_picture")
 
-            # Update Patient Data
-            patient.age = request.POST.get("age") or patient.age
-            patient.gender = request.POST.get("gender") or patient.gender
-            patient.phone = request.POST.get("phone") or patient.phone
-            patient.address = request.POST.get("address") or patient.address
+        # update user name
+        request.user.first_name = name
+        request.user.save()
 
-            # Update User Name
-            new_name = request.POST.get("name")
-            if new_name:
-                request.user.first_name = new_name
-                request.user.save()
-
-            # Photo upload check
-            if "profile_photo" in request.FILES:
-                patient.profile_photo = request.FILES["profile_photo"]
-
+        # update patient profile photo
+        if photo:
+            patient.photo = photo
             patient.save()
 
-            return JsonResponse({"message": "Profile updated successfully"}, status=200)
+        return redirect('patient_dashboard')  # your dashboard url name
 
-        except Patient.DoesNotExist:
-            return JsonResponse({"message": "Patient profile not found."}, status=404)
-
-        except Exception as e:
-            return JsonResponse({"message": f"Server error: {str(e)}"}, status=500)
-
-    return JsonResponse({"message": "Invalid method"}, status=405)
+    return render(request, 'patient_edit_profile.html')

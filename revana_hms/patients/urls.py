@@ -5,18 +5,14 @@ urlpatterns = [
     path('', views.patient_register_page, name='patient_register_page'),
     path('register/', views.register_patient, name='register_patient'),
 
-    # Login Routes
+    # Login
     path('login-page/', views.login_page, name='login_page'),
     path('login/', views.login_user, name='login_user'),
 
-    # 👉 NEW: Patient Dashboard Route
-   
+    # Dashboard
     path('dashboard/', views.patient_dashboard, name='patient_dashboard'),
 
-    path('edit-profile/', views.update_profile, name='edit_profile'),
-
-    path('update-profile/', views.update_profile, name='update_profile'),
-
-
+    # Edit Profile
+    path('patient/edit-profile/', views.patient_edit_profile, name='patient_edit_profile'),
 
 ]
