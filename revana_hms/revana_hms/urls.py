@@ -57,6 +57,5 @@ urlpatterns = [
     path('', include('frontend.urls')),
     path('patients/', include('patients.urls')),
     
-
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

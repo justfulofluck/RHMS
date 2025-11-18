@@ -19,14 +19,20 @@ User = get_user_model()
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        password = request.POST.get('password')  # ✅ fixed typo
+        password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-            return redirect('dashboard')
+            if user.role == 'hospital_admin':
+                return redirect('hospital_admin_dashboard')
+            elif user.role == 'doctor':
+                return redirect('doctor_dashboard')
+            else:
+                messages.error(request, "Unknown role.")
         else:
             messages.error(request, 'Invalid credentials')
     return render(request, 'frontend/login.html')
+
 
 # 🔐 Login view using Django's AuthenticationForm
 def user_login(request):
