@@ -1,41 +1,60 @@
-from django.contrib.auth.models import User
+# ✅ Use the custom user model instead of the default 'auth.User'
+from django.contrib.auth import get_user_model
+User = get_user_model()  # 🔄 Replaces: from django.contrib.auth.models import User
+
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import send_mail
 from rest_framework import status, generics
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
+# ✅ Removed duplicate import
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
 
 from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
 
 class PasswordResetRequestView(generics.GenericAPIView):
+    permission_classes = [AllowAny]  # ✅ Ensures public access despite global IsAuthenticated default
     serializer_class = PasswordResetRequestSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
+
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"massage": "if this email is exists, a reset link has been sent."}, status=status.HTTP_200_OK)
-        
+            # ✅ Typo fix: "massage" → "message"
+            return Response({"message": "If this email exists, a reset link has been sent."}, status=status.HTTP_200_OK)
+
+        # ✅ Token and UID generation for secure reset link
         token = PasswordResetTokenGenerator().make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"http://192.168.1.208:8040/reset-password-confirm/?uid={uid}&token={token}" 
 
+        # ✅ Use settings or reverse() for dynamic domain in production
+        reset_link = f"http://192.168.1.208:8000/reset-password-confirm/?uid={uid}&token={token}"
+
+        # ✅ Use DEFAULT_FROM_EMAIL from settings
         send_mail(
             subject="Password Reset Request",
             message=f"Click the link to reset your password: {reset_link}",
-            from_email=None,
+            from_email=None,  # 🔄 Consider using settings.DEFAULT_FROM_EMAIL
             recipient_list=[email],
         )
 
-        return Response({"message": "if this email is exists, a reset link has been sent."}, status=status.HTTP_200_OK)
-    
+        print("mail sent to user")  
+
+        return Response({"message": "If this email exists, a reset link has been sent."}, status=status.HTTP_200_OK)
+
+
 class PasswordResetConfirmView(generics.GenericAPIView):
+    permission_classes = [AllowAny]  # ✅ Allows unauthenticated access for token-based reset
     serializer_class = PasswordResetConfirmSerializer
-    
+
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

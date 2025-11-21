@@ -1,6 +1,6 @@
 # revana_hms/frontend/urls.py
 from django.urls import path
-from .views import hospital_register_page,register_hospital_ajax, login_view, hospital_admin_dashboard
+from .views import hospital_register_page, register_hospital_ajax, login_view, hospital_admin_dashboard, reset_password_confirm_page, request_password_reset_page 
 from . import views
 
 urlpatterns = [
@@ -10,4 +10,6 @@ urlpatterns = [
     path('api/register-hospital/', register_hospital_ajax, name='register_hospital_ajax'),
     path('register-doctor/', views.register_doctor, name='register_doctor'),
     path('login/', login_view, name='login'),
+    path('reset-password-confirm/', reset_password_confirm_page, name='reset_password_confirm_page'),
+    path('request-password-reset/', request_password_reset_page, name='request_password_reset_page'),
 ]

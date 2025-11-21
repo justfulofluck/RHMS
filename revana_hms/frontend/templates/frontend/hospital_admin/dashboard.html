@@ -1,2 +1,259 @@
-<h2>Welcome, {{ request.user.username }}</h2>
-<p>This is your dashboard.</p>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hospital Admin Dashboard</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --brown-dark: #6b3f21;
+            --brown: #8c6239;
+            --panel: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+            background: #f5ede5;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 230px;
+            background: var(--panel);
+            padding: 20px;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h4 {
+            font-weight: 800;
+            color: var(--brown);
+            margin-bottom: 20px;
+        }
+
+        .side-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--brown-dark);
+            font-weight: 600;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            text-decoration: none;
+        }
+
+        .side-link.active,
+        .side-link:hover {
+            background: var(--brown);
+            color: white !important;
+        }
+
+        .main {
+            margin-left: 260px;
+            padding: 25px;
+        }
+
+        /* Top Bar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .topbar h2 {
+            margin: 0;
+            color: var(--brown-dark);
+            font-weight: 700;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--brown);
+        }
+
+        /* Cards */
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-title {
+            color: var(--brown);
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-top: 5px;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--brown-dark);
+            margin-bottom: 10px;
+        }
+
+        .list-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.07);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4>Admin Panel</h4>
+
+        <a class="side-link active" href="#">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+
+        <a class="side-link" href="#">
+            <i class="fa-solid fa-layer-group"></i> Departments
+        </a>
+
+        <a class="side-link" href="#">
+            <i class="fa-solid fa-user-doctor"></i> Doctors
+        </a>
+
+        <a class="side-link" href="#">
+            <i class="fa-solid fa-prescription-bottle-medical"></i> Treatments
+        </a>
+
+        <a class="side-link" href="#">
+            <i class="fa-regular fa-calendar-check"></i> Appointments
+        </a>
+
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div>
+                <h2>Hospital Admin Dashboard</h2>
+                <div class="text-muted">Logged in as {{ request.user.email }}</div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="small text-muted">Hospital</div>
+                    <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
+                </div>
+
+                <img src="{% static 'default_profile.png' %}" class="avatar">
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-title">Departments</div>
+                    <div class="stat-value">{{ departments|length }}</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-title">Doctors</div>
+                    <div class="stat-value">{{ doctors|length }}</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-title">Upcoming Appointments</div>
+                    <div class="stat-value">{{ appointments|length }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Lists -->
+        <div class="row g-4">
+
+            <div class="col-lg-4">
+
+                <div class="list-card">
+                    <div class="section-title">Departments</div>
+                    <ul class="list-unstyled">
+                        {% for dept in departments %}
+                        <li class="py-2 border-bottom">{{ dept.name }}</li>
+                        {% empty %}
+                        <li>No departments found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="list-card">
+                    <div class="section-title">Treatments</div>
+                    <ul class="list-unstyled">
+                        {% for treatment in treatments %}
+                        <li class="py-2 border-bottom">{{ treatment.name }}</li>
+                        {% empty %}
+                        <li>No treatments found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="col-lg-8">
+                <div class="list-card">
+                    <div class="section-title">Doctors</div>
+                    <ul class="list-unstyled">
+                        {% for doctor in doctors %}
+                        <li class="py-2 border-bottom">{{ doctor.name }}</li>
+                        {% empty %}
+                        <li>No doctors found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="list-card">
+                    <div class="section-title">Upcoming Appointments</div>
+                    <ul class="list-unstyled">
+                        {% for appointment in appointments %}
+                        <li class="py-2 border-bottom">
+                            {{ appointment.appointment_date }} — Dr. {{ appointment.doctor.name }}
+                        </li>
+                        {% empty %}
+                        <li>No upcoming appointments.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

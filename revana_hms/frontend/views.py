@@ -5,13 +5,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from hospitals.models import Hospital, Treatment, Department
+from hospitals.models import Hospital, Treatment, Department, HospitalAdmin
 from accounts.forms.hospital_admin import HospitalAdminRegistrationForm, DoctorRegistrationForm
 from .decorators import role_required
 from accounts.models import DoctorProfile
 from appointments.models import Appointment, DoctorAvailability, Doctor
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.mail import send_mail
 
 User = get_user_model()
 
@@ -83,6 +84,14 @@ def register_hospital_ajax(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
 
+    send_mail(
+        subject='Hospital Registration Submitted',
+        message='A new hospital has been registered. Admin will review and approve it.',
+        from_email='blueglobalcloud@gmail.com',
+        recipient_list=[hospital.email],
+        fail_silently=False,
+    )
+
 # 👨‍⚕️ Doctor registration
 def register_doctor(request):
     if request.method == 'POST':
@@ -133,7 +142,12 @@ def register_doctor(request):
 @login_required
 @role_required('hospital_admin', 'superadmin')
 def hospital_admin_dashboard(request):
-    hospital = Hospital.objects.get(user=request.user)
+    try:
+        hospital_admin = HospitalAdmin.objects.get(user=request.user)
+        hospital = hospital_admin.hospital
+    except HospitalAdmin.DoesNotExist:
+        messages.error(request, "Hospital admin record not found.")
+        return redirect('hospital_login')
 
     departments = Department.objects.filter(hospital=hospital)
     treatments = Treatment.objects.filter(hospital=hospital)
@@ -143,7 +157,7 @@ def hospital_admin_dashboard(request):
         appointment_date__gte=timezone.now()
     ).order_by('appointment_date')
 
-    return render(request, 'hospital_admin/dashboard.html', {
+    return render(request, 'frontend/hospital_admin/dashboard.html', {
         'hospital': hospital,
         'departments': departments,
         'treatments': treatments,
@@ -171,3 +185,12 @@ def doctor_dashboard(request):
         'appointments': appointments,
         'availabilities': availabilities
     })
+
+def reset_password_confirm_page(request):
+    uid = request.GET.get('uid')
+    token = request.GET.get('token')
+    return render(request, 'frontend/reset_password_confirm.html', {'uid': uid, 'token': token})
+
+
+def request_password_reset_page(request):
+    return render(request, 'frontend/request_password_reset.html')  

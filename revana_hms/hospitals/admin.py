@@ -1,8 +1,10 @@
-# hospitals/admin.py
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Hospital, Department, Treatment, HospitalAdmin
 from .utils import approve_hospital_and_notify
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class DepartmentInline(admin.TabularInline):
@@ -30,8 +32,9 @@ class HospitalAdminModel(admin.ModelAdmin):
     logo_preview.short_description = 'Logo'
 
     def get_admin(self, obj):
-        if hasattr(obj, 'admin') and obj.admin and obj.admin.user:
-            return getattr(obj.admin.user, 'email', getattr(obj.admin.user, 'username', '—'))
+        hospital_admin = HospitalAdmin.objects.filter(hospital=obj).first()
+        if hospital_admin and hospital_admin.user:
+            return getattr(hospital_admin.user, 'email', getattr(hospital_admin.user, 'username', '—'))
         return '—'
     get_admin.short_description = 'Hospital Admin'
 
@@ -40,9 +43,28 @@ class HospitalAdminModel(admin.ModelAdmin):
         for hospital in queryset.filter(status=Hospital.STATUS_PENDING):
             hospital.status = Hospital.STATUS_APPROVED
             hospital.save()
+
+            hospital_admin = HospitalAdmin.objects.filter(hospital=hospital).first()
+
+            # Create HospitalAdmin if missing
+            if not hospital_admin:
+                user = User.objects.filter(email=hospital.email).first()
+                if user:
+                    hospital_admin = HospitalAdmin.objects.create(hospital=hospital, user=user)
+                    print(f"🔗 Linked hospital to user: {user.email}")
+                else:
+                    print(f"⚠️ No user found with email {hospital.email}")
+
+            # Assign role if user exists
+            if hospital_admin and hospital_admin.user and hospital_admin.user.role != 'hospital_admin':
+                hospital_admin.user.role = 'hospital_admin'
+                hospital_admin.user.save()
+                print(f"✅ Role assigned: {hospital_admin.user.email}")
+
             print("📤 Bulk approval: sending email to", hospital.email)
             approve_hospital_and_notify(hospital)
             count += 1
+
         self.message_user(request, f'✅ Approved {count} hospital(s) and sent credentials.')
     approve_selected.short_description = 'Approve selected hospitals (create admin + email)'
 
@@ -52,11 +74,27 @@ class HospitalAdminModel(admin.ModelAdmin):
     reject_selected.short_description = 'Reject selected hospitals'
 
     def save_model(self, request, obj, form, change):
-        # Detect manual approval and trigger email only if not already linked
         if change and obj.status == Hospital.STATUS_APPROVED:
-            if not HospitalAdmin.objects.filter(hospital=obj).exists():
-                print("📤 Manual approval: sending email to", obj.email)
-                approve_hospital_and_notify(obj)
+            hospital_admin = HospitalAdmin.objects.filter(hospital=obj).first()
+
+            # Create HospitalAdmin if missing
+            if not hospital_admin:
+                user = User.objects.filter(email=obj.email).first()
+                if user:
+                    hospital_admin = HospitalAdmin.objects.create(hospital=obj, user=user)
+                    print(f"🔗 Linked hospital to user: {user.email}")
+                else:
+                    print(f"⚠️ No user found with email {obj.email}")
+
+            # Assign role if user exists
+            if hospital_admin and hospital_admin.user and hospital_admin.user.role != 'hospital_admin':
+                hospital_admin.user.role = 'hospital_admin'
+                hospital_admin.user.save()
+                print(f"✅ Role assigned: {hospital_admin.user.email}")
+
+            print("📤 Manual approval: sending email to", obj.email)
+            approve_hospital_and_notify(obj)
+
         super().save_model(request, obj, form, change)
 
 
