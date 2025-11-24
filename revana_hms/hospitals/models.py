@@ -29,8 +29,8 @@ class Hospital(models.Model):
     country = models.CharField(max_length=50, default='India')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
-    hospital_type = models.CharField(max_length=50, choices=HOSPITAL_TYPES, default='general')
-    hours = models.CharField(max_length=100, default='9:00 AM - 5:00 PM')
+    hospital_type = models.JSONField(default=list)
+    hours = models.JSONField(default=dict)
     is_approved = models.BooleanField(default=False)
 
 

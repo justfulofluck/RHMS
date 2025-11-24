@@ -149,6 +149,14 @@ def superadmin_dashboard(request):
         'recent_appointments': Appointment.objects.order_by('-created_at')[:5],
     }
 
+    pending_hospitals = Hospital.objects.filter(status=Hospital.STATUS_PENDING)
+    approved_hospitals = Hospital.objects.filter(status=Hospital.STATUS_APPROVED)
+
+    return render(request, 'accounts/templates/accounts/superadmin_dashboard.html', {
+        'pending_hospitals': pending_hospitals,
+        'approved_hospitals': approved_hospitals,
+    })
+
     # Appointment trends (last 7 days)
     last_7_days = timezone.now() - timedelta(days=6)
     appointment_by_day = (

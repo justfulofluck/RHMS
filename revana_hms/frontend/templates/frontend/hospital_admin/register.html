@@ -206,20 +206,39 @@
         </div>
 
         <!-- Hospital Type -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-sitemap"></i></span>
-            <input class="form-control" name="hospital_type" placeholder="Hospital Type">
+        <div class="mb-3">
+          <label class="file-label">Hospital Type:</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="type" value="General" id="typeGeneral">
+            <label class="form-check-label" for="typeGeneral">General</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="type" value="Multispeciality" id="typeMulti">
+            <label class="form-check-label" for="typeMulti">Multispeciality</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="type" value="Pediatric" id="typePediatric">
+            <label class="form-check-label" for="typePediatric">Pediatric</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="type" value="Cardiology" id="typeCardiology">
+            <label class="form-check-label" for="typeCardiology">Cardiology</label>
           </div>
         </div>
 
         <!-- Operating Hours -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-regular fa-clock"></i></span>
-            <input class="form-control" name="hours" placeholder="Operating Hours (e.g., 9 AM - 7 PM)">
+        <div class="mb-3">
+          <label class="file-label">Operating Hours:</label>
+          {% for day in days %}
+          <div class="input-pair">
+            <label class="me-2" style="width: 90px;">{{ day }}:</label>
+            <input class="form-control me-2" type="time" name="{{ day|lower }}_open">
+            <span class="me-2">to</span>
+            <input class="form-control" type="time" name="{{ day|lower }}_close">
           </div>
+          {% endfor %}
         </div>
+
 
         <!-- Logo -->
         <div class="mb-3">

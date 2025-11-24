@@ -9,6 +9,7 @@ from .views import (
     request_password_reset_page,
     doctor_login_view,
     hospital_login_view,
+    approve_hospital,
 )
 from . import views
 
@@ -25,5 +26,7 @@ urlpatterns = [
     path('request-password-reset/', request_password_reset_page, name='request_password_reset_page'),
     path('superadmin/login/', superadmin_login_ajax, name='superadmin_login_ajax'),
     path('superadmin/dashboard/', superadmin_dashboard, name='superadmin_dashboard'),
-
+    path('hospital/edit/', views.edit_hospital_info, name='edit_hospital_info'),
+    path('superadmin/hospital/approve/<int:hospital_id>/', views.approve_hospital, name='approve_hospital'),
+    
 ]

@@ -132,127 +132,173 @@
             <i class="fa-solid fa-chart-line"></i> Dashboard
         </a>
 
-        <a class="side-link" href="#">
-            <i class="fa-solid fa-layer-group"></i> Departments
-        </a>
+        <!-- Hospital Info -->
+        <div class="list-card">
+            <div class="section-title">Hospital Info</div>
 
-        <a class="side-link" href="#">
-            <i class="fa-solid fa-user-doctor"></i> Doctors
-        </a>
+            <h6 class="text-muted mb-2">Hospital Type:</h6>
+            <ul class="list-unstyled mb-3">
+                {% for t in hospital.hospital_type %}
+                <li class="py-1">{{ t|title }}</li>
+                {% empty %}
+                <li>No types specified.</li>
+                {% endfor %}
+            </ul>
 
-        <a class="side-link" href="#">
-            <i class="fa-solid fa-prescription-bottle-medical"></i> Treatments
-        </a>
+            <h6 class="text-muted mb-2">Operating Hours:</h6>
+            <ul class="list-unstyled mb-3">
+                {% for day, time in hospital.hours.items %}
+                <li class="py-1">{{ day }}: {{ time }}</li>
+                {% empty %}
+                <li>No hours specified.</li>
+                {% endfor %}
+            </ul>
 
-        <a class="side-link" href="#">
-            <i class="fa-regular fa-calendar-check"></i> Appointments
-        </a>
-
-    </div>
-
-    <!-- Main -->
-    <div class="main">
-
-        <!-- Top Bar -->
-        <div class="topbar">
-            <div>
-                <h2>Hospital Admin Dashboard</h2>
-                <div class="text-muted">Logged in as {{ request.user.email }}</div>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end">
-                    <div class="small text-muted">Hospital</div>
-                    <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
-                </div>
-
-                <img src="{% static 'default_profile.png' %}" class="avatar">
-            </div>
+            {% if hospital.logo %}
+            <h6 class="text-muted mb-2">Hospital Logo:</h6>
+            <img src="{{ hospital.logo.url }}" alt="Hospital Logo" class="img-fluid rounded" style="max-width: 180px;">
+            {% endif %}
         </div>
 
-        <!-- Stats -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-title">Departments</div>
-                    <div class="stat-value">{{ departments|length }}</div>
-                </div>
+        <div class="col-lg-4">
+
+            <!-- Departments -->
+            <div class="list-card">
+                <div class="section-title">Departments</div>
+                <ul class="list-unstyled">
+                    {% for dept in departments %}
+                    <li class="py-2 border-bottom">{{ dept.name }}</li>
+                    {% empty %}
+                    <li>No departments found.</li>
+                    {% endfor %}
+                </ul>
             </div>
 
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-title">Doctors</div>
-                    <div class="stat-value">{{ doctors|length }}</div>
-                </div>
+            <a class="side-link" href="#">
+                <i class="fa-solid fa-user-doctor"></i> Doctors
+            </a>
+
+            <!-- Treatments -->
+            <div class="list-card">
+                <div class="section-title">Treatments</div>
+                <ul class="list-unstyled">
+                    {% for treatment in treatments %}
+                    <li class="py-2 border-bottom">{{ treatment.name }}</li>
+                    {% empty %}
+                    <li>No treatments found.</li>
+                    {% endfor %}
+                </ul>
             </div>
 
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-title">Upcoming Appointments</div>
-                    <div class="stat-value">{{ appointments|length }}</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Data Lists -->
-        <div class="row g-4">
-
-            <div class="col-lg-4">
-
-                <div class="list-card">
-                    <div class="section-title">Departments</div>
-                    <ul class="list-unstyled">
-                        {% for dept in departments %}
-                        <li class="py-2 border-bottom">{{ dept.name }}</li>
-                        {% empty %}
-                        <li>No departments found.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-                <div class="list-card">
-                    <div class="section-title">Treatments</div>
-                    <ul class="list-unstyled">
-                        {% for treatment in treatments %}
-                        <li class="py-2 border-bottom">{{ treatment.name }}</li>
-                        {% empty %}
-                        <li>No treatments found.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-            </div>
-
-            <div class="col-lg-8">
-                <div class="list-card">
-                    <div class="section-title">Doctors</div>
-                    <ul class="list-unstyled">
-                        {% for doctor in doctors %}
-                        <li class="py-2 border-bottom">{{ doctor.name }}</li>
-                        {% empty %}
-                        <li>No doctors found.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-                <div class="list-card">
-                    <div class="section-title">Upcoming Appointments</div>
-                    <ul class="list-unstyled">
-                        {% for appointment in appointments %}
-                        <li class="py-2 border-bottom">
-                            {{ appointment.appointment_date }} — Dr. {{ appointment.doctor.name }}
-                        </li>
-                        {% empty %}
-                        <li>No upcoming appointments.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-            </div>
+            <a class="side-link" href="#">
+                <i class="fa-regular fa-calendar-check"></i> Appointments
+            </a>
 
         </div>
 
-    </div>
+        <!-- Main -->
+        <div class="main">
+
+            <!-- Top Bar -->
+            <div class="topbar">
+                <div>
+                    <h2>Hospital Admin Dashboard</h2>
+                    <div class="text-muted">Logged in as {{ request.user.email }}</div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="text-end">
+                        <div class="small text-muted">Hospital</div>
+                        <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
+                    </div>
+
+                    <img src="{% static 'default_profile.png' %}" class="avatar">
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-title">Departments</div>
+                        <div class="stat-value">{{ departments|length }}</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-title">Doctors</div>
+                        <div class="stat-value">{{ doctors|length }}</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-title">Upcoming Appointments</div>
+                        <div class="stat-value">{{ appointments|length }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Lists -->
+            <div class="row g-4">
+
+                <div class="col-lg-4">
+
+                    <div class="list-card">
+                        <div class="section-title">Departments</div>
+                        <ul class="list-unstyled">
+                            {% for dept in departments %}
+                            <li class="py-2 border-bottom">{{ dept.name }}</li>
+                            {% empty %}
+                            <li>No departments found.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="list-card">
+                        <div class="section-title">Treatments</div>
+                        <ul class="list-unstyled">
+                            {% for treatment in treatments %}
+                            <li class="py-2 border-bottom">{{ treatment.name }}</li>
+                            {% empty %}
+                            <li>No treatments found.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="list-card">
+                        <div class="section-title">Doctors</div>
+                        <ul class="list-unstyled">
+                            {% for doctor in doctors %}
+                            <li class="py-2 border-bottom">{{ doctor.name }}</li>
+                            {% empty %}
+                            <li>No doctors found.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="list-card">
+                        <div class="section-title">Upcoming Appointments</div>
+                        <ul class="list-unstyled">
+                            {% for appointment in appointments %}
+                            <li class="py-2 border-bottom">
+                                {{ appointment.appointment_date }} — Dr. {{ appointment.doctor.name }}
+                            </li>
+                            {% empty %}
+                            <li>No upcoming appointments.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
 </body>
 

@@ -58,8 +58,6 @@ def hospital_login_view(request):
 def hospital_register_page(request):
     return render(request, 'frontend/hospital_admin/register.html')
 
-
-# 🏥 AJAX hospital registration with FormData support
 @csrf_exempt
 def register_hospital_ajax(request):
     if request.method == 'POST':
@@ -70,11 +68,22 @@ def register_hospital_ajax(request):
                     email=request.POST.get('email'),
                     password=request.POST.get('password'),
                     phone=request.POST.get('phone_number'),
-                    role='pending_hospital_admin',  # ✅ Assign pending role
-                    is_active=True
+                    role='pending_hospital_admin',
+                    is_active=True  # ✅ Set inactive until approved
                 )
 
-                # Step 2 - Create hospital with pending status
+                # Step 2 - Collect hospital types (checkboxes)
+                hospital_types = request.POST.getlist('type')  # e.g., ['General', 'Pediatric']
+
+                # Step 3 - Collect operating hours
+                days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+                hours = {}
+                for day in days:
+                    open_time = request.POST.get(f"{day}_open", "")
+                    close_time = request.POST.get(f"{day}_close", "")
+                    hours[day.capitalize()] = f"{open_time}-{close_time}" if open_time and close_time else "Closed"
+
+                # Step 4 - Create hospital
                 hospital = Hospital.objects.create(
                     name=request.POST.get('name'),
                     registration_number=request.POST.get('registration_number'),
@@ -84,16 +93,16 @@ def register_hospital_ajax(request):
                     city=request.POST.get('city'),
                     state=request.POST.get('state', 'Gujarat'),
                     country=request.POST.get('country', 'India'),
-                    hospital_type=request.POST.get('hospital_type', 'general'),
-                    hours=request.POST.get('hours', '9:00 AM - 5:00 PM'),
+                    hospital_type=hospital_types,
+                    hours=hours,
                     logo=request.FILES.get('logo'),
                     status=Hospital.STATUS_PENDING
                 )
 
-                # Step 3: Link hospital admin profile
+                # Step 5 - Link hospital admin profile
                 HospitalAdmin.objects.create(user=user, hospital=hospital)
 
-                # ✅ Send confirmation email
+                # Step 6 - Send confirmation email
                 send_mail(
                     subject='Hospital Registration Submitted',
                     message='A new hospital has been registered. Admin will review and approve it.',
@@ -101,14 +110,30 @@ def register_hospital_ajax(request):
                     recipient_list=[hospital.email],
                     fail_silently=False,
                 )
-            
-            return JsonResponse({'status': 'success', 'message': 'Hospital registration submitted. Awaiting approval.'})
-        except IntegrityError:
-            return JsonResponse({'status': 'error', 'message': 'A hospital with this email or registration number already exists.'}, status=400)
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Hospital registration submitted. Awaiting approval.'
+            })
+
+        except IntegrityError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'A hospital with this email or registration number already exists.'
+            }, status=400)
+
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method.'
+    }, status=400)
+
+
 
 # 👨‍⚕️ Doctor registration via AJAX
 @csrf_exempt
@@ -199,6 +224,57 @@ def hospital_admin_dashboard(request):
         'appointments': appointments
     })
 
+@login_required
+@role_required('hospital_admin')
+def edit_hospital_admin(request):
+    hospital = HospitalAdmin.objects.get(user=request.user).hospital
+
+    if request.method == 'POST':
+        hospital.name = request.POST.get('name')
+        hospital.phone_number = request.POST.get('phone_number')
+        hospital_address = request.POST.get('address')
+        hospital.city = request.POST.get('city')
+        hospital.state = request.POST.get('state')
+        hospital.country = request.POST.get('country')
+        hospital.hospital_type = request.POST.get('hospital_type')
+
+    # Update Hours
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    hours = {}
+    for day in days:
+        open_time = request.POST.get(f"{day.lower()}_open_time")
+        close_time = request.POST.get(f"{day.lower()}_close_time")
+        hours[day] = f"{open_time}-{close_time}" if open_time and close_time else "Closed"
+    hospital.hours = hours
+
+    if request.FILES.get('logo'):
+        hospital.logo = request.FILES.get('logo')
+
+    hospital.save()
+    messages.success(request, 'Hospital updated successfully.')
+    return redirect('hospital_admin_dashboard')
+
+return render(request, 'frontend/hospital_admin/edit_hospital.html', {'hospital': hospital})
+
+@role_required('hospital_admin')
+def approve_doctor(request, doctor_id):
+    doctor = Doctor.objects.get(id=doctor_id, hospital__hospitaladmin__user=request.user)
+    doctor.is_active = True
+    doctor.staus = Doctor.STATUS_APPROVED
+    doctor.save()
+    messages.success(request, 'Doctor approved successfully.')
+
+    send_mail(
+        subject='Doctor Approved',
+        message='Your profile has been approved by the hospital admin.',
+        from_email='blueglobalcloud@gmail.com',
+        recipient_list=[doctor.user.email],
+        fail_silently=False,         
+    )
+
+    messages.success(request, 'Doctor approved successfully.')
+    return redirect('pending_doctors')
+         
 
 # 👨‍⚕️ Doctor dashboard
 @login_required
@@ -237,4 +313,7 @@ def request_password_reset_page(request):
 def doctor_register_page(request):
     return render(request, 'frontend/doctor/register.html')
 
+def hospital_register_page(request):
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    return render(request, 'frontend/hospital_admin/register.html', {'days': days})
 
