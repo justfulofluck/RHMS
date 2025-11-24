@@ -67,6 +67,12 @@ class DoctorSerializer(serializers.ModelSerializer):
             doctor.user = user
         doctor.status = Doctor.STATUS_APPROVED
         doctor.is_verified = True
+        
+        # Assign role and activate user
+        doctor.user.role = 'doctor'
+        doctor.user.is_active = True
+        doctor.user.save()
+        
         doctor.save()
         return doctor
 

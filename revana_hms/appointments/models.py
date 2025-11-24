@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone  # ✅ Required for created_at default
 from hospitals.models import Hospital
 from doctors.models import Doctor
 
@@ -17,12 +18,14 @@ class DoctorAvailability(models.Model):
     def __str__(self):
         return f'{self.doctor.name} - {self.date} {self.start_time}-{self.end_time}'
 
+
 class Patient(models.Model):
     name = models.CharField(max_length=255)
     age = models.IntegerField()
     gender = models.CharField(max_length=10)
     contact_number = models.CharField(max_length=15)
     address = models.TextField()
+
 
 class Appointment(models.Model):
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name="appointments")
@@ -34,6 +37,7 @@ class Appointment(models.Model):
         choices=[("Pending", "Pending"), ("Confirmed", "Confirmed"), ("Cancelled", "Cancelled")],
         default="Pending"
     )
+    created_at = models.DateTimeField(default=timezone.now)  # ✅ Now works correctly
 
     def __str__(self):
         return f"Appointment with {self.doctor.name} on {self.appointment_date}"

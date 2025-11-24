@@ -31,6 +31,7 @@ class Hospital(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     hospital_type = models.CharField(max_length=50, choices=HOSPITAL_TYPES, default='general')
     hours = models.CharField(max_length=100, default='9:00 AM - 5:00 PM')
+    is_approved = models.BooleanField(default=False)
 
 
     class Meta:

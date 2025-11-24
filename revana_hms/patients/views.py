@@ -57,6 +57,7 @@ def register_patient(request):
             # Create User
             user = User.objects.create_user(email=email, password=password)
             user.first_name = name
+            user.role = 'patient'  # ✅ Assign role
             user.save()
 
             # Create Patient record

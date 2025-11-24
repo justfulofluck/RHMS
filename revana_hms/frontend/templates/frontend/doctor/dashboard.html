@@ -1,17 +1,11 @@
-<h2>Upcoming Appointments</h2>
-<ul>
-  {% for appointment in appointments %}
-    <li>{{ appointment.appointment_date }} — {{ appointment.patient_name }} ({{ appointment.status }})</li>
-  {% empty %}
-    <li>No upcoming appointments.</li>
-  {% endfor %}
-</ul>
-
-<h2>Availability Slots</h2>
-<ul>
-  {% for slot in availabilities %}
-    <li>{{ slot.date }}: {{ slot.start_time }} - {{ slot.end_time }} {% if slot.is_available %}(Available){% else %}(Unavailable){% endif %}</li>
-  {% empty %}
-    <li>No availability slots set.</li>
-  {% endfor %}
-</ul>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Welcome, Dr. {{ doctor.user.email }}</h2>
+  <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+  <p><strong>Experience:</strong> {{ doctor.year_of_experience }} years</p>
+  <p><strong>Qualification:</strong> {{ doctor.qualification }}</p>
+  <p><strong>Contact:</strong> {{ doctor.contact_number }}</p>
+  <p><strong>Address:</strong> {{ doctor.address }}</p>
+</div>
+{% endblock %}
