@@ -56,6 +56,7 @@ urlpatterns = [
     path('mobile/book/', MobileBookingView.as_view(), name='mobile-booking'),
     path('', include('frontend.urls')),
     path('patients/', include('patients.urls')),
+    path('hospital/doctors/', include('doctors.urls')),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

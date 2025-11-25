@@ -20,21 +20,7 @@ from accounts.views import superadmin_login_ajax
 
 User = get_user_model()
 
-def doctor_login_view(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        user = authenticate(request, username=email, password=password)
-        if user and user.role == 'doctor':
-            print("User authenticated successfully.")
-            print("User role: ", user.role)
-            print("User email: ", user.email)
-            print("User is_active: ", user.is_active)
-            login(request, user)
-            return redirect('doctor_dashboard')
-        else:
-            messages.error(request, 'Invalid credentials or not a doctor.')
-    return render(request, 'frontend/doctor_login.html')
+
 
 
 def hospital_login_view(request):
@@ -136,93 +122,9 @@ def register_hospital_ajax(request):
 
 
 # 👨‍⚕️ Doctor registration via AJAX
-@csrf_exempt
-def register_doctor_ajax(request):
-    if request.method == 'POST':
-        data = request.POST
-        email = data.get('email')
-        aadhaar = data.get('aadhaar')
-
-        # ✅ Check for duplicate email
-        if User.objects.filter(email=email).exists():
-            return JsonResponse({'status': 'error', 'message': 'Email already exists.'}, status=400)
-
-        # ✅ Check for duplicate Aadhaar
-        if DoctorProfile.objects.filter(aadhaar=aadhaar).exists():
-            return JsonResponse({'status': 'error', 'message': 'Aadhaar already exists.'}, status=400)
-
-        try:
-            user = User.objects.create_user(
-                email=email,
-                password=data.get('password'),
-                phone=data.get('contact_number'),
-                role='doctor',
-                is_active=False  # 🔐 Inactive until email confirmation
-            )
-
-            DoctorProfile.objects.create(
-                user=user,
-                gender=data.get('gender'),
-                date_of_birth=data.get('date_of_birth'),
-                contact_number=data.get('contact_number'),
-                address=data.get('address'),
-                medical_certificate=request.FILES.get('medical_certificate'),
-                qualification=data.get('qualification'),
-                specialization=data.get('specialization'),
-                year_of_experience=data.get('year_of_experience'),
-                registration_certificate=request.FILES.get('registration_certificate'),
-                degree_certificates=request.FILES.get('degree_certificates'),
-                aadhaar=aadhaar,
-                passport_photo=request.FILES.get('passport_photo'),
-                experience_certificate=request.FILES.get('experience_certificate')
-            )
-
-            # ✅ Send activation email
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            activation_link = f"http://192.168.1.208:8000/activate-doctor/?uid={uid}&token={token}"
-
-            send_mail(
-                subject="Activate Your Doctor Account",
-                message=f"Click the link to activate your account: {activation_link}",
-                from_email=None,
-                recipient_list=[email],
-            )
-
-            return JsonResponse({'status': 'success', 'message': 'Doctor registered. Please check your email to activate your account.'})
-
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
 
 
-# 🏥 Hospital admin dashboard
-@login_required
-@role_required('hospital_admin', 'superadmin')
-def hospital_admin_dashboard(request):
-    try:
-        hospital_admin = HospitalAdmin.objects.get(user=request.user)
-        hospital = hospital_admin.hospital
-    except HospitalAdmin.DoesNotExist:
-        messages.error(request, "Hospital admin record not found.")
-        return redirect('hospital_login')
 
-    departments = Department.objects.filter(hospital=hospital)
-    treatments = Treatment.objects.filter(hospital=hospital)
-    doctors = Doctor.objects.filter(hospital=hospital)
-    appointments = Appointment.objects.filter(
-        hospital=hospital,
-        appointment_date__gte=timezone.now()
-    ).order_by('appointment_date')
-
-    return render(request, 'frontend/hospital_admin/dashboard.html', {
-        'hospital': hospital,
-        'departments': departments,
-        'treatments': treatments,
-        'doctors': doctors,
-        'appointments': appointments
-    })
 
 @login_required
 @role_required('hospital_admin')
@@ -232,70 +134,31 @@ def edit_hospital_admin(request):
     if request.method == 'POST':
         hospital.name = request.POST.get('name')
         hospital.phone_number = request.POST.get('phone_number')
-        hospital_address = request.POST.get('address')
+        hospital.address = request.POST.get('address')
         hospital.city = request.POST.get('city')
         hospital.state = request.POST.get('state')
         hospital.country = request.POST.get('country')
         hospital.hospital_type = request.POST.get('hospital_type')
 
-    # Update Hours
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    hours = {}
-    for day in days:
-        open_time = request.POST.get(f"{day.lower()}_open_time")
-        close_time = request.POST.get(f"{day.lower()}_close_time")
-        hours[day] = f"{open_time}-{close_time}" if open_time and close_time else "Closed"
-    hospital.hours = hours
+        # Update Hours
+        days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        hours = {}
+        for day in days:
+            open_time = request.POST.get(f"{day.lower()}_open_time")
+            close_time = request.POST.get(f"{day.lower()}_close_time")
+            hours[day] = f"{open_time}-{close_time}" if open_time and close_time else "Closed"
+        hospital.hours = hours
 
-    if request.FILES.get('logo'):
-        hospital.logo = request.FILES.get('logo')
+        if request.FILES.get('logo'):
+            hospital.logo = request.FILES.get('logo')
 
-    hospital.save()
-    messages.success(request, 'Hospital updated successfully.')
-    return redirect('hospital_admin_dashboard')
+        hospital.save()
+        messages.success(request, 'Hospital updated successfully.')
+        return redirect('hospital_admin_dashboard')
 
-return render(request, 'frontend/hospital_admin/edit_hospital.html', {'hospital': hospital})
+    return render(request, 'frontend/hospital_admin/edit_hospital.html', {'hospital': hospital})
 
-@role_required('hospital_admin')
-def approve_doctor(request, doctor_id):
-    doctor = Doctor.objects.get(id=doctor_id, hospital__hospitaladmin__user=request.user)
-    doctor.is_active = True
-    doctor.staus = Doctor.STATUS_APPROVED
-    doctor.save()
-    messages.success(request, 'Doctor approved successfully.')
 
-    send_mail(
-        subject='Doctor Approved',
-        message='Your profile has been approved by the hospital admin.',
-        from_email='blueglobalcloud@gmail.com',
-        recipient_list=[doctor.user.email],
-        fail_silently=False,         
-    )
-
-    messages.success(request, 'Doctor approved successfully.')
-    return redirect('pending_doctors')
-         
-
-# 👨‍⚕️ Doctor dashboard
-@login_required
-@role_required('doctor')
-def doctor_dashboard(request):
-    doctor = Doctor.objects.get(user=request.user)
-
-    appointments = Appointment.objects.filter(
-        doctor=doctor,
-        appointment_date__gte=timezone.now()
-    ).order_by('appointment_date')
-
-    availabilities = DoctorAvailability.objects.filter(
-        doctor=doctor,
-        date__gte=timezone.now().date()
-    ).order_by('date', 'start_time')
-
-    return render(request, 'doctor/dashboard.html', {
-        'appointments': appointments,
-        'availabilities': availabilities
-    })
 
 
 # 🔐 Password reset confirmation page
@@ -310,10 +173,37 @@ def request_password_reset_page(request):
     return render(request, 'frontend/request_password_reset.html')
 
 
-def doctor_register_page(request):
-    return render(request, 'frontend/doctor/register.html')
+
 
 def hospital_register_page(request):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     return render(request, 'frontend/hospital_admin/register.html', {'days': days})
+
+
+@role_required('superadmin')
+def approve_hospital(request, hospital_id):
+    hospital = Hospital.objects.get(id=hospital_id)
+    hospital.status = Hospital.STATUS_APPROVED
+    hospital.is_approved = True
+    hospital.save()
+
+    # Activate the hospital admin user
+    try:
+        admin = HospitalAdmin.objects.get(hospital=hospital)
+        admin.user.is_active = True
+        admin.user.save()
+        
+        # Send approval email
+        send_mail(
+            subject='Hospital Registration Approved',
+            message='Your hospital registration has been approved. You can now login to your dashboard.',
+            from_email='blueglobalcloud@gmail.com',
+            recipient_list=[hospital.email],
+            fail_silently=False,
+        )
+        messages.success(request, f'Hospital {hospital.name} approved successfully.')
+    except HospitalAdmin.DoesNotExist:
+        messages.warning(request, f'Hospital {hospital.name} approved, but no admin user found.')
+
+    return redirect('superadmin_dashboard')
 

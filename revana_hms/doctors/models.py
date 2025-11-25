@@ -6,9 +6,19 @@ from hospitals.models import Hospital, Department, Treatment
 #User = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 class Doctor(models.Model):
+    STATUS_PENDING = 'pending'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_APPROVED, 'Approved'),
+        (STATUS_REJECTED, 'Rejected'),
+    ]
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1)
     specialization = models.CharField(max_length=100)
     hospital = models.ForeignKey('hospitals.Hospital', on_delete=models.CASCADE, default=1)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     is_approved = models.BooleanField(default=False)
 
     def __str__(self):
