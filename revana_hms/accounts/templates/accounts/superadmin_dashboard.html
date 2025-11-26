@@ -1,168 +1,258 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Superadmin Dashboard{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Superadmin Dashboard</h2>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 250px;
+        background-color: #343a40;
+        color: #fff;
+        padding-top: 20px;
+    }
+    .sidebar a {
+        color: #fff;
+        text-decoration: none;
+        display: block;
+        padding: 10px 15px;
+        transition: background-color 0.3s;
+    }
+    .sidebar a:hover {
+        background-color: #495057;
+    }
+    .sidebar .active {
+        background-color: #0d6efd;
+    }
+    .main-content {
+        margin-left: 250px;
+        padding: 20px;
+    }
+    .card-metric {
+        border-radius: 10px;
+        color: #fff;
+    }
+    .card-metric .card-body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .card-metric i {
+        font-size: 3rem;
+        opacity: 0.7;
+    }
+</style>
 
-    <!-- Metrics -->
-    <div class="row text-center mb-4">
-        <div class="col-md-3">
-            <div class="card bg-light p-3">
-                <h5>Total Users</h5>
-                <h3>{{ total_users }}</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-light p-3">
-                <h5>Doctors</h5>
-                <h3>{{ total_doctors }}</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-light p-3">
-                <h5>Hospitals</h5>
-                <h3>{{ total_hospitals }}</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-light p-3">
-                <h5>Appointments</h5>
-                <h3>{{ total_appointments }}</h3>
-            </div>
-        </div>
-    </div>
-
-    <!-- Additional Metrics -->
-    <div class="row text-center mb-4">
-        <div class="col-md-3">
-            <div class="card bg-success text-white p-3">
-                <h6>New Users This Week</h6>
-                <h4>{{ new_users_week }}</h4>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-primary text-white p-3">
-                <h6>New Users This Month</h6>
-                <h4>{{ new_users_month }}</h4>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white p-3">
-                <h6>Appointments Today</h6>
-                <h4>{{ appointments_today }}</h4>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark p-3">
-                <h6>Pending / Confirmed</h6>
-                <h4>{{ pending_appointments }} / {{ confirmed_appointments }}</h4>
-            </div>
-        </div>
-    </div>
-
-    <!-- Appointment Trends Chart -->
-    <div class="card mb-5">
-        <div class="card-body">
-            <h5 class="card-title">Appointment Trends (Last 7 Days)</h5>
-            <canvas id="appointmentsChart" height="100"></canvas>
-        </div>
-    </div>
-
-    <!-- Doctor Registrations Chart -->
-    <div class="card mb-5">
-        <div class="card-body">
-            <h5 class="card-title">Doctor Registrations (Last 12 Months)</h5>
-            <canvas id="doctorChart" height="100"></canvas>
-        </div>
-    </div>
-
-    <!-- User Role Distribution Chart -->
-    <div class="card mb-5">
-        <div class="card-body">
-            <h5 class="card-title">User Role Distribution</h5>
-            <canvas id="roleChart" height="100"></canvas>
-        </div>
-    </div>
-
-    <!-- Recent Users -->
-    <h4>Recent Users</h4>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Date Joined</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in recent_users %}
-            <tr>
-                <td>{{ user.email }}</td>
-                <td>{{ user.role }}</td>
-                <td>{{ user.date_joined }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- Recent Appointments -->
-    <h4>Recent Appointments</h4>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Patient</th>
-                <th>Doctor</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for appt in recent_appointments %}
-            <tr>
-                <td>{{ appt.patient_name }}</td>
-                <td>{{ appt.doctor.user.email }}</td>
-                <td>{{ appt.appointment_date }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="sidebar">
+    <h3 class="text-center mb-4">RHMS</h3>
+    <a href="#dashboard" class="active">Dashboard</a>
+    <a href="#approvals">Pending Approvals</a>
+    <a href="#users">Users</a>
+    <a href="#appointments">Appointments</a>
+    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+        {% csrf_token %}
+    </form>
+    <a href="#" onclick="document.getElementById('logout-form').submit(); return false;">Logout</a>
 </div>
 
-<form method="get" action="{% url 'export_appointments' %}">
-    {{ filter_form.as_p }}
-    <button type="submit" class="btn btn-outline-secondary">Export to CSV</button>
-</form>
+<div class="main-content">
+    <div id="dashboard">
+        <h2 class="mb-4">Dashboard</h2>
 
+        <!-- Metrics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card card-metric bg-primary">
+                    <div class="card-body">
+                        <div>
+                            <h5>Total Users</h5>
+                            <h3>{{ total_users }}</h3>
+                        </div>
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-metric bg-info">
+                    <div class="card-body">
+                        <div>
+                            <h5>Doctors</h5>
+                            <h3>{{ total_doctors }}</h3>
+                        </div>
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-metric bg-success">
+                    <div class="card-body">
+                        <div>
+                            <h5>Hospitals</h5>
+                            <h3>{{ total_hospitals }}</h3>
+                        </div>
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-metric bg-warning">
+                    <div class="card-body">
+                        <div>
+                            <h5>Appointments</h5>
+                            <h3>{{ total_appointments }}</h3>
+                        </div>
+                        <i class="far fa-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- Chart.js -->
+        <!-- Charts -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Appointment Trends (Last 7 Days)</h5>
+                        <canvas id="appointmentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Doctor Registrations (Last 12 Months)</h5>
+                        <canvas id="doctorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="approvals" class="mt-5">
+        <h2 class="mb-4">Pending Approvals</h2>
+        <div class="card">
+            <div class="card-body">
+                <h4>Pending Hospitals</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hospital in pending_hospitals %}
+                        <tr>
+                            <td>{{ hospital.name }}</td>
+                            <td>{{ hospital.email }}</td>
+                            <td>
+                                <a href="{% url 'approve_hospital' hospital.id %}" class="btn btn-sm btn-success">Approve</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No pending hospitals.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="users" class="mt-5">
+        <h2 class="mb-4">Recent Users</h2>
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Date Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users %}
+                        <tr>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.role }}</td>
+                            <td>{{ user.date_joined|date:"Y-m-d" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="appointments" class="mt-5">
+        <h2 class="mb-4">Recent Appointments</h2>
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in recent_appointments %}
+                        <tr>
+                            <td>{{ appt.patient_name }}</td>
+                            <td>{{ appt.doctor.user.email }}</td>
+                            <td>{{ appt.appointment_date|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart.js and Font Awesome -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
 <script>
     // Appointment Trends Chart
     const ctx = document.getElementById('appointmentsChart').getContext('2d');
     const appointmentsChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: {{ chart_labels| safe }},
-    datasets: [{
-        label: 'Appointments',
-        data: {{ chart_data| safe }},
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.3,
-        fill: true,
-        pointRadius: 5,
-        pointHoverRadius: 7
+            labels: {{ chat_labels|safe }},
+            datasets: [{
+                label: 'Appointments',
+                data: {{ chart_data|safe }},
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.3,
+                fill: true
             }]
         },
-    options: {
-        responsive: true,
+        options: {
+            responsive: true,
             scales: {
-            y: {
-                beginAtZero: true,
+                y: {
+                    beginAtZero: true,
                     ticks: {
-                    precision: 0
+                        precision: 0
+                    }
                 }
             }
         }
-    }
     });
 
     // Doctor Registrations Chart
@@ -170,179 +260,26 @@
     const doctorChart = new Chart(doctorCtx, {
         type: 'bar',
         data: {
-            labels: {{ doctor_chart_labels| safe }},
-    datasets: [{
-        label: 'Doctors Registered',
-        data: {{ doctor_chart_data| safe }},
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
+            labels: {{ doctor_chart_labels|safe }},
+            datasets: [{
+                label: 'Doctors Registered',
+                data: {{ doctor_chart_data|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
             }]
         },
-    options: {
-        responsive: true,
+        options: {
+            responsive: true,
             scales: {
-            y: {
-                beginAtZero: true,
+                y: {
+                    beginAtZero: true,
                     ticks: {
-                    precision: 0
+                        precision: 0
+                    }
                 }
             }
         }
-    }
-    });
-
-    // User Role Distribution Chart
-    const roleCtx = document.getElementById('roleChart').getContext('2d');
-    const roleChart = new Chart(roleCtx, {
-        type: 'pie',
-        data: {
-            labels: {{ role_labels| safe }},
-    datasets: [{
-        data: {{ role_counts| safe }},
-        backgroundColor: [
-        'rgba(255, 99, 132, 0.6)',
-        'rgba(54, 162, 235, 0.6)',
-        'rgba(255, 206, 86, 0.6)',
-        'rgba(75, 192, 192, 0.6)',
-        'rgba(153, 102, 255, 0.6)'
-    ],
-        borderColor: '#fff',
-        borderWidth: 1
-            }]
-        },
-    options: {
-        responsive: true,
-            plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
     });
 </script>
-
-<!-- Appointment Filter -->
-<h4>Filter Appointments</h4>
-<form method="get" class="row g-3 mb-4">
-    <div class="col-md-3">
-        {{ filter_form.start_date.label_tag }} {{ filter_form.start_date }}
-    </div>
-    <div class="col-md-3">
-        {{ filter_form.end_date.label_tag }} {{ filter_form.end_date }}
-    </div>
-    <div class="col-md-3">
-        {{ filter_form.doctor.label_tag }} {{ filter_form.doctor }}
-    </div>
-    <div class="col-md-3">
-        {{ filter_form.hospital.label_tag }} {{ filter_form.hospital }}
-    </div>
-    <div class="col-md-12">
-        <button type="submit" class="btn btn-primary">Apply Filters</button>
-    </div>
-</form>
-
-<div class="list-card">
-    <div class="section-title">Pending Hospitals</div>
-    <ul class="list-unstyled">
-        {% for hospital in pending_hospitals %}
-        <li class="py-2 border-bottom d-flex justify-content-between align-items-center">
-            <span>{{ hospital.name }} — {{ hospital.email }}</span>
-            <a href="{% url 'approve_hospital' hospital.id %}" class="btn btn-sm btn-success">Approve</a>
-        </li>
-        {% empty %}
-        <li>No pending hospitals.</li>
-        {% endfor %}
-    </ul>
-</div>
-
-
-<!-- Filtered Appointments -->
-<h4>Filtered Appointments</h4>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Patient</th>
-            <th>Doctor</th>
-            <th>Hospital</th>
-            <th>Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for appt in filtered_appointments %}
-        <tr>
-            <td>{{ appt.patient_name }}</td>
-            <td>{{ appt.doctor.user.email }}</td>
-            <td>{{ appt.hospital.name }}</td>
-            <td>{{ appt.appointment_date }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4">No appointments found for selected filters.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<div class="container mt-5">
-    <h2>Manage Registrations</h2>
-
-    <h4>Pending Hospitals</h4>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for hospital in pending_hospitals %}
-            <tr>
-                <td>{{ hospital.name }}</td>
-                <td>
-                    <form method="post">{% csrf_token %}
-                        <input type="hidden" name="type" value="hospital">
-                        <input type="hidden" name="id" value="{{ hospital.id }}">
-                        <button name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                        <button name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h4>Pending Doctors</h4>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for doctor in pending_doctors %}
-            <tr>
-                <td>{{ doctor.user.email }}</td>
-                <td>
-                    <form method="post">{% csrf_token %}
-                        <input type="hidden" name="type" value="doctor">
-                        <input type="hidden" name="id" value="{{ doctor.id }}">
-                        <button name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                        <button name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<div class="d-flex justify-content-end mb-3">
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-outline-danger">Logout</button>
-    </form>
-</div>
-
 {% endblock %}

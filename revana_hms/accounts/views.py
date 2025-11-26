@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes, force_str
@@ -94,13 +94,18 @@ def superadmin_login_ajax(request):
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                return JsonResponse({'success': True, 'redirect_url': '/superadmin/dashboard/'})
+                return JsonResponse({'success': True, 'redirect_url': '/accounts/superadmin/dashboard/'})
             else:
                 return JsonResponse({'success': False, 'error': 'Invalid password'})
         else:
             return JsonResponse({'success': False, 'error': 'Not a super admin'})
 
     return render(request, 'accounts/superadmin_login.html')
+
+def logout_view(request):
+    from django.contrib.auth import logout
+    logout(request)
+    return redirect('homepage')
 
 def is_superadmin(user):
     return user.is_authenticated and user.is_superuser

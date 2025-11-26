@@ -107,7 +107,7 @@ urlpatterns = [
     # App-specific routes
     path('hospitals/', include('hospitals.urls')),
     path('api/hospitals/', include('hospitals.api_urls')),
-    path('api/accounts/', include('accounts.urls')),
+    path('accounts/', include('accounts.urls')),
     path('api/appointments/', include('appointments.urls')),
 
     # DRF router endpoints
@@ -122,6 +122,9 @@ urlpatterns = [
     path('', include('frontend.urls')),
     path('patients/', include('patients.urls')),
     path('hospital/doctors/', include('doctors.urls')),
+
+    # Homepage
+    path('', include('frontend.urls')),
 ]
 
 # Media files

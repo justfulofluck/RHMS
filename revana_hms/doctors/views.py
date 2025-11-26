@@ -157,7 +157,7 @@ def pending_doctors(request):
         hospital = HospitalAdmin.objects.get(user=request.user).hospital
     except HospitalAdmin.DoesNotExist:
         messages.error(request, "You are not authorized as a hospital admin.")
-        return redirect('home') 
+        return redirect('homepage') 
 
     doctors = Doctor.objects.filter(hospital=hospital, status=Doctor.STATUS_PENDING)
     return render(request, 'doctors/pending_doctors.html', {'doctors': doctors})

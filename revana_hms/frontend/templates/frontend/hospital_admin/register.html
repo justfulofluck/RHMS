@@ -27,8 +27,10 @@
       font-family: "Poppins", sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      background: linear-gradient(180deg, #d9cbc0 0%, #c9a07e 50%, #a26835 100%);
+      background: linear-gradient(90deg, #e7dacf 0%, #c9a07e 100%, #a2683566 100%);
+
     }
+    
 
     /* center container vertically */
     .page-wrap {
@@ -40,7 +42,7 @@
     }
 
     .card-register {
-      width: 520px;
+      width: auto;
       max-width: calc(100% - 40px);
       background: var(--card-bg);
       border-radius: 12px;
@@ -113,6 +115,11 @@
     .form-control::placeholder {
       color: #9a8b83;
     }
+    
+    .form-check-input:checked {
+    background-color:#683f1e;
+    border-color: #683f1e;
+}
 
     .small-muted {
       color: rgba(74, 47, 23, 0.6);
@@ -139,105 +146,168 @@
 
       <h2>Hospital Registration</h2>
       <div class="card-sub">Please fill the details to register a hospital</div>
+      
+      <!-- done by khushi->
 
-      <form id="hospitalForm" enctype="multipart/form-data" method="post">
-        <!-- Hospital Name -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-hospital"></i></span>
-            <input class="form-control" name="name" placeholder="Hospital Name" required>
-          </div>
-        </div>
+     <form id="hospitalForm" enctype="multipart/form-data" method="post">
 
-        <!-- Phone -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
-            <input class="form-control" name="phone_number" placeholder="Phone Number" required>
-          </div>
+  <!-- ROW 1 : Hospital Name + Phone Number -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="input-pair">
+        <div class="input-group w-100">
+          <span class="input-group-text"><i class="fa-solid fa-hospital"></i></span>
+          <input class="form-control" name="name" placeholder="Hospital Name" required>
         </div>
+      </div>
+    </div>
 
-        <!-- Email -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
-            <input class="form-control" name="email" placeholder="Email" type="email" required>
-          </div>
+    <div class="col-md-6">
+      <div class="input-pair">
+        <div class="input-group w-100">
+          <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+          <input class="form-control" name="phone_number" placeholder="Phone Number" required>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Registration Number -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
-            <input class="form-control" name="registration_number" placeholder="Registration Number" required>
-          </div>
+  <!-- ROW 2 : Email + Registration Number -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="input-pair">
+        <div class="input-group w-100">
+          <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+          <input class="form-control" name="email" placeholder="Email" type="email" required>
         </div>
+      </div>
+    </div>
 
-        <!-- Address -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-            <input class="form-control" name="address" placeholder="Address">
-          </div>
+    <div class="col-md-6">
+      <div class="input-pair">
+        <div class="input-group w-100">
+          <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
+          <input class="form-control" name="registration_number" placeholder="Registration Number" required>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- City -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
-            <input class="form-control" name="city" placeholder="City">
-          </div>
-        </div>
+  <!-- Address -->
+  <div class="input-pair">
+    <div class="input-group w-100">
+      <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+      <input class="form-control" name="address" placeholder="Address">
+    </div>
+  </div>
 
-        <!-- State -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-location-pin"></i></span>
-            <input class="form-control" name="state" placeholder="State">
-          </div>
+  <!-- ROW 3 : City + State -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="input-pair">
+        <div class="input-group w-100">
+          <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
+          <input class="form-control" name="city" placeholder="City">
         </div>
+      </div>
+    </div>
 
-        <!-- Country -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
-            <input class="form-control" name="country" placeholder="Country">
-          </div>
+    <div class="col-md-6">
+      <div class="input-pair">
+        <div class="input-group w-100">
+          <span class="input-group-text"><i class="fa-solid fa-location-pin"></i></span>
+          <input class="form-control" name="state" placeholder="State">
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Country -->
+  <div class="input-pair">
+    <div class="input-group w-100">
+      <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
+      <input class="form-control" name="country" placeholder="Country">
+    </div>
+  </div>
+
 
         <!-- Hospital Type -->
         <div class="mb-3">
-          <label class="file-label">Hospital Type:</label>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="type" value="General" id="typeGeneral">
-            <label class="form-check-label" for="typeGeneral">General</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="type" value="Multispeciality" id="typeMulti">
-            <label class="form-check-label" for="typeMulti">Multispeciality</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="type" value="Pediatric" id="typePediatric">
-            <label class="form-check-label" for="typePediatric">Pediatric</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="type" value="Cardiology" id="typeCardiology">
-            <label class="form-check-label" for="typeCardiology">Cardiology</label>
-          </div>
+          <!-- Hospital Type (Dropdown Styled Like Other Fields) -->
+          
+          <!-- design by khushi-->
+                <div class="input-pair">
+                  <div class="input-group w-100">
+                    <span class="input-group-text">
+                      <i class="fa-solid fa-stethoscope"></i>
+                    </span>
+                
+                    <select class="form-control" name="hospital_type" required>
+                      <option value="" disabled selected>Select Hospital Type</option>
+                      <option value="General Hospital">General Hospital</option>
+                      <option value="Multi-Speciality">Multi-Speciality</option>
+                      <option value="Clinic">Clinic</option>
+                      <option value="Diagnostic Center">Diagnostic Center</option>
+                      <option value="Children Hospital">Children Hospital</option>
+                      <option value="Eye Hospital">Eye Hospital</option>
+                      <option value="Dental Hospital">Dental Hospital</option>
+                      <option value="Orthopedic Hospital">Orthopedic Hospital</option>
+                      <option value="ENT Hospital">ENT Hospital</option>
+                    </select>
+                  </div>
+                </div>
+
+        </div>
+
+    <!-- design by khushi -->
+        <!-- Operating Hours -->
+        <div class="mb-3">
+            <label class="file-label">Hours:</label>
+
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="hours_type" id="hours247" value="24_7" checked>
+                <label class="form-check-label" for="hours247">Open 24/7</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="hours_type" id="hoursMain" value="main_hours">
+                <label class="form-check-label" for="hoursMain">Open with main hours</label>
+            </div>
         </div>
 
         <!-- Operating Hours -->
-        <div class="mb-3">
-          <label class="file-label">Operating Hours:</label>
-          {% for day in days %}
-          <div class="input-pair">
-            <label class="me-2" style="width: 90px;">{{ day }}:</label>
-            <input class="form-control me-2" type="time" name="{{ day|lower }}_open">
-            <span class="me-2">to</span>
-            <input class="form-control" type="time" name="{{ day|lower }}_close">
-          </div>
-          {% endfor %}
+        <div class="mb-3" id="hoursSection" style="display: none;">
+            <label class="file-label">Operating Hours:</label>
+
+            {% for day in days %}
+            <div class="input-pair">
+                <label class="me-2" style="width: 90px;">{{ day }}:</label>
+                <input class="form-control me-2" type="time" name="{{ day|lower }}_open">
+                <span class="me-2">to</span>
+                <input class="form-control" type="time" name="{{ day|lower }}_close">
+            </div>
+            {% endfor %}
         </div>
+        
+        <script>
+              const hours247 = document.getElementById("hours247");
+              const hoursMain = document.getElementById("hoursMain");
+              const hoursSection = document.getElementById("hoursSection");
+            
+              function updateHoursUI() {
+                if (hoursMain.checked) {
+                  hoursSection.style.display = "block";   // show time inputs
+                } else {
+                  hoursSection.style.display = "none";    // hide time inputs
+                }
+              }
+            
+              hours247.addEventListener("change", updateHoursUI);
+              hoursMain.addEventListener("change", updateHoursUI);
+            
+              updateHoursUI(); // initialize on page load
+        </script>
+
 
 
         <!-- Logo -->

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Pending Doctors</h2>
+    {% if doctors %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Specialization</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doctor in doctors %}
+            <tr>
+                <td>{{ doctor.user.email }}</td> <!-- Displaying email as name might not be set yet -->
+                <td>{{ doctor.user.email }}</td>
+                <td>{{ doctor.specialization }}</td>
+                <td>
+                    <a href="{% url 'approve_doctor' doctor.id %}" class="btn btn-success btn-sm">Approve</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No pending doctors found.</p>
+    {% endif %}
+</div>
+{% endblock %}

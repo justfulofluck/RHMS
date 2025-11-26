@@ -1,42 +1,142 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
+{% block title %}Super Admin Login{% endblock %}
 
-<head>
-    <title>Super Admin Login</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
+{% block content %}
 
-<body>
-    <h2>Super Admin Login</h2>
-    <form id="superadmin-login-form" method="post">
-        {% csrf_token %}
-        <input type="email" id="email" name="email" placeholder="Email" required><br><br>
-        <input type="password" id="password" name="password" placeholder="Password" required><br><br>
-        <button type="submit">Login</button>
-        <div id="login-error" style="color:red;"></div>
-    </form>
+<style>
+    /* Background gradient */
+    body {
+        background: linear-gradient(to bottom, #f3e5d1, #d2a57c);
+        font-family: "Segoe UI", sans-serif;
+    }
 
-    <script>
-        $('#superadmin-login-form').on('submit', function (e) {
-            e.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: window.location.pathname,
-                data: {
-                    email: $('#email').val(),
-                    password: $('#password').val(),
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                },
-                success: function (response) {
-                    if (response.success) {
-                        window.location.href = response.redirect_url;
-                    } else {
-                        $('#login-error').text(response.error);
-                    }
+    /* Center card */
+    .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Card style */
+    .login-card {
+        background: #fff;
+        padding: 35px;
+        border-radius: 14px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 420px;
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Title */
+    .login-title {
+        font-weight: 700;
+        text-align: center;
+        color: #8a5a34;
+        margin-bottom: 10px;
+    }
+
+    .login-subtitle {
+        text-align: center;
+        color: #695d57;
+        margin-bottom: 25px;
+        font-size: 0.95rem;
+    }
+
+    /* Form fields */
+    .form-control {
+        height: 45px;
+        border-radius: 8px;
+        border: 1px solid #d1c1b1;
+    }
+
+    /* Button */
+    .btn-login {
+        background-color: #b57a50;
+        border: none;
+        height: 45px;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .btn-login:hover {
+        background-color: #9c6742;
+    }
+
+    /* Error message */
+    #login-error {
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container login-wrapper">
+    <div class="login-card">
+        <h2 class="login-title">Super Admin Login</h2>
+        <p class="login-subtitle">Welcome back! Please log in to continue.</p>
+
+        <form id="superadmin-login-form" method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold">Email address</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter password"
+                    required>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100 mt-2">Login</button>
+
+            <div id="login-error" class="text-danger mt-3 text-center"></div>
+        </form>
+    </div>
+</div>
+
+<!-- AJAX Script -->
+<script>
+    document.getElementById('superadmin-login-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const errorDiv = document.getElementById('login-error');
+
+        fetch("{% url 'superadmin_login' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    errorDiv.textContent = data.error;
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorDiv.textContent = 'An error occurred. Please try again.';
             });
-        });
-    </script>
-</body>
+    });
+</script>
 
-</html>
+{% endblock %}

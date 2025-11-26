@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Doctor Dashboard</h2>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Upcoming Appointments
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for appointment in appointments %}
+                    <li class="list-group-item">
+                        {{ appointment.appointment_date }} - {{ appointment.patient_name }}
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No upcoming appointments.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    My Availability
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for availability in availabilities %}
+                    <li class="list-group-item">
+                        {{ availability.date }}: {{ availability.start_time }} - {{ availability.end_time }}
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No availability set.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

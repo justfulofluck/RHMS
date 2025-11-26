@@ -18,10 +18,8 @@ from django.contrib.auth import login
 from django.contrib.admin.views.decorators import staff_member_required
 from accounts.views import superadmin_login_ajax
 
+
 User = get_user_model()
-
-
-
 
 def hospital_login_view(request):
     if request.method == 'POST':
@@ -207,3 +205,5 @@ def approve_hospital(request, hospital_id):
 
     return redirect('superadmin_dashboard')
 
+def homepage(request):
+    return render(request, 'frontend/homepage.html')
