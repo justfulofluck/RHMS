@@ -207,7 +207,7 @@ def hospital_admin_dashboard(request):
 
     pending_doctors = doctors.filter(status=Doctor.STATUS_PENDING)
 
-    return render(request, 'doctors/dashboard.html', {
+    return render(request, 'frontend/hospital_admin/dashboard.html', {
         'hospital': hospital,
         'departments': departments,
         'treatments': treatments,
