@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -178,29 +179,51 @@ def hospital_register_page(request):
     return render(request, 'frontend/hospital_admin/register.html', {'days': days})
 
 
-@role_required('superadmin')
+from django.contrib.auth.decorators import user_passes_test
+from accounts.views import is_superadmin
+
+@user_passes_test(is_superadmin)
 def approve_hospital(request, hospital_id):
-    hospital = Hospital.objects.get(id=hospital_id)
+    hospital = get_object_or_404(Hospital, id=hospital_id)
     hospital.status = Hospital.STATUS_APPROVED
     hospital.is_approved = True
     hospital.save()
 
     # Activate the hospital admin user
-    try:
-        admin = HospitalAdmin.objects.get(hospital=hospital)
-        admin.user.is_active = True
-        admin.user.save()
+    # Use filter().first() to handle cases with 0 or >1 admins safely
+    admin = HospitalAdmin.objects.filter(hospital=hospital).first()
+    
+    if admin:
+        if admin.user:
+            # Generate a random password
+            from django.utils.crypto import get_random_string
+            password = get_random_string(length=10)
+            admin.user.set_password(password)
+            admin.user.is_active = True
+            admin.user.role = 'hospital_admin'  # Update role from pending_hospital_admin
+            admin.user.save()
+            
+            # Send approval email with credentials
+            login_url = request.build_absolute_uri(reverse('hospital_login'))
+            try:
+                send_mail(
+                    subject='Hospital Registration Approved - Login Credentials',
+                    message=f'Your hospital registration has been approved.\n\n'
+                            f'Here are your login credentials:\n'
+                            f'Email: {hospital.email}\n'
+                            f'Password: {password}\n\n'
+                            f'Login here: {login_url}',
+                    from_email='blueglobalcloud@gmail.com',
+                    recipient_list=[hospital.email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                messages.warning(request, f'Hospital approved, but failed to send email: {e}')
+        else:
+             messages.warning(request, f'Hospital {hospital.name} approved, but admin user is missing.')
         
-        # Send approval email
-        send_mail(
-            subject='Hospital Registration Approved',
-            message='Your hospital registration has been approved. You can now login to your dashboard.',
-            from_email='blueglobalcloud@gmail.com',
-            recipient_list=[hospital.email],
-            fail_silently=False,
-        )
         messages.success(request, f'Hospital {hospital.name} approved successfully.')
-    except HospitalAdmin.DoesNotExist:
+    else:
         messages.warning(request, f'Hospital {hospital.name} approved, but no admin user found.')
 
     return redirect('superadmin_dashboard')

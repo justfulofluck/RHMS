@@ -213,12 +213,21 @@ def superadmin_dashboard(request):
     return render(request, 'accounts/superadmin_dashboard.html', context)
 
 @login_required
+@login_required
 @user_passes_test(is_superadmin)
 def delete_user(request, user_id):
     if request.method == 'POST':
         user = get_object_or_404(User, id=user_id)
-        user.delete()
-        messages.success(request, 'User deleted successfully.')
+        
+        # If user is a hospital admin, delete the hospital as well
+        if hasattr(user, 'hospitaladmin'):
+            hospital = user.hospitaladmin.hospital
+            hospital.delete() # This will cascade delete the HospitalAdmin as well
+            messages.success(request, f'Hospital {hospital.name} and Admin User deleted successfully.')
+        else:
+            user.delete()
+            messages.success(request, 'User deleted successfully.')
+            
     return redirect('superadmin_dashboard')
 
 @login_required
