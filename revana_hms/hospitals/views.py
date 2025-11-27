@@ -1,9 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.generic import TemplateView
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from rest_framework import viewsets, permissions ,decorators, response, status
 from doctors.models import Doctor
-from .models import Department, Treatment, Hospital
+from .models import Department, Treatment, Hospital, HospitalAdmin
 from .serializers import DepartmentSerializer, TreatmentSerializer, HospitalRegisterSerializer
 from doctors.serializers import DoctorSerializer
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital
@@ -104,3 +106,80 @@ class DoctorViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+
+@login_required
+def manage_departments(request):
+    try:
+        hospital_admin = HospitalAdmin.objects.get(user=request.user)
+        hospital = hospital_admin.hospital
+    except HospitalAdmin.DoesNotExist:
+        messages.error(request, "You are not authorized to view this page.")
+        return redirect('homepage')
+
+    if request.method == 'POST':
+        if 'create' in request.POST:
+            name = request.POST.get('name')
+            if name:
+                Department.objects.create(hospital=hospital, name=name)
+                messages.success(request, 'Department created successfully.')
+        elif 'delete' in request.POST:
+            department_id = request.POST.get('department_id')
+            department = get_object_or_404(Department, id=department_id, hospital=hospital)
+            department.delete()
+            messages.success(request, 'Department deleted successfully.')
+        return redirect('manage_departments')
+
+    departments = Department.objects.filter(hospital=hospital)
+    return render(request, 'hospitals/manage_departments.html', {'departments': departments})
+
+@login_required
+def manage_treatments(request):
+    try:
+        hospital_admin = HospitalAdmin.objects.get(user=request.user)
+        hospital = hospital_admin.hospital
+    except HospitalAdmin.DoesNotExist:
+        messages.error(request, "You are not authorized to view this page.")
+        return redirect('homepage')
+
+    departments = Department.objects.filter(hospital=hospital)
+
+    if request.method == 'POST':
+        if 'create' in request.POST:
+            name = request.POST.get('name')
+            department_id = request.POST.get('department_id')
+            cost = request.POST.get('cost')
+            duration = request.POST.get('duration')
+            
+            if name and department_id:
+                department = get_object_or_404(Department, id=department_id, hospital=hospital)
+                Treatment.objects.create(
+                    hospital=hospital, 
+                    department=department, 
+                    name=name,
+                    # cost=cost, # Add these fields to model if needed
+                    # duration=duration
+                )
+                messages.success(request, 'Treatment created successfully.')
+        elif 'delete' in request.POST:
+            treatment_id = request.POST.get('treatment_id')
+            treatment = get_object_or_404(Treatment, id=treatment_id, hospital=hospital)
+            treatment.delete()
+            messages.success(request, 'Treatment deleted successfully.')
+        return redirect('manage_treatments')
+
+    treatments = Treatment.objects.filter(hospital=hospital).select_related('department')
+    return render(request, 'hospitals/manage_treatments.html', {'treatments': treatments, 'departments': departments})
+
+def department_list(request):
+    departments = Department.objects.select_related('hospital').all()
+    return render(request, 'frontend/departments.html', {'departments': departments})
+
+def department_detail(request, department_id):
+    department = get_object_or_404(Department, id=department_id)
+    treatments = department.treatments.all()
+    doctors = department.doctors.all()
+    return render(request, 'frontend/department_detail.html', {
+        'department': department,
+        'treatments': treatments,
+        'doctors': doctors
+    })

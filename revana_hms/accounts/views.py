@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes, force_str
@@ -205,9 +206,20 @@ def superadmin_dashboard(request):
         'filtered_appointments': appointments.order_by('-appointment_date')[:10],
         'pending_hospitals': pending_hospitals,
         'approved_hospitals': approved_hospitals,
+        'hospital_admins': User.objects.filter(role='hospital_admin'),
+        'doctors': User.objects.filter(role='doctor'),
     })
 
     return render(request, 'accounts/superadmin_dashboard.html', context)
+
+@login_required
+@user_passes_test(is_superadmin)
+def delete_user(request, user_id):
+    if request.method == 'POST':
+        user = get_object_or_404(User, id=user_id)
+        user.delete()
+        messages.success(request, 'User deleted successfully.')
+    return redirect('superadmin_dashboard')
 
 @login_required
 @user_passes_test(is_superadmin)

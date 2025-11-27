@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'department_list' %}">Departments</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ department.name }}</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">{{ department.name }} <small class="text-muted">at {{ department.hospital.name }}</small></h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Available Treatments</div>
+                <ul class="list-group list-group-flush">
+                    {% for treatment in treatments %}
+                    <li class="list-group-item">{{ treatment.name }}</li>
+                    {% empty %}
+                    <li class="list-group-item">No treatments listed.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Our Doctors</div>
+                <ul class="list-group list-group-flush">
+                    {% for doctor in doctors %}
+                    <li class="list-group-item">
+                        <strong>{{ doctor.user.get_full_name|default:doctor.user.email }}</strong><br>
+                        <small class="text-muted">{{ doctor.specialization }}</small>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No doctors assigned.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

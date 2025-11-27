@@ -17,6 +17,8 @@ class Doctor(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1)
     specialization = models.CharField(max_length=100)
     hospital = models.ForeignKey('hospitals.Hospital', on_delete=models.CASCADE, default=1)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='doctors')
+    treatments = models.ManyToManyField(Treatment, blank=True, related_name='doctors')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     is_approved = models.BooleanField(default=False)
 
