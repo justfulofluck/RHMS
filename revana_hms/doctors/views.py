@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, decorators, response, status
 from .models import Doctor, DoctorAvailability
 from .serializers import DoctorSerializer, DoctorAvailabilitySerializer
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from hospitals.models import HospitalAdmin, Department, Treatment, Hospital
@@ -70,6 +71,7 @@ def register_doctor(request):
                 hospital = Hospital.objects.get(id=hospital_id)
                 Doctor.objects.create(
                     user=user,
+                    name=data.get('name'),
                     hospital=hospital,
                     specialization=data.get('specialization'),
                     status=Doctor.STATUS_PENDING
@@ -78,7 +80,8 @@ def register_doctor(request):
                 # Notify Hospital Admin (Optional - could be email)
                 # For now, just return success
 
-            return JsonResponse({'status': 'success', 'message': 'Doctor registered. Awaiting hospital approval.'})
+            messages.success(request, 'Doctor registered successfully. Awaiting hospital approval.')
+            return redirect('doctor_login')
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
@@ -168,7 +171,8 @@ def approve_doctor(request, doctor_id):
     doctor = get_object_or_404(Doctor, id=doctor_id, hospital__hospitaladmin__user=request.user)
     
     # Generate random password
-    password = User.objects.make_random_password()
+    from django.utils.crypto import get_random_string
+    password = get_random_string(length=10)
     user = doctor.user
     user.set_password(password)
     user.is_active = True
@@ -179,7 +183,7 @@ def approve_doctor(request, doctor_id):
     doctor.save()
 
     # Send email with credentials
-    login_url = request.build_absolute_uri('/hospital/doctors/login/')
+    login_url = request.build_absolute_uri(reverse('doctor_login'))
     send_mail(
         subject='Doctor Account Approved',
         message=f'Your account has been approved.\n\nLogin URL: {login_url}\nEmail: {user.email}\nPassword: {password}\n\nPlease change your password after logging in.',
@@ -241,11 +245,11 @@ def doctor_dashboard(request):
     ).order_by('appointment_date')
 
     availabilities = DoctorAvailability.objects.filter(
-        doctor=doctor,
+        doctor=doctor.user,
         date__gte=timezone.now().date()
     ).order_by('date', 'start_time')
 
-    return render(request, 'doctor/dashboard.html', {
+    return render(request, 'doctors/dashboard.html', {
         'appointments': appointments,
         'availabilities': availabilities
     })

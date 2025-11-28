@@ -15,6 +15,7 @@ class Doctor(models.Model):
     ]
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1)
+    name = models.CharField(max_length=255, default="Doctor Name")  # Added name field
     specialization = models.CharField(max_length=100)
     hospital = models.ForeignKey('hospitals.Hospital', on_delete=models.CASCADE, default=1)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='doctors')
@@ -23,7 +24,7 @@ class Doctor(models.Model):
     is_approved = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.user.email} - {self.specialization}"
+        return f"{self.name} - {self.specialization}"
 
 
 class DoctorAvailability(models.Model):

@@ -11,8 +11,11 @@ from doctors.serializers import DoctorSerializer
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
+from accounts.models import DoctorProfile
 from django.http import JsonResponse
 from hospitals.utils import approve_hospital_and_notify  # Only if actually used in views
+
+
 
 
 class RegisterView(TemplateView):
@@ -127,7 +130,7 @@ def manage_departments(request):
             department = get_object_or_404(Department, id=department_id, hospital=hospital)
             department.delete()
             messages.success(request, 'Department deleted successfully.')
-        return redirect('manage_departments')
+        return redirect('hospitals:manage_departments')
 
     departments = Department.objects.filter(hospital=hospital)
     return render(request, 'hospitals/manage_departments.html', {'departments': departments})
@@ -165,7 +168,7 @@ def manage_treatments(request):
             treatment = get_object_or_404(Treatment, id=treatment_id, hospital=hospital)
             treatment.delete()
             messages.success(request, 'Treatment deleted successfully.')
-        return redirect('manage_treatments')
+        return redirect('hospitals:manage_treatments')
 
     treatments = Treatment.objects.filter(hospital=hospital).select_related('department')
     return render(request, 'hospitals/manage_treatments.html', {'treatments': treatments, 'departments': departments})

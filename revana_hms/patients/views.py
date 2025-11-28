@@ -134,4 +134,4 @@ def patient_edit_profile(request):
 
         return redirect('patient_dashboard')  # your dashboard url name
 
-    return render(request, 'patient_edit_profile.html')
+    return render(request, 'patients/patient_edit_profile.html')

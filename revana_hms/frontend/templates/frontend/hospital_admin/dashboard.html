@@ -266,7 +266,7 @@
                     <div class="section-title">Doctors</div>
                     <ul class="list-unstyled">
                         {% for doctor in doctors %}
-                        <li class="py-2 border-bottom">{{ doctor.email }}</li>
+                        <li class="py-2 border-bottom">{{ doctor.name }} - {{ doctor.specialization }}</li>
                         {% empty %}
                         <li>No doctors found.</li>
                         {% endfor %}
