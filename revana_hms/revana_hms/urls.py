@@ -14,52 +14,6 @@
 #     1. Import the include() function: from django.urls import include, path
 #     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 # """
-# from django.contrib import admin
-# from django.urls import path, include
-# from django.conf import settings
-# from django.conf.urls.static import static
-# from hospitals import api_views
-# from rest_framework_simplejwt.views import (
-#     TokenObtainPairView,
-#     TokenRefreshView,
-# )
-# from rest_framework.routers import DefaultRouter
-# from doctors.views import DoctorViewSet, DoctorAvailabilityViewSet, PublicAvailabilityViewSet
-# from appointments.views import AppointmentViewSet, DoctorAvailabilityViewSet, CalendarView, MobileBookingView
-# from hospitals.views import DepartmentViewSet, TreatmentViewSet, RegisterView
-# from core.views import test_auth
-# from hospitals import views
-
-
-
-# router = DefaultRouter()
-# router.register(r'doctors', DoctorViewSet, basename='doctor')
-# router.register(r'availability', DoctorAvailabilityFromDoctors, basename='availability')
-# router.register(r'public-availability', PublicAvailabilityViewSet, basename='public-availability')
-# router.register(r'appointments', AppointmentViewSet, basename='appointment')
-# router.register(r'doctor-availabilities', DoctorAvailabilityFromAppointments, basename='doctor-availability')
-# router.register(r'departments', DepartmentViewSet, basename='department')
-# router.register(r'treatments', TreatmentViewSet, basename='treatment')
-
-# urlpatterns = [
-#     path('api/test-auth/', test_auth),
-#     path('hospitals/', include('hospitals.urls')),
-#     path('admin/', admin.site.urls),
-#     path('api/', include('hospitals.api_urls')),
-#     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-#     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-#     path('api/accounts/', include('accounts.urls')),
-#     path('api/', include(router.urls)),
-#     path('register/', views.RegisterView.as_view(), name='register'),
-#     path('api/appointments/', include('appointments.urls')),
-#     path('calendar/', CalendarView.as_view(), name='calendar-view'),
-#     path('mobile/book/', MobileBookingView.as_view(), name='mobile-booking'),
-#     path('', include('frontend.urls')),
-#     path('patients/', include('patients.urls')),
-#     path('hospital/doctors/', include('doctors.urls')),
-    
-# ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 
 from django.contrib import admin
 from django.urls import path, include
@@ -110,6 +64,7 @@ urlpatterns = [
     path('api/hospitals/', include('hospitals.api_urls')),
     path('accounts/', include('accounts.urls')),
     path('api/appointments/', include('appointments.urls')),
+    path('api/', include('appointments.urls')),
 
     # DRF router endpoints
     path('api/', include(router.urls)),
@@ -126,6 +81,8 @@ urlpatterns = [
 
     # Homepage
     path('', include('frontend.urls')),
+    path('', include('appointments.urls')),
+    path('admin/', admin.site.urls),
 ]
 
 # Media files

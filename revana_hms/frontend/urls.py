@@ -9,6 +9,7 @@ from .views import (
     hospital_login_view,
     approve_hospital,
     homepage,
+    appointment_widget,
 )
 from doctors.views import hospital_admin_dashboard
 from . import views
@@ -23,5 +24,6 @@ urlpatterns = [
     path('request-password-reset/', request_password_reset_page, name='request_password_reset_page'),
     path('hospital/edit/', views.edit_hospital_admin, name='edit_hospital_info'),
     path('superadmin/hospital/approve/<int:hospital_id>/', views.approve_hospital, name='approve_hospital'),
+    path('book-appointment/', appointment_widget, name='appointment_widget'),
     
 ]

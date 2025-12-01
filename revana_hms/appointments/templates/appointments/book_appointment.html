@@ -1,0 +1,54 @@
+<from id="appointment_form">
+    <input type="hidden" name="doctor_id" value="{{ doctor_id }}">
+    <input type="hidden" name="hospital_id" value="{{ hospital.id }}">
+    <input type="hidden" name="appointment_date" value="{{ appointment_date }}">
+    <input type="text" name="name" placeholder="Full Name" required>
+    <input type="number" name="age" placeholder="Age" required>
+    <select name="gender" required>
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+    </select>
+    <input type="number" name="phone_number" placeholder="Phone Number" required>
+    <textarea name="address" placeholder="Address" required></textarea>
+
+    <input type="hidden" name="appointment_date" id="appointment_date">
+    <div id="slotPicker" class="mb-4">
+        <h4>Select a Time Slot</h4>
+        <dev id="slotContainer"></dev>
+    </div>
+    <button type="submit">Book Appointment</button>
+</from>
+
+<script>
+    const doctorId = "{{ doctor_id }}";  // passed from view context
+
+    function loadSlots() {
+        fetch(`/appointments/slots/?doctor_id=${doctorId}`)
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('slotsContainer');
+                container.innerHTML = '';
+
+                if (data.slots.length === 0) {
+                    container.innerHTML = '<p>No available slots in the next 3 days.</p>';
+                    return;
+                }
+
+                data.slots.forEach(slot => {
+                    const button = document.createElement('button');
+                    button.className = 'btn btn-outline-success m-2';
+                    button.innerText = `${slot.date} ${slot.start_time} - ${slot.end_time}`;
+                    button.onclick = () => {
+                        document.getElementById('appointmentDate').value = `${slot.date}T${slot.start_time}`;
+                        document.querySelectorAll('#slotsContainer button').forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                    };
+                    container.appendChild(button);
+                });
+            });
+    }
+
+    loadSlots();
+</script>

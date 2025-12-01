@@ -1,23 +1,40 @@
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from django.db.models import Q
 from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.utils import timezone
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
 
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital, IsSelfDoctor
 from appointments.models import Appointment, DoctorAvailability
+from patients.models import Patient
 from appointments.serializers import AppointmentSerializer, DoctorAvailabilitySerializer
 from doctors.models import Doctor
+from hospitals.models import Hospital
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
+
+# ... (rest of imports)
+
+# ...
+
+# 🔐 Permissions
 class IsHospitalAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
         return request.user and request.user.is_authenticated
 
+
+# 📅 Doctor Availability API
 class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
     queryset = DoctorAvailability.objects.select_related('doctor').all()
     serializer_class = DoctorAvailabilitySerializer
@@ -31,7 +48,6 @@ class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         department = self.request.query_params.get('department')
-
         qs = super().get_queryset()
 
         if hasattr(user, 'patient') and department:
@@ -65,30 +81,8 @@ class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
 
         serializer.save()
 
-class AppointmentViewSet(viewsets.ModelViewSet):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        return Appointment.objects.filter(patient=self.request.user.patient)
-
-    def perform_create(self, serializer):
-        appointment = serializer.save(patient=self.request.user.patient)
-
-        patient_email = self.request.user.email
-        doctor_name = appointment.availability.doctor.user.get_full_name()
-        date = appointment.availability.date
-        time = f"{appointment.availability.start_time} - {appointment.availability.end_time}"
-
-        send_mail(
-            subject='Appointment Confirmation',
-            message=f'Your appointment with Dr. {doctor_name} on {date} at {time} is confirmed.',
-            from_email='your_email@gmail.com',
-            recipient_list=[patient_email],
-            fail_silently=False,
-        )
-
+# 📆 Calendar View for Doctors & Patients
 class CalendarView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -103,14 +97,13 @@ class CalendarView(APIView):
 
         if start_date and end_date:
             availability_qs = availability_qs.filter(date__range=[start_date, end_date])
-            appointment_qs = appointment_qs.filter(availability__date__range=[start_date, end_date])
+            appointment_qs = appointment_qs.filter(appointment_date__date__range=[start_date, end_date])
 
         if hasattr(user, 'doctor'):
             availability_qs = availability_qs.filter(doctor=user.doctor)
-            appointment_qs = appointment_qs.filter(availability__doctor=user.doctor)
-
+            appointment_qs = appointment_qs.filter(doctor=user.doctor)
         elif hasattr(user, 'patient'):
-            appointment_qs = appointment_qs.filter(patient=user.patient)
+            appointment_qs = appointment_qs.filter(patient_name=user.get_full_name())
 
         for slot in availability_qs:
             events.append({
@@ -121,22 +114,17 @@ class CalendarView(APIView):
             })
 
         for appt in appointment_qs:
-            if hasattr(user, 'doctor'):
-                title = f"Booked: {appt.patient.user.get_full_name()}"
-                color = "#dc3545"
-            else:
-                title = f"Your Appointment with Dr. {appt.availability.doctor.user.get_full_name()}"
-                color = "#007bff"
-
             events.append({
-                "title": title,
-                "start": f"{appt.availability.date}T{appt.availability.start_time}",
-                "end": f"{appt.availability.date}T{appt.availability.end_time}",
-                "color": color
+                "title": f"Booked with Dr. {appt.doctor.name}",
+                "start": appt.appointment_date.isoformat(),
+                "end": (appt.appointment_date + timezone.timedelta(minutes=15)).isoformat(),
+                "color": "#dc3545"
             })
 
         return Response(events)
 
+
+# 📱 Mobile Booking API (Authenticated)
 class MobileBookingView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -148,23 +136,124 @@ class MobileBookingView(APIView):
             return Response({"error": "Slot not available"}, status=400)
 
         appointment = Appointment.objects.create(
-            patient=request.user.patient,
-            availability=slot
+            patient_name=request.user.get_full_name(),
+            doctor=slot.doctor,
+            hospital=slot.doctor.hospital,
+            appointment_date=datetime.combine(slot.date, slot.start_time),
+            created_at=timezone.now()
         )
         slot.is_available = False
         slot.save()
 
         return Response({
             "message": "Appointment booked",
-            "doctor": slot.doctor.user.get_full_name(),
+            "doctor": slot.doctor.name,
             "date": slot.date,
             "start": slot.start_time,
             "end": slot.end_time
         })
 
+
+# 📄 Public Booking via AJAX (Unauthenticated)
+@csrf_exempt
+@require_POST
+def book_appointment_ajax(request):
+    try:
+        name = request.POST['name']
+        age = int(request.POST['age'])
+        gender = request.POST['gender']
+        contact = request.POST['contact_number']
+        address = request.POST['address']
+        doctor_id = request.POST['doctor_id']
+        hospital_id = request.POST['hospital_id']
+        appointment_date = request.POST['appointment_date']
+        email = request.POST.get('email', f"{contact}@example.com") # Fallback email
+
+        # Create User
+        user, created = User.objects.get_or_create(email=email, defaults={
+            'role': 'patient',
+            'is_active': True
+        })
+        if created:
+            user.set_unusable_password()
+            user.save()
+
+        # Save patient
+        patient, _ = Patient.objects.get_or_create(
+            user=user,
+            defaults={
+                'age': age,
+                'gender': gender,
+                'phone': contact,
+                'address': address
+            }
+        )
+
+        # Save appointment
+        doctor = Doctor.objects.get(id=doctor_id)
+        hospital = Hospital.objects.get(id=hospital_id)
+        appointment_datetime = datetime.fromisoformat(appointment_date)
+        token = str(uuid.uuid4())[:8]
+
+        Appointment.objects.create(
+            hospital=hospital,
+            doctor=doctor,
+            patient_name=patient.name,
+            appointment_date=appointment_datetime,
+            created_at=timezone.now()
+        )
+
+        return JsonResponse({
+            'success': True,
+            'token': token,
+            'time': appointment_datetime.strftime('%I:%M %p, %d %b %Y')
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+# 📋 My Appointments (Authenticated)
 class MyAppointmentsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AppointmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    def get_queryset(self):
+        return Appointment.objects.filter(patient_name=self.request.user.get_full_name())
+
+def get_available_slots(request):
+    doctor_id = request.GET.get('doctor_id')
+    if not doctor_id:
+        return JsonResponse({'error': 'Doctor ID is required'}, status=400)
+
+    today = date.today()
+    end_date = today + timedelta(days=4)
+
+    slots = DoctorAvailability.objects.filter(
+        doctor_id=doctor_id,
+        date__range=(today, end_date),
+        is_available=True
+    ).order_by('date', 'start_time')
+
+    slot_data = []
+    for slot in slots:
+        slot_data.append({
+            'id': slot.id,
+            'date': slot.date.strftime('%Y-%m-%d'),
+            'start_time': slot.start_time.strftime('%H:%M'),
+            'end_time': slot.end_time.strftime('%H:%M'),
+        })
+
+    return JsonResponse({'slots': slot_data})
+
+class AppointmentViewSet(viewsets.ModelViewSet):  # ✅ Correct name
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer
+    #permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        return Appointment.objects.filter(patient=self.request.user.patient)
+        user = self.request.user
+        if user.is_authenticated:
+            return Appointment.objects.filter(patient_name=self.request.user.get_full_name())
+        return Appointment.objects.all()

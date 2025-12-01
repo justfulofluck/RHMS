@@ -1,0 +1,184 @@
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from django.conf import settings
+from django.db import transaction
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+
+from hospitals.models import Hospital, Department
+from doctors.models import Doctor
+from appointments.models import Appointment, DoctorAvailability
+from patients.models import Patient
+
+import json
+from datetime import datetime
+
+User = get_user_model()
+
+@require_GET
+def get_cities(request):
+    cities = Hospital.objects.values_list('city', flat=True).distinct()
+    return JsonResponse({'cities': list(cities)})
+
+@require_GET
+def get_departments(request):
+    city = request.GET.get('city')
+    if not city:
+        return JsonResponse({'error': 'City is required'}, status=400)
+    
+    departments = Department.objects.filter(hospital__city=city).values_list('name', flat=True).distinct()
+    return JsonResponse({'departments': list(departments)})
+
+@require_GET
+def get_hospitals(request):
+    city = request.GET.get('city')
+    department = request.GET.get('department')
+    
+    if not city or not department:
+        return JsonResponse({'error': 'City and Department are required'}, status=400)
+    
+    hospitals = Hospital.objects.filter(
+        city=city, 
+        departments__name=department
+    ).values('id', 'name').distinct()
+    
+    return JsonResponse({'hospitals': list(hospitals)})
+
+@require_GET
+def get_doctors(request):
+    hospital_id = request.GET.get('hospital_id')
+    department = request.GET.get('department')
+    
+    if not hospital_id or not department:
+        return JsonResponse({'error': 'Hospital ID and Department are required'}, status=400)
+    
+    doctors = Doctor.objects.filter(
+        hospital_id=hospital_id,
+        department__name=department
+    ).values('id', 'name', 'specialization')
+    
+    return JsonResponse({'doctors': list(doctors)})
+
+@require_GET
+def get_slots(request):
+    doctor_id = request.GET.get('doctor_id')
+    if not doctor_id:
+        return JsonResponse({'error': 'Doctor ID is required'}, status=400)
+    
+    today = timezone.now().date()
+    slots = DoctorAvailability.objects.filter(
+        doctor_id=doctor_id,
+        date__gte=today,
+        is_available=True
+    ).order_by('date', 'start_time')
+    
+    data = []
+    for slot in slots:
+        data.append({
+            'id': slot.id,
+            'date': slot.date.strftime('%Y-%m-%d'),
+            'start_time': slot.start_time.strftime('%H:%M'),
+            'end_time': slot.end_time.strftime('%H:%M')
+        })
+        
+    return JsonResponse({'slots': data})
+
+@csrf_exempt
+@require_POST
+def book_appointment_widget(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Extract data
+        full_name = data.get('full_name')
+        email = data.get('email')
+        contact_number = data.get('contact_number')
+        slot_id = data.get('slot_id')
+        
+        if not all([full_name, email, contact_number, slot_id]):
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+            
+        with transaction.atomic():
+            # 1. Get Slot
+            try:
+                slot = DoctorAvailability.objects.select_for_update().get(id=slot_id, is_available=True)
+            except DoctorAvailability.DoesNotExist:
+                return JsonResponse({'error': 'Slot not available'}, status=400)
+            
+            # 2. User Registration / Retrieval
+            user, created = User.objects.get_or_create(email=email, defaults={
+                'role': 'patient',
+                'is_active': True
+            })
+            if created:
+                user.set_unusable_password() # User needs to reset password or login via magic link
+                user.save()
+                
+            # 3. Patient Profile
+            patient, _ = Patient.objects.get_or_create(user=user, defaults={
+                'age': 0, # Default, user should update
+                'gender': 'Other', # Default
+                'phone': contact_number,
+                'address': ''
+            })
+            
+            # 4. Token Generation
+            appointment_date = slot.date
+            hospital = slot.doctor.hospital
+            
+            # Count appointments for this hospital on this date to generate token
+            # Note: This is a simple counter. For high concurrency, might need a more robust sequence.
+            current_count = Appointment.objects.filter(
+                hospital=hospital,
+                appointment_date__date=appointment_date
+            ).count()
+            
+            token_number = current_count + 1
+            if token_number > 500:
+                return JsonResponse({'error': 'Daily token limit reached for this hospital'}, status=400)
+            
+            # 5. Create Appointment
+            appointment = Appointment.objects.create(
+                hospital=hospital,
+                doctor=slot.doctor,
+                patient_name=full_name, # Keeping this for redundancy/display
+                appointment_date=datetime.combine(slot.date, slot.start_time),
+                token_number=token_number,
+                created_at=timezone.now()
+            )
+            
+            # 6. Mark Slot Unavailable
+            slot.is_available = False
+            slot.save()
+            
+            # 7. Send Email
+            subject = f"Appointment Confirmed - Token #{token_number}"
+            message = f"""
+            Dear {full_name},
+            
+            Your appointment has been confirmed.
+            
+            Doctor: {slot.doctor.name}
+            Hospital: {hospital.name}
+            Date: {slot.date}
+            Time: {slot.start_time}
+            Token Number: {token_number}
+            
+            Thank you for choosing us.
+            """
+            try:
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+            except Exception as e:
+                print(f"Email sending failed: {e}") # Non-blocking
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Appointment booked successfully',
+                'token_number': token_number,
+                'appointment_id': appointment.id
+            })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

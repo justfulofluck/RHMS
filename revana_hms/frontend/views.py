@@ -230,3 +230,6 @@ def approve_hospital(request, hospital_id):
 
 def homepage(request):
     return render(request, 'frontend/homepage.html')
+
+def appointment_widget(request):
+    return render(request, 'frontend/appointment_widget.html')

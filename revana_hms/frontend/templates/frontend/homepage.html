@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,13 +9,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Poppins', sans-serif;
             height: 100vh;
-background: linear-gradient(to top, #8b5e3c, #f0e2d3);
-          /*  background-image: url("https://media.istockphoto.com/id/1057138932/photo/female-doctor-with-stethoscope-hand-pointing-touching-data-digital-icon-hologram-with-blurred.jpg?s=612x612&w=0&k=20&c=fiu4_8SLvaPz-VpJzLpd0eGM_oZajIJHBWhL0n981oI=");
+            background: linear-gradient(to top, #8b5e3c, #f0e2d3);
+            /*  background-image: url("https://media.istockphoto.com/id/1057138932/photo/female-doctor-with-stethoscope-hand-pointing-touching-data-digital-icon-hologram-with-blurred.jpg?s=612x612&w=0&k=20&c=fiu4_8SLvaPz-VpJzLpd0eGM_oZajIJHBWhL0n981oI=");
             background-repeat: no-repeat;
             background-size: cover;
             background-position: center;
@@ -32,17 +37,17 @@ background: linear-gradient(to top, #8b5e3c, #f0e2d3);
             border-radius: 10px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
             padding: 40px 50px;
-            text-align:center;
+            text-align: center;
         }
 
         .title {
-    text-align: center;
-    font-size: 36px;
-    font-weight: 600;
-   color: #f3ede7;
-    -webkit-text-stroke: 1.2px #875e39;
+            text-align: center;
+            font-size: 36px;
+            font-weight: 600;
+            color: #f3ede7;
+            -webkit-text-stroke: 1.2px #875e39;
 
-}
+        }
 
         .subtitle {
             text-align: center;
@@ -60,17 +65,17 @@ background: linear-gradient(to top, #8b5e3c, #f0e2d3);
         }
 
         .card {
-          width: 320px;
-          padding: 40px;
-          background: #fff;
-          border-radius: 10px;
-          position: relative;
-          border: 2px solid #906a47;
-          z-index: 1;
+            width: 320px;
+            padding: 40px;
+            background: #fff;
+            border-radius: 10px;
+            position: relative;
+            border: 2px solid #906a47;
+            z-index: 1;
         }
-        
-                /* Animated border layer */
-       
+
+        /* Animated border layer */
+
 
         .card img {
             width: 70px;
@@ -127,50 +132,62 @@ background: linear-gradient(to top, #8b5e3c, #f0e2d3);
             .container {
                 padding: 25px;
             }
+
             .title {
                 font-size: 28px;
             }
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <img src="	https://reevanax.com/wp-content/uploads/2022/08/ReevanaX-Final-Logo-CDR-1024x253.webp" width="300px" >	
-    <div class="title">Hospital Management System</div>
-    <div class="subtitle">Choose Your Access Type</div>
+        <img src="	https://reevanax.com/wp-content/uploads/2022/08/ReevanaX-Final-Logo-CDR-1024x253.webp" width="300px">
+        <div class="title">Hospital Management System</div>
+        <div class="subtitle">Choose Your Access Type</div>
 
-    <div class="cards">
+        <div class="cards">
 
-        <!-- Hospital -->
-        <div class="card">
-            <img src="https://cdn-icons-png.flaticon.com/512/2966/2966483.png" alt="">
-            <h3>Hospitals</h3>
-            <p>Manage departments, staff, patient records & operations.</p>
+            <!-- Hospital -->
+            <div class="card">
+                <img src="https://cdn-icons-png.flaticon.com/512/2966/2966483.png" alt="">
+                <h3>Hospitals</h3>
+                <p>Manage departments, staff, patient records & operations.</p>
 
-     <a href="{% url 'hospital_login' %}" class="btn register-btn">Login</a>
+                <a href="{% url 'hospital_login' %}" class="btn register-btn">Login</a>
 
-        <a href="{% url 'hospital_register_page' %}" class="btn register-btn">Register</a>
+                <a href="{% url 'hospital_register_page' %}" class="btn register-btn">Register</a>
+            </div>
+
+            <!-- Doctors -->
+            <div class="card">
+                <img src="https://cdn-icons-png.flaticon.com/512/387/387561.png" alt="">
+                <h3>Doctors</h3>
+                <p>View appointments, patient details and schedules.</p>
+
+                <a href="{% url 'doctor_login' %}" class="btn register-btn">Login</a>
+                <a href="{% url 'doctor_register_page' %}" class="btn register-btn">Register</a>
+            </div>
+
+            <!-- Patients / Book Appointment -->
+            <div class="card">
+                <img src="https://cdn-icons-png.flaticon.com/512/2913/2913133.png" alt="">
+                <h3>Patients</h3>
+                <p>Book appointments with doctors and manage your health records.</p>
+
+                <a href="{% url 'appointment_widget' %}" class="btn login-btn">Book Appointment</a>
+            </div>
         </div>
 
-        <!-- Doctors -->
-        <div class="card">
-            <img src="https://cdn-icons-png.flaticon.com/512/387/387561.png" alt="">
-            <h3>Doctors</h3>
-            <p>View appointments, patient details and schedules.</p>
+        <br>
+        <h4 style=" color: #8b5e3c;">Super Admin: <a href="{% url 'superadmin_login' %}">Login</a></h3>
 
-              <a href="{% url 'doctor_login' %}" class="btn register-btn">Login</a>
-              <a href="{% url 'doctor_register_page' %}" class="btn register-btn">Register</a>
-        </div> 
+
+
     </div>
 
-<br>
-             <h4 style=" color: #8b5e3c;">Super Admin: <a href="{% url 'superadmin_login' %}" >Login</a></h3>
-             
-            
-      
-</div>
-
 </body>
+
 </html>
