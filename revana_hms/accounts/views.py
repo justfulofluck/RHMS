@@ -147,8 +147,6 @@ def superadmin_dashboard(request):
         'new_users_week': User.objects.filter(date_joined__date__gte=start_of_week).count(),
         'new_users_month': User.objects.filter(date_joined__date__gte=start_of_month).count(),
         'appointments_today': Appointment.objects.filter(created_at__range=(today_start, today_end)).count(),
-        'pending_appointments': Appointment.objects.filter(status="Pending").count(),
-        'confirmed_appointments': Appointment.objects.filter(status="Confirmed").count(),
         'top_doctors': Doctor.objects.annotate(total_appointments=Count('appointments')).order_by('-total_appointments')[:5],
         'top_hospitals': Hospital.objects.annotate(total_appointments=Count('appointments')).order_by('-total_appointments')[:5],
         'recent_users': User.objects.order_by('-date_joined')[:5],
@@ -286,7 +284,7 @@ def export_appointments_csv(request):
     response['Content-Disposition'] = 'attachment; filename="appointments.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['Patient', 'Doctor', 'Hospital', 'Date', 'Status'])
+    writer.writerow(['Patient', 'Doctor', 'Hospital', 'Date', 'Token'])
 
     for appt in appointments:
         writer.writerow([
@@ -294,7 +292,7 @@ def export_appointments_csv(request):
             appt.doctor.user.email,
             appt.hospital.name,
             appt.appointment_date,
-            appt.status
+            appt.token_number or 'N/A'
         ])
 
     return response
