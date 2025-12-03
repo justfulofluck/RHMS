@@ -162,8 +162,15 @@ def pending_doctors(request):
         messages.error(request, "You are not authorized as a hospital admin.")
         return redirect('homepage') 
 
-    doctors = Doctor.objects.filter(hospital=hospital, status=Doctor.STATUS_PENDING)
-    return render(request, 'doctors/pending_doctors.html', {'doctors': doctors})
+    # Get all doctors for this hospital
+    all_doctors = Doctor.objects.filter(hospital=hospital).select_related('user', 'department', 'user__doctorprofile')
+    pending_doctors_list = all_doctors.filter(status=Doctor.STATUS_PENDING)
+    
+    return render(request, 'doctors/pending_doctors.html', {
+        'hospital': hospital,
+        'all_doctors': all_doctors,
+        'pending_doctors': pending_doctors_list,
+    })
 
 @login_required
 @role_required('hospital_admin')
@@ -252,4 +259,80 @@ def doctor_dashboard(request):
     return render(request, 'doctors/dashboard.html', {
         'appointments': appointments,
         'availabilities': availabilities
+    })
+
+
+@login_required
+@role_required('hospital_admin')
+def edit_doctor(request, doctor_id):
+    """Edit doctor information - only accessible by hospital admin"""
+    try:
+        hospital = HospitalAdmin.objects.get(user=request.user).hospital
+    except HospitalAdmin.DoesNotExist:
+        messages.error(request, "You are not authorized as a hospital admin.")
+        return redirect('homepage')
+    
+    # Get doctor and ensure they belong to this hospital
+    doctor = get_object_or_404(Doctor, id=doctor_id, hospital=hospital)
+    
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Update Doctor model
+                doctor.name = request.POST.get('name')
+                doctor.specialization = request.POST.get('specialization')
+                
+                # Update department if provided
+                department_id = request.POST.get('department')
+                if department_id:
+                    doctor.department = Department.objects.get(id=department_id)
+                else:
+                    doctor.department = None
+                
+                # Update treatments
+                doctor.treatments.clear()
+                treatment_ids = request.POST.getlist('treatments')
+                for treatment_id in treatment_ids:
+                    treatment = Treatment.objects.get(id=treatment_id)
+                    doctor.treatments.add(treatment)
+                
+                doctor.save()
+                
+                # Update DoctorProfile if exists
+                if hasattr(doctor.user, 'doctorprofile'):
+                    profile = doctor.user.doctorprofile
+                    profile.contact_number = request.POST.get('contact_number', profile.contact_number)
+                    profile.gender = request.POST.get('gender', profile.gender)
+                    
+                    dob = request.POST.get('date_of_birth')
+                    if dob:
+                        profile.date_of_birth = dob
+                    
+                    profile.qualification = request.POST.get('qualification', profile.qualification)
+                    profile.year_of_experience = request.POST.get('year_of_experience', profile.year_of_experience)
+                    profile.address = request.POST.get('address', profile.address)
+                    profile.save()
+                
+                # Update User phone
+                phone = request.POST.get('contact_number')
+                if phone:
+                    doctor.user.phone = phone
+                    doctor.user.save()
+                
+                messages.success(request, f'Doctor {doctor.name} updated successfully.')
+                return redirect('hospital_admin_dashboard')
+                
+        except Exception as e:
+            messages.error(request, f'Error updating doctor: {str(e)}')
+    
+    # Get departments and treatments for this hospital
+    departments = Department.objects.filter(hospital=hospital)
+    treatments = Treatment.objects.filter(hospital=hospital)
+    treatment_ids = list(doctor.treatments.values_list('id', flat=True))
+    
+    return render(request, 'doctors/edit_doctor.html', {
+        'doctor': doctor,
+        'departments': departments,
+        'treatments': treatments,
+        'treatment_ids': treatment_ids,
     })

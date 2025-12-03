@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Hospital Admin Dashboard</title>
+    <title>Manage Doctors</title>
 
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -72,7 +72,7 @@
         .topbar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items-center;
             margin-bottom: 25px;
         }
 
@@ -90,49 +90,27 @@
             border: 2px solid var(--brown);
         }
 
-        /* Cards */
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 18px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-        }
-
-        .stat-title {
-            color: var(--brown-dark);
-            font-weight: 700;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-top: 5px;
-            color: var(--brown);
-        }
-
-        /* Content Sections */
         .list-card {
             background: #fff;
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.07);
             margin-bottom: 20px;
         }
 
-        .table th{
-            background-color: #c9a788;color: #6b3f21;font-weight: 600;
-        }
-        .table td{
-
-            background-color: #fff;
-        }
-      
-
-        .section-title {
-            font-weight: 700;
+        .nav-tabs .nav-link {
             color: var(--brown-dark);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: var(--brown);
+            color: white;
+            border-color: var(--brown);
+        }
+
+        .badge {
+            font-size: 0.75rem;
         }
     </style>
 </head>
@@ -143,7 +121,7 @@
     <div class="sidebar">
         <h4>Admin Panel</h4>
 
-        <a class="side-link " href="{% url 'hospital_admin_dashboard' %}">
+        <a class="side-link" href="{% url 'hospital_admin_dashboard' %}">
             <i class="fa-solid fa-chart-line"></i> Dashboard
         </a>
 
@@ -174,57 +152,169 @@
         <!-- Top Bar -->
         <div class="topbar">
             <div>
-                <h2>Hospital Admin Dashboard</h2>
-                <div class="text-muted">Logged in as {{ request.user.email }}</div>
+                <h2>Manage Doctors</h2>
+                <div class="text-muted">{{ hospital.name }}</div>
             </div>
 
             <div class="d-flex align-items-center gap-3">
                 <div class="text-end">
-                    <div class="small text-muted">Hospital</div>
-                    <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
+                    <div class="small text-muted">Logged in as</div>
+                    <div class="fw-bold" style="color:var(--brown-dark)">{{ request.user.email }}</div>
                 </div>
-
                 <img src="{{ hospital.logo.url }}" class="avatar">
             </div>
         </div>
 
-
-        <br>
-        <div class="col-lg-12">
-            <h2 style="color:#6e432d;">Pending Doctors</h2>
-            {% if doctors %}<br>
-            <table  class="table table-striped"  >
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Specialization</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for doctor in doctors %}
-                    <tr>
-                        <td>{{ doctor.name }}</td>
-                        <td>{{ doctor.user.email }}</td>
-                        <td>{{ doctor.specialization }}</td>
-                        <td>
-                            <a href="{% url 'approve_doctor' doctor.id %}"  style="background-color: #6b3f21;border: #6b3f21; " class="btn btn-success btn-sm">Approve</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No pending doctors found.</p>
-            {% endif %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+        {% endfor %}
+        {% endif %}
 
-       
+        <!-- Tabs -->
+        <div class="list-card">
+            <ul class="nav nav-tabs mb-4" id="doctorTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all"
+                        type="button">
+                        All Doctors <span class="badge bg-secondary">{{ all_doctors|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending"
+                        type="button">
+                        Pending Approval <span class="badge bg-warning text-dark">{{ pending_doctors|length }}</span>
+                    </button>
+                </li>
+            </ul>
 
+            <div class="tab-content" id="doctorTabsContent">
+                <!-- All Doctors Tab -->
+                <div class="tab-pane fade show active" id="all" role="tabpanel">
+                    {% if all_doctors %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead style="background:#f8f9fa;">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Specialization</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Degree</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doctor in all_doctors %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ doctor.name }}</div>
+                                        <small class="text-muted">{{ doctor.department.name|default:"No Dept" }}</small>
+                                    </td>
+                                    <td>{{ doctor.specialization }}</td>
+                                    <td>{{ doctor.user.email }}</td>
+                                    <td>
+                                        {% if doctor.user.doctorprofile %}
+                                        {{ doctor.user.doctorprofile.contact_number }}
+                                        {% else %}
+                                        <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if doctor.user.doctorprofile %}
+                                        {{ doctor.user.doctorprofile.qualification }}
+                                        {% else %}
+                                        <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if doctor.user.date_joined %}
+                                        {{ doctor.user.date_joined|date:"M d, Y" }}
+                                        {% else %}
+                                        <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if doctor.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif doctor.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'edit_doctor' doctor.id %}"
+                                            class="btn btn-sm btn-outline-primary">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No doctors found.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Pending Doctors Tab -->
+                <div class="tab-pane fade" id="pending" role="tabpanel">
+                    {% if pending_doctors %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead style="background:#fff3cd;">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Specialization</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doctor in pending_doctors %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ doctor.name }}</div>
+                                        <small class="text-muted">{{ doctor.department.name|default:"No Dept" }}</small>
+                                    </td>
+                                    <td>{{ doctor.user.email }}</td>
+                                    <td>{{ doctor.specialization }}</td>
+                                    <td>
+                                        {% if doctor.user.doctorprofile %}
+                                        {{ doctor.user.doctorprofile.contact_number }}
+                                        {% else %}
+                                        <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'approve_doctor' doctor.id %}" class="btn btn-sm"
+                                            style="background-color: #6b3f21; color: white;">
+                                            <i class="fa-solid fa-check"></i> Approve
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No pending doctors found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

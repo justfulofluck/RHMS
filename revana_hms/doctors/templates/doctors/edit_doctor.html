@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Doctor - {{ doctor.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2>Edit Doctor: {{ doctor.name }}</h2>
+        <a href="{% url 'hospital_admin_dashboard' %}" class="btn btn-secondary mb-3">Back</a>
+
+        <div id="messageBox"></div>
+
+        <form id="editDoctorForm" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Name:</label>
+                    <input type="text" class="form-control mb-3" name="name" value="{{ doctor.name }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label>Email:</label>
+                    <input type="email" class="form-control mb-3" value="{{ doctor.user.email }}" disabled>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Specialization:</label>
+                    <input type="text" class="form-control mb-3" name="specialization"
+                        value="{{ doctor.specialization }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label>Department:</label>
+                    <select class="form-control mb-3" name="department">
+                        <option value="">-- Select --</option>
+                        {% for dept in departments %}
+                        {% if doctor.department and doctor.department.id == dept.id %}
+                        <option value="{{ dept.id }}" selected>{{ dept.name }}</option>
+                        {% else %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            {% if doctor.user.doctorprofile %}
+            <h4>Profile Details</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Contact:</label>
+                    <input type="text" class="form-control mb-3" name="contact_number"
+                        value="{{ doctor.user.doctorprofile.contact_number }}">
+                </div>
+                <div class="col-md-6">
+                    <label>Gender:</label>
+                    <select class="form-control mb-3" name="gender" id="genderSelect">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Date of Birth:</label>
+                    <input type="date" class="form-control mb-3" name="date_of_birth"
+                        value="{{ doctor.user.doctorprofile.date_of_birth|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-6">
+                    <label>Qualification:</label>
+                    <input type="text" class="form-control mb-3" name="qualification"
+                        value="{{ doctor.user.doctorprofile.qualification }}">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Experience (years):</label>
+                    <input type="number" class="form-control mb-3" name="year_of_experience"
+                        value="{{ doctor.user.doctorprofile.year_of_experience|default:0 }}" min="0">
+                </div>
+                <div class="col-md-6">
+                    <label>Aadhaar:</label>
+                    <input type="text" class="form-control mb-3" value="{{ doctor.user.doctorprofile.aadhaar }}"
+                        disabled>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Address:</label>
+                <textarea class="form-control" name="address"
+                    rows="3">{{ doctor.user.doctorprofile.address }}</textarea>
+            </div>
+            {% endif %}
+
+            <h4>Treatments:</h4>
+            <div class="row mb-4" id="treatmentsRow">
+                {% for treatment in treatments %}
+                <div class="col-md-4 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input treatment-checkbox" type="checkbox" name="treatments"
+                            value="{{ treatment.id }}" id="treatment{{ treatment.id }}">
+                        <label class="form-check-label" for="treatment{{ treatment.id }}">
+                            {{ treatment.name }}
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submitBtn">Save Changes</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const gender = "{{ doctor.user.doctorprofile.gender|default:''|escapejs }}";
+            const genderSelect = document.getElementById('genderSelect');
+            if (genderSelect && gender) {
+                genderSelect.value = gender;
+            }
+
+            const treatments = [{{ treatment_ids| join: ", " }}];
+        treatments.forEach(id => {
+            const checkbox = document.querySelector(`input[type="checkbox"][value="${id}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+
+        document.getElementById('editDoctorForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const messageBox = document.getElementById('messageBox');
+            messageBox.innerHTML = '';
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const formData = new FormData(this);
+                const response = await fetch('', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                } else {
+                    messageBox.innerHTML = `<div class="alert alert-danger">${data.error || 'Something went wrong.'}</div>`;
+                }
+            } catch (err) {
+                messageBox.innerHTML = `<div class="alert alert-danger">Network error. Please try again.</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+            }
+        });
+    });
+    </script>
+
+</body>
+
+</html>

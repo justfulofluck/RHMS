@@ -263,7 +263,13 @@
                 </div>
 
                 <div class="list-card">
-                    <div class="section-title">Doctors</div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="section-title">Doctors ({{ doctors|length }})</div>
+                        <a href="{% url 'pending_doctors' %}" class="btn btn-sm"
+                            style="background:var(--brown); color:white;">
+                            <i class="fa-solid fa-user-doctor"></i> Manage Doctors
+                        </a>
+                    </div>
                     <ul class="list-unstyled">
                         {% for doctor in doctors %}
                         <li class="py-2 border-bottom">{{ doctor.name }} - {{ doctor.specialization }}</li>

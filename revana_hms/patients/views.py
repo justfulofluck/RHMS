@@ -135,3 +135,45 @@ def patient_edit_profile(request):
         return redirect('patient_dashboard')  # your dashboard url name
 
     return render(request, 'patients/patient_edit_profile.html')
+
+# ----------------------------------------------------
+# API Views
+# ----------------------------------------------------
+from rest_framework import generics, permissions
+from .serializers import PatientProfileSerializer
+
+class PatientProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = PatientProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.patient
+
+class MedicalHistoryView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        patient = request.user.patient
+        return JsonResponse({'medical_history': patient.medical_history})
+
+from .models import Notification
+from .serializers import NotificationSerializer
+
+class NotificationListView(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(patient=self.request.user.patient)
+
+class NotificationMarkReadView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def patch(self, request, pk):
+        try:
+            notification = Notification.objects.get(pk=pk, patient=request.user.patient)
+            notification.is_read = True
+            notification.save()
+            return JsonResponse({'success': True, 'message': 'Notification marked as read'})
+        except Notification.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Notification not found'}, status=404)

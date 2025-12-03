@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: rhms_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-rhms_db}
+      MYSQL_USER: ${DB_USER:-rhms_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - rhms_network
+
+  web:
+    image: bgtuser/rhms:latest
+    container_name: rhms_web
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 revana_hms.wsgi:application"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    environment:
+      - DB_NAME=${DB_NAME:-rhms_db}
+      - DB_USER=${DB_USER:-rhms_user}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=3306
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    networks:
+      - rhms_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: rhms_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - web
+    restart: always
+    networks:
+      - rhms_network
+
+volumes:
+  mysql_data:
+  static_volume:
+  media_volume:
+
+networks:
+  rhms_network:
+    driver: bridge

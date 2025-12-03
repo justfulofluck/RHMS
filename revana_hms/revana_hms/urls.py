@@ -61,6 +61,7 @@ urlpatterns = [
     # App-specific routes
     path('hospitals/', include('hospitals.urls')),
     path('api/admin/', include('accounts.admin_urls')),
+    path('api/accounts/', include('accounts.api_urls')),
     path('api/hospitals/', include('hospitals.api_urls')),
     path('accounts/', include('accounts.urls')),
     path('api/appointments/', include('appointments.urls')),
