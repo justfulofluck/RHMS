@@ -1,0 +1,29 @@
+📋 Phase Summary
+Phase 1: Core Registration & Approval Flow (2-3 hours)
+Focus: Modify the registration and approval logic
+
+Key Tasks:
+
+✅ Generate password during registration (not approval)
+✅ Send credentials immediately in registration email
+✅ Change user role from pending_hospital_admin to 
+hospital_admin
+✅ Update approval flow to remove password generation
+✅ Update approval email (congratulations, no credentials)
+Files to modify: 
+frontend/views.py
+ (2 functions)
+
+
+Phase 2: Patient-Side Protection (3-4 hours)
+Focus: Hide pending hospitals from ALL patient-facing views
+
+Key Tasks:
+
+✅ Filter homepage to show only approved hospitals
+✅ Filter hospital search/listings
+✅ Filter doctor listings by hospital approval
+✅ Block appointments for pending hospitals
+✅ Filter department views
+✅ Update API endpoints (if any)
+Critical: This is the most important phase - prevents data leakage;2;13~;2;13~

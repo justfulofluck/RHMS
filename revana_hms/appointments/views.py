@@ -192,6 +192,14 @@ def book_appointment_ajax(request):
         # Save appointment
         doctor = Doctor.objects.get(id=doctor_id)
         hospital = Hospital.objects.get(id=hospital_id)
+        
+        # \u2705 Verify hospital is approved before allowing booking
+        if hospital.status != Hospital.STATUS_APPROVED:
+            return JsonResponse({
+                'success': False, 
+                'error': 'This hospital is not currently accepting appointments.'
+            }, status=400)
+        
         appointment_datetime = datetime.fromisoformat(appointment_date)
         token = str(uuid.uuid4())[:8]
 

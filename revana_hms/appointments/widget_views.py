@@ -19,7 +19,8 @@ User = get_user_model()
 
 @require_GET
 def get_cities(request):
-    cities = Hospital.objects.values_list('city', flat=True).distinct()
+    # Only show cities with approved hospitals
+    cities = Hospital.objects.filter(status=Hospital.STATUS_APPROVED).values_list('city', flat=True).distinct()
     return JsonResponse({'cities': list(cities)})
 
 @require_GET
@@ -28,7 +29,11 @@ def get_departments(request):
     if not city:
         return JsonResponse({'error': 'City is required'}, status=400)
     
-    departments = Department.objects.filter(hospital__city=city).values_list('name', flat=True).distinct()
+    # Only show departments from approved hospitals
+    departments = Department.objects.filter(
+        hospital__city=city,
+        hospital__status=Hospital.STATUS_APPROVED
+    ).values_list('name', flat=True).distinct()
     return JsonResponse({'departments': list(departments)})
 
 @require_GET
@@ -39,9 +44,11 @@ def get_hospitals(request):
     if not city or not department:
         return JsonResponse({'error': 'City and Department are required'}, status=400)
     
+    # Only show approved hospitals
     hospitals = Hospital.objects.filter(
         city=city, 
-        departments__name=department
+        departments__name=department,
+        status=Hospital.STATUS_APPROVED  # ✅ Only approved hospitals
     ).values('id', 'name').distinct()
     
     return JsonResponse({'hospitals': list(hospitals)})
@@ -54,8 +61,10 @@ def get_doctors(request):
     if not hospital_id or not department:
         return JsonResponse({'error': 'Hospital ID and Department are required'}, status=400)
     
+    # Only show doctors from approved hospitals
     doctors = Doctor.objects.filter(
         hospital_id=hospital_id,
+        hospital__status=Hospital.STATUS_APPROVED,  # ✅ Only approved hospitals
         department__name=department
     ).values('id', 'name', 'specialization')
     

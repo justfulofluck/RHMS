@@ -17,6 +17,7 @@ from django.utils.encoding import force_bytes
 from django.db import transaction, IntegrityError
 from django.contrib.auth import login
 from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.crypto import get_random_string
 from accounts.views import superadmin_login_ajax
 
 
@@ -48,19 +49,22 @@ def register_hospital_ajax(request):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Step 1 - Create user with pending status
+                # Step 1 - Generate random password for hospital admin
+                password = get_random_string(length=12)
+                
+                # Step 2 - Create user with hospital_admin role (immediate access)
                 user = User.objects.create_user(
                     email=request.POST.get('email'),
-                    password=request.POST.get('password'),
+                    password=password,
                     phone=request.POST.get('phone_number'),
-                    role='pending_hospital_admin',
-                    is_active=True  # ✅ Set inactive until approved
+                    role='hospital_admin',  # ✅ Active role for immediate login
+                    is_active=True
                 )
 
-                # Step 2 - Collect hospital types (checkboxes)
+                # Step 3 - Collect hospital types (checkboxes)
                 hospital_types = request.POST.getlist('type')  # e.g., ['General', 'Pediatric']
 
-                # Step 3 - Collect operating hours
+                # Step 4 - Collect operating hours
                 days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
                 hours = {}
                 for day in days:
@@ -68,7 +72,7 @@ def register_hospital_ajax(request):
                     close_time = request.POST.get(f"{day}_close", "")
                     hours[day.capitalize()] = f"{open_time}-{close_time}" if open_time and close_time else "Closed"
 
-                # Step 4 - Create hospital
+                # Step 5 - Create hospital (pending approval)
                 hospital = Hospital.objects.create(
                     name=request.POST.get('name'),
                     registration_number=request.POST.get('registration_number'),
@@ -81,16 +85,27 @@ def register_hospital_ajax(request):
                     hospital_type=hospital_types,
                     hours=hours,
                     logo=request.FILES.get('logo'),
-                    status=Hospital.STATUS_PENDING
+                    status=Hospital.STATUS_PENDING  # ✅ Pending until superadmin approves
                 )
 
-                # Step 5 - Link hospital admin profile
+                # Step 6 - Link hospital admin profile
                 HospitalAdmin.objects.create(user=user, hospital=hospital)
 
-                # Step 6 - Send confirmation email
+                # Step 7 - Send registration email with login credentials
+                login_url = request.build_absolute_uri(reverse('hospital_login'))
                 send_mail(
-                    subject='Hospital Registration Submitted',
-                    message='A new hospital has been registered. Admin will review and approve it.',
+                    subject='Hospital Registration - Login Credentials',
+                    message=f'Welcome to RHMS!\n\n'
+                            f'Your hospital "{hospital.name}" has been registered successfully.\n\n'
+                            f'Login Credentials:\n'
+                            f'Email: {user.email}\n'
+                            f'Password: {password}\n\n'
+                            f'Login URL: {login_url}\n\n'
+                            f'IMPORTANT: Your hospital is currently in DRAFT MODE.\n'
+                            f'You can login and add departments, doctors, and configure settings.\n'
+                            f'However, your hospital will be visible to patients only after admin approval.\n\n'
+                            f'Please complete your hospital profile and wait for approval.\n\n'
+                            f'Thank you for joining RHMS!',
                     from_email='blueglobalcloud@gmail.com',
                     recipient_list=[hospital.email],
                     fail_silently=False,
@@ -98,7 +113,7 @@ def register_hospital_ajax(request):
 
             return JsonResponse({
                 'status': 'success',
-                'message': 'Hospital registration submitted. Awaiting approval.'
+                'message': 'Registration successful! Check your email for login credentials.'
             })
 
         except IntegrityError:
@@ -195,24 +210,24 @@ def approve_hospital(request, hospital_id):
     
     if admin:
         if admin.user:
-            # Generate a random password
-            from django.utils.crypto import get_random_string
-            password = get_random_string(length=10)
-            admin.user.set_password(password)
+            # User already has credentials from registration
+            # Just ensure user is active (should already be active)
             admin.user.is_active = True
-            admin.user.role = 'hospital_admin'  # Update role from pending_hospital_admin
             admin.user.save()
             
-            # Send approval email with credentials
-            login_url = request.build_absolute_uri(reverse('hospital_login'))
+            # Send approval notification email (no credentials needed)
             try:
                 send_mail(
-                    subject='Hospital Registration Approved - Login Credentials',
-                    message=f'Your hospital registration has been approved.\n\n'
-                            f'Here are your login credentials:\n'
-                            f'Email: {hospital.email}\n'
-                            f'Password: {password}\n\n'
-                            f'Login here: {login_url}',
+                    subject='Hospital Registration Approved - Now Live!',
+                    message=f'Congratulations!\n\n'\
+                            f'Your hospital "{hospital.name}" has been approved by our admin team.\n\n'\
+                            f'Your hospital is now LIVE and visible to patients.\n'\
+                            f'Patients can now:\n'\
+                            f'- Find your hospital in search results\n'\
+                            f'- View your departments and doctors\n'\
+                            f'- Book appointments with your doctors\n\n'\
+                            f'You can continue managing your hospital through the dashboard.\n\n'\
+                            f'Thank you for joining RHMS!',
                     from_email='blueglobalcloud@gmail.com',
                     recipient_list=[hospital.email],
                     fail_silently=False,

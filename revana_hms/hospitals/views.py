@@ -33,7 +33,8 @@ def reject_hospital_view(request, hospital_id):
 
 
 class HospitalViewSet(ModelViewSet):
-    queryset = Hospital.objects.all()
+    # Only show approved hospitals to non-admin users
+    queryset = Hospital.objects.filter(status=Hospital.STATUS_APPROVED)
     serializer_class = HospitalRegisterSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -174,11 +175,19 @@ def manage_treatments(request):
     return render(request, 'hospitals/manage_treatments.html', {'treatments': treatments, 'departments': departments})
 
 def department_list(request):
-    departments = Department.objects.select_related('hospital').all()
+    # Only show departments from approved hospitals
+    departments = Department.objects.select_related('hospital').filter(
+        hospital__status=Hospital.STATUS_APPROVED
+    )
     return render(request, 'frontend/departments.html', {'departments': departments})
 
 def department_detail(request, department_id):
-    department = get_object_or_404(Department, id=department_id)
+    # Only show department if hospital is approved
+    department = get_object_or_404(
+        Department.objects.select_related('hospital'),
+        id=department_id,
+        hospital__status=Hospital.STATUS_APPROVED
+    )
     treatments = department.treatments.all()
     doctors = department.doctors.all()
     return render(request, 'frontend/department_detail.html', {

@@ -144,11 +144,19 @@ class DoctorViewSet(viewsets.ModelViewSet):
             return qs.filter(hospital=user.hospital_admin.hospital)  # Hospital admin sees own hospital
         elif user.is_superuser:
             return qs  # Super admin sees all
+        else:
+            # ✅ Regular users (patients) only see doctors from approved hospitals
+            return qs.filter(hospital__status=Hospital.STATUS_APPROVED)
         return qs.none()
 
 
 class PublicAvailabilityViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = DoctorAvailability.objects.filter(is_available=True)
+    # ✅ Only show availability for doctors from approved hospitals
+    # Note: doctor field points to User, User.doctor points to Doctor model
+    queryset = DoctorAvailability.objects.filter(
+        is_available=True,
+        doctor__doctor__hospital__status=Hospital.STATUS_APPROVED
+    )
     serializer_class = DoctorAvailabilitySerializer
     permission_classes = [permissions.AllowAny]
 
