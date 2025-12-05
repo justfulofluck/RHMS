@@ -61,10 +61,11 @@ def get_doctors(request):
     if not hospital_id or not department:
         return JsonResponse({'error': 'Hospital ID and Department are required'}, status=400)
     
-    # Only show doctors from approved hospitals
+    # Only show doctors from approved hospitals AND approved doctors
     doctors = Doctor.objects.filter(
         hospital_id=hospital_id,
         hospital__status=Hospital.STATUS_APPROVED,  # ✅ Only approved hospitals
+        status=Doctor.STATUS_APPROVED,  # ✅ Only approved doctors
         department__name=department
     ).values('id', 'name', 'specialization')
     

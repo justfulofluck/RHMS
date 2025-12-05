@@ -1,4 +1,4 @@
-📋 Phase Summary
+l📋 Phase Summary
 Phase 1: Core Registration & Approval Flow (2-3 hours)
 Focus: Modify the registration and approval logic
 
@@ -26,4 +26,32 @@ Key Tasks:
 ✅ Block appointments for pending hospitals
 ✅ Filter department views
 ✅ Update API endpoints (if any)
-Critical: This is the most important phase - prevents data leakage;2;13~;2;13~
+Critical: This is the most important phase - prevents data leakage;
+
+Phase 3: UI Polish & Testing (2-3 hours)
+Focus: User experience and comprehensive testing
+
+Key Tasks:
+✅ Add "Draft Mode" banner to hospital admin dashboard
+✅ Add status badges (Draft/Live)
+✅ Improve superadmin dashboard
+✅ Enhance email templates
+✅ Comprehensive manual testing (20+ test cases)
+✅ Edge case testing
+✅ Documentation updates
+
+🎯 Total Estimated Time: 7-10 hours (~1-2 days)
+📊 Task Distribution
+Phase 1: 6 main tasks (backend logic)
+Phase 2: 7 main tasks (filtering & protection)
+Phase 3: 6 main tasks (UI & testing)
+Each task includes:
+
+✅ Checkbox for tracking
+📁 File references with links
+💻 Code snippets
+📝 Detailed instructions
+⚠️ Risk Mitigation Included
+
+The plan includes:
+Risk assessment (High/Medium/Low)
