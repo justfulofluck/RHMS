@@ -21,7 +21,7 @@ class Patient(models.Model):
     photo = models.ImageField(upload_to="patients/photos/", blank=True, null=True)
 
     def __str__(self):
-        return self.user.first_name
+        return self.user.email
 
 class Notification(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='notifications')
@@ -34,4 +34,4 @@ class Notification(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} - {self.patient.user.first_name}"
+        return f"{self.title} - {self.patient.user.email}"

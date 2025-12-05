@@ -144,13 +144,13 @@ from .serializers import PatientProfileSerializer
 
 class PatientProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = PatientProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_object(self):
         return self.request.user.patient
 
 class MedicalHistoryView(generics.RetrieveAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     
     def get(self, request, *args, **kwargs):
         patient = request.user.patient
@@ -161,13 +161,13 @@ from .serializers import NotificationSerializer
 
 class NotificationListView(generics.ListAPIView):
     serializer_class = NotificationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         return Notification.objects.filter(patient=self.request.user.patient)
 
 class NotificationMarkReadView(generics.UpdateAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     
     def patch(self, request, pk):
         try:
