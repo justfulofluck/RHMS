@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .monthly_views import create_monthly_availability, doctor_availability_list, delete_availability, get_booked_dates
 
 urlpatterns = [
     path('', views.doctor_register_page, name='doctor_register_page'),
@@ -10,5 +11,13 @@ urlpatterns = [
     path('login/', views.doctor_login_view, name='doctor_login'),
     path('dashboard/', views.doctor_dashboard, name='doctor_dashboard'),
     path('hospital/dashboard/', views.hospital_admin_dashboard, name='hospital_dashboard'),
-    path('approve/<int:doctor_id>/', views.approve_doctor, name='approve_doctor'),
+    
+    # Availability management
+    path('availability/monthly/', create_monthly_availability, name='monthly_availability'),
+    path('availability/', doctor_availability_list, name='doctor_availability'),
+    path('availability/delete/<int:availability_id>/', delete_availability, name='delete_availability'),
+    path('availability/api/booked-dates/', get_booked_dates, name='get_booked_dates'),
+    
+    # Appointment Actions
+    path('appointment/update-status/<int:appointment_id>/', views.update_appointment_status, name='update_appointment_status'),
 ]

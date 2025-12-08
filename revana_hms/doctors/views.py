@@ -17,6 +17,7 @@ from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
+from django.utils.crypto import get_random_string
 from accounts.models import DoctorProfile
 
 User = get_user_model()
@@ -33,22 +34,20 @@ def register_doctor(request):
         if User.objects.filter(email=email).exists():
             return JsonResponse({'status': 'error', 'message': 'Email already exists.'}, status=400)
 
-        # ✅ Check for duplicate Aadhaar
-        if DoctorProfile.objects.filter(aadhaar=aadhaar).exists():
-            return JsonResponse({'status': 'error', 'message': 'Aadhaar already exists.'}, status=400)
 
         try:
             with transaction.atomic():
-                # Create User without password (unusable)
+                # Generate random password for doctor
+                password = get_random_string(length=12)
+                
+                # Create User with password and active status (same as hospital admin)
                 user = User.objects.create_user(
                     email=email,
-                    password=None, # No password yet
+                    password=password,  # ✅ Generated password
                     phone=data.get('contact_number'),
-                    role='doctor',
-                    is_active=False 
+                    role='doctor',  # ✅ Active role
+                    is_active=True  # ✅ Can login immediately
                 )
-                user.set_unusable_password()
-                user.save()
 
                 DoctorProfile.objects.create(
                     user=user,
@@ -74,13 +73,30 @@ def register_doctor(request):
                     name=data.get('name'),
                     hospital=hospital,
                     specialization=data.get('specialization'),
-                    status=Doctor.STATUS_PENDING
+                    status=Doctor.STATUS_PENDING  # ✅ Pending until hospital admin approves
                 )
 
-                # Notify Hospital Admin (Optional - could be email)
-                # For now, just return success
+                # Send registration email with login credentials
+                login_url = request.build_absolute_uri(reverse('doctor_login'))
+                send_mail(
+                    subject='Doctor Registration - Login Credentials',
+                    message=f'Welcome to RHMS!\n\n'
+                            f'Your doctor account has been registered successfully.\n\n'
+                            f'Login Credentials:\n'
+                            f'Email: {user.email}\n'
+                            f'Password: {password}\n\n'
+                            f'Login URL: {login_url}\n\n'
+                            f'IMPORTANT: Your profile is currently in DRAFT MODE.\n'
+                            f'You can login and set your availability, but you will be visible '
+                            f'to patients only after hospital admin approval.\n\n'
+                            f'Please complete your profile and wait for approval.\n\n'
+                            f'Thank you for joining RHMS!',
+                    from_email='blueglobalcloud@gmail.com',
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
 
-            messages.success(request, 'Doctor registered successfully. Awaiting hospital approval.')
+            messages.success(request, 'Registration successful! Check your email for login credentials.')
             return redirect('doctor_login')
 
         except Exception as e:
@@ -177,11 +193,9 @@ def pending_doctors(request):
 def approve_doctor(request, doctor_id):
     doctor = get_object_or_404(Doctor, id=doctor_id, hospital__hospitaladmin__user=request.user)
     
-    # Generate random password
-    from django.utils.crypto import get_random_string
-    password = get_random_string(length=10)
+    # User already has credentials from registration
+    # Just ensure user is active (should already be active)
     user = doctor.user
-    user.set_password(password)
     user.is_active = True
     user.save()
 
@@ -189,17 +203,25 @@ def approve_doctor(request, doctor_id):
     doctor.is_approved = True
     doctor.save()
 
-    # Send email with credentials
-    login_url = request.build_absolute_uri(reverse('doctor_login'))
+    # Send approval notification email (no credentials needed)
+    hospital = doctor.hospital
     send_mail(
-        subject='Doctor Account Approved',
-        message=f'Your account has been approved.\n\nLogin URL: {login_url}\nEmail: {user.email}\nPassword: {password}\n\nPlease change your password after logging in.',
+        subject='Doctor Account Approved - Now Live!',
+        message=f'Congratulations!\n\n'
+                f'Your doctor account has been approved by {hospital.name}.\n\n'
+                f'Your profile is now LIVE and visible to patients.\n'
+                f'Patients can now:\n'
+                f'- Find you in doctor search\n'
+                f'- View your availability\n'
+                f'- Book appointments with you\n\n'
+                f'You can continue managing your availability through the dashboard.\n\n'
+                f'Thank you for joining RHMS!',
         from_email='blueglobalcloud@gmail.com',
         recipient_list=[user.email],
         fail_silently=False,
     )
 
-    messages.success(request, f'Doctor {doctor.user.email} approved and credentials sent.')
+    messages.success(request, f'Doctor {doctor.user.email} approved successfully.')
     return redirect('pending_doctors')
 
 # 🏥 Hospital admin dashboard
@@ -245,19 +267,41 @@ def doctor_login_view(request):
 @role_required('doctor')
 def doctor_dashboard(request):
     doctor = Doctor.objects.get(user=request.user)
-
+    hospital = doctor.hospital
+    
+    # Get today's date
+    today = timezone.now().date()
+    
+    # All upcoming appointments
     appointments = Appointment.objects.filter(
         doctor=doctor,
         appointment_date__gte=timezone.now()
     ).order_by('appointment_date')
-
+    
+    # Today's appointments count
+    today_appointments = Appointment.objects.filter(
+        doctor=doctor,
+        appointment_date__date=today
+    ).count()
+    
+    # Total unique patients (based on patient_name)
+    total_patients = Appointment.objects.filter(
+        doctor=doctor
+    ).values('patient_name').distinct().count()
+    
+    # Availabilities
     availabilities = DoctorAvailability.objects.filter(
         doctor=doctor.user,
-        date__gte=timezone.now().date()
+        date__gte=today
     ).order_by('date', 'start_time')
-
+    
     return render(request, 'doctors/dashboard.html', {
+        'doctor': doctor,
+        'hospital': hospital,
         'appointments': appointments,
+        'today_appointments': today_appointments,
+        'total_patients': total_patients,
+        'reports_count': 0,  # Placeholder for future feature
         'availabilities': availabilities
     })
 
@@ -336,3 +380,30 @@ def edit_doctor(request, doctor_id):
         'treatments': treatments,
         'treatment_ids': treatment_ids,
     })
+
+
+@csrf_exempt
+@login_required
+@role_required('doctor')
+def update_appointment_status(request, appointment_id):
+    """Update appointment status (Completed, No Show, etc.)"""
+    if request.method == 'POST':
+        try:
+            doctor = Doctor.objects.get(user=request.user)
+            appointment = get_object_or_404(Appointment, id=appointment_id, doctor=doctor)
+            
+            new_status = request.POST.get('status')
+            if new_status in ['completed', 'no_show', 'cancelled']:
+                appointment.status = new_status
+                if new_status == 'cancelled':
+                    appointment.cancelled_at = timezone.now()
+                    appointment.cancellation_reason = "Cancelled by doctor"
+                appointment.save()
+                return JsonResponse({'success': True, 'status': new_status})
+            else:
+                return JsonResponse({'error': 'Invalid status'}, status=400)
+                
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+            
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

@@ -69,7 +69,7 @@ class DoctorProfile(models.Model):
     year_of_experience = models.IntegerField()
     registration_certificate = models.FileField(upload_to=doctor_cert_path)
     degree_certificates = models.FileField(upload_to=doctor_cert_path)
-    aadhaar = models.CharField(max_length=20, unique=True)
+    aadhaar = models.CharField(max_length=20)
     passport_photo = models.ImageField(upload_to=doctor_photo_path)
     experience_certificate = models.FileField(upload_to=doctor_cert_path, null=True, blank=True)
 

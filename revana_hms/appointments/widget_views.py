@@ -63,24 +63,37 @@ def get_doctors(request):
 
 @require_GET
 def get_slots(request):
+    """Get available time slots for a doctor - returns individual slots based on duration"""
+    from appointments.utils import generate_time_slots
+    
     doctor_id = request.GET.get('doctor_id')
     if not doctor_id:
         return JsonResponse({'error': 'Doctor ID is required'}, status=400)
     
     today = timezone.now().date()
-    slots = DoctorAvailability.objects.filter(
+    availabilities = DoctorAvailability.objects.filter(
         doctor_id=doctor_id,
         date__gte=today,
         is_available=True
     ).order_by('date', 'start_time')
     
+    # Generate individual slots from availabilities
+    all_slots = []
+    for availability in availabilities:
+        individual_slots = generate_time_slots(availability)
+        all_slots.extend(individual_slots)
+    
+    # Format for JSON response
     data = []
-    for slot in slots:
+    for idx, slot in enumerate(all_slots):
+        # Create unique ID combining availability ID and slot index
+        slot_id = f"{slot['availability_id']}_{idx}"
         data.append({
-            'id': slot.id,
-            'date': slot.date.strftime('%Y-%m-%d'),
-            'start_time': slot.start_time.strftime('%H:%M'),
-            'end_time': slot.end_time.strftime('%H:%M')
+            'id': slot_id,
+            'date': slot['date'].strftime('%Y-%m-%d'),
+            'start_time': slot['start_time'].strftime('%H:%M'),
+            'end_time': slot['end_time'].strftime('%H:%M'),
+            'duration': slot['duration']
         })
         
     return JsonResponse({'slots': data})
@@ -88,6 +101,9 @@ def get_slots(request):
 @csrf_exempt
 @require_POST
 def book_appointment_widget(request):
+    """Book appointment using individual time slot"""
+    from appointments.utils import generate_time_slots
+    
     try:
         data = json.loads(request.body)
         
@@ -95,17 +111,37 @@ def book_appointment_widget(request):
         full_name = data.get('full_name')
         email = data.get('email')
         contact_number = data.get('contact_number')
-        slot_id = data.get('slot_id')
+        slot_id = data.get('slot_id')  # Format: "availability_id_slot_index"
         
         if not all([full_name, email, contact_number, slot_id]):
             return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        # Parse slot ID to get availability ID and slot index
+        try:
+            availability_id, slot_index = slot_id.split('_')
+            availability_id = int(availability_id)
+            slot_index = int(slot_index)
+        except (ValueError, AttributeError):
+            return JsonResponse({'error': 'Invalid slot ID format'}, status=400)
             
         with transaction.atomic():
-            # 1. Get Slot
+            # 1. Get Availability and generate slots
             try:
-                slot = DoctorAvailability.objects.select_for_update().get(id=slot_id, is_available=True)
+                availability = DoctorAvailability.objects.select_for_update().get(
+                    id=availability_id,
+                    is_available=True
+                )
             except DoctorAvailability.DoesNotExist:
                 return JsonResponse({'error': 'Slot not available'}, status=400)
+            
+            # Generate individual slots from this availability
+            individual_slots = generate_time_slots(availability)
+            
+            # Get the specific slot the patient selected
+            if slot_index >= len(individual_slots):
+                return JsonResponse({'error': 'Invalid slot index'}, status=400)
+            
+            selected_slot = individual_slots[slot_index]
             
             # 2. User Registration / Retrieval
             user, created = User.objects.get_or_create(email=email, defaults={
@@ -125,11 +161,10 @@ def book_appointment_widget(request):
             })
             
             # 4. Token Generation
-            appointment_date = slot.date
-            hospital = slot.doctor.hospital
+            appointment_date = selected_slot['date']
+            hospital = availability.doctor.hospital
             
             # Count appointments for this hospital on this date to generate token
-            # Note: This is a simple counter. For high concurrency, might need a more robust sequence.
             current_count = Appointment.objects.filter(
                 hospital=hospital,
                 appointment_date__date=appointment_date
@@ -139,32 +174,42 @@ def book_appointment_widget(request):
             if token_number > 500:
                 return JsonResponse({'error': 'Daily token limit reached for this hospital'}, status=400)
             
-            # 5. Create Appointment
+            # 5. Create Appointment with specific start time
+            from datetime import datetime
+            appointment_start = datetime.combine(
+                selected_slot['date'],
+                selected_slot['start_time']
+            )
+            
             appointment = Appointment.objects.create(
                 hospital=hospital,
-                doctor=slot.doctor,
-                patient_name=full_name, # Keeping this for redundancy/display
-                appointment_date=datetime.combine(slot.date, slot.start_time),
+                doctor=availability.doctor,
+                patient_name=full_name,
+                appointment_date=appointment_start,
                 token_number=token_number,
                 created_at=timezone.now()
             )
             
-            # 6. Mark Slot Unavailable
-            slot.is_available = False
-            slot.save()
+            # 6. Mark Slot Unavailable (simplified - marks entire availability)
+            # TODO: Track individual slot bookings for better granularity
+            # For now, we'll leave availability as is since we're tracking appointments
             
             # 7. Send Email
+            from appointments.utils import format_time_12hr
             subject = f"Appointment Confirmed - Token #{token_number}"
             message = f"""
             Dear {full_name},
             
             Your appointment has been confirmed.
             
-            Doctor: {slot.doctor.name}
+            Doctor: {availability.doctor.name}
             Hospital: {hospital.name}
-            Date: {slot.date}
-            Time: {slot.start_time}
+            Date: {selected_slot['date'].strftime('%B %d, %Y')}
+            Time: {format_time_12hr(selected_slot['start_time'])} - {format_time_12hr(selected_slot['end_time'])}
+            Duration: {selected_slot['duration']} minutes
             Token Number: {token_number}
+            
+            Please arrive 10 minutes before your appointment time.
             
             Thank you for choosing us.
             """
@@ -177,7 +222,10 @@ def book_appointment_widget(request):
                 'success': True,
                 'message': 'Appointment booked successfully',
                 'token_number': token_number,
-                'appointment_id': appointment.id
+                'appointment_id': appointment.id,
+                'start_time': format_time_12hr(selected_slot['start_time']),
+                'end_time': format_time_12hr(selected_slot['end_time']),
+                'duration': selected_slot['duration']
             })
 
     except Exception as e:
