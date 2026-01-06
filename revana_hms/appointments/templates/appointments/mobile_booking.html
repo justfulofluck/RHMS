@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+    <!-- Doctor Header -->
+    <div class="card mb-3 shadow-sm border-0">
+        <div class="card-body d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                style="width: 50px; height: 50px; font-size: 1.5rem;">
+                {{ doctor.name|slice:":1" }}
+            </div>
+            <div>
+                <h5 class="mb-0">Dr. {{ doctor.name }}</h5>
+                <small class="text-muted">{{ doctor.specialization }} • {{ doctor.hospital.name }}</small>
+            </div>
+        </div>
+    </div>
+
+    <h6 class="mb-3 ps-1">Select a Time Slot</h6>
+
+    <!-- Date Tabs -->
+    <ul class="nav nav-pills nav-fill mb-3" id="dateTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="day0-tab" data-bs-toggle="tab" data-bs-target="#day0" type="button"
+                role="tab">Today</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="day1-tab" data-bs-toggle="tab" data-bs-target="#day1" type="button"
+                role="tab">Tomorrow</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="day2-tab" data-bs-toggle="tab" data-bs-target="#day2" type="button"
+                role="tab">Day 3</button>
+        </li>
+    </ul>
+
+    <!-- Slots Content -->
+    <div class="tab-content" id="slotsContent">
+        <div class="tab-pane fade show active" id="day0" role="tabpanel">
+            <div class="text-center py-5 loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div class="slot-list d-none"></div>
+        </div>
+        <div class="tab-pane fade" id="day1" role="tabpanel">
+            <div class="slot-list"></div>
+        </div>
+        <div class="tab-pane fade" id="day2" role="tabpanel">
+            <div class="slot-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Booking</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Book appointment with <strong>Dr. {{ doctor.name }}</strong>?</p>
+                <div class="alert alert-light border">
+                    <i class="bi bi-clock"></i> <span id="confirmTime"></span><br>
+                    <i class="bi bi-calendar"></i> <span id="confirmDate"></span>
+                </div>
+
+                {% if not user.is_authenticated %}
+                <div class="alert alert-warning small">
+                    <i class="bi bi-exclamation-triangle"></i> You are not logged in.
+                </div>
+                <!-- Simple guest form could go here, but for now we'll assume logged in or rely on existing auth -->
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmBookBtn">Confirm & Book</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-pills .nav-link {
+        border-radius: 20px;
+        font-size: 0.9rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        margin: 0 5px;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: #0d6efd;
+        color: white;
+        box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+    }
+
+    .slot-card {
+        transition: transform 0.1s;
+        cursor: pointer;
+        border: 1px solid #dee2e6;
+    }
+
+    .slot-card:active {
+        transform: scale(0.98);
+        background-color: #f0f0f0;
+    }
+
+    .slot-time {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const doctorId = {{ doctor.id }
+    };
+    const slotsContainer = {
+        0: document.querySelector('#day0 .slot-list'),
+        1: document.querySelector('#day1 .slot-list'),
+        2: document.querySelector('#day2 .slot-list')
+    };
+    const tabLabels = {
+        0: document.getElementById('day0-tab'),
+        1: document.getElementById('day1-tab'),
+        2: document.getElementById('day2-tab')
+    };
+
+    let selectedSlotId = null;
+    const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+
+    // Fetch Slots
+    fetch(`{% url 'get_mobile_slots' doctor.id %}`)
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector('.loading-spinner').classList.add('d-none');
+            document.querySelector('#day0 .slot-list').classList.remove('d-none');
+
+            if (data.success) {
+                data.days.forEach((day, index) => {
+                    // Update Tab Label if needed (e.g. Day 3 -> Mon, 12 Dec)
+                    if (index === 2) tabLabels[2].textContent = day.label;
+
+                    const container = slotsContainer[index];
+                    container.innerHTML = '';
+
+                    if (day.slots.length === 0) {
+                        container.innerHTML = `<div class="text-center text-muted py-4"><i class="bi bi-calendar-x"></i> No slots available</div>`;
+                    } else {
+                        day.slots.forEach(slot => {
+                            const btn = document.createElement('div');
+                            btn.className = 'card slot-card mb-2 p-3';
+                            btn.innerHTML = `
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="slot-time text-primary">${slot.start} - ${slot.end}</div>
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                </div>
+                            `;
+                            btn.onclick = () => openBookingModal(slot, day.label);
+                            container.appendChild(btn);
+                        });
+                    }
+                });
+            } else {
+                alert('Error loading slots: ' + data.error);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            document.querySelector('.loading-spinner').innerHTML = '<span class="text-danger">Failed to load schedule.</span>';
+        });
+
+    function openBookingModal(slot, dateLabel) {
+        selectedSlotId = slot.id;
+        document.getElementById('confirmTime').textContent = `${slot.start} - ${slot.end}`;
+        document.getElementById('confirmDate').textContent = dateLabel;
+        bookingModal.show();
+    }
+
+    document.getElementById('confirmBookBtn').addEventListener('click', function () {
+        if (!selectedSlotId) return;
+
+        const btn = this;
+        btn.disabled = true;
+        btn.textContent = 'Booking...';
+
+        fetch('{% url "mobile_book_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                availability_id: selectedSlotId
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message || data.success) { // MobileBookingView returns "message": "Appointment booked"
+                    bookingModal.hide();
+                    alert('Appointment booked successfully!');
+                    location.reload(); // Refresh to update slots
+                } else {
+                    alert('Error: ' + (data.error || 'Booking failed'));
+                    btn.disabled = false;
+                    btn.textContent = 'Confirm & Book';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('An error occurred.');
+                btn.disabled = false;
+                btn.textContent = 'Confirm & Book';
+            });
+    });
+});
+</script>
+{% endblock %}

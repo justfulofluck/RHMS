@@ -1,6 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from appointments.views import AppointmentViewSet, DoctorAvailabilityViewSet, MyAppointmentsViewSet, get_available_slots
+from appointments.views import (
+    AppointmentViewSet, DoctorAvailabilityViewSet, MyAppointmentsViewSet, 
+    get_available_slots, cancel_appointment, mobile_booking_view, get_mobile_slots,
+    MobileBookingView
+)
 from appointments.widget_views import (
     get_cities, get_departments, get_hospitals, get_doctors, get_slots, book_appointment_widget
 )
@@ -22,4 +26,12 @@ urlpatterns = [
     path('widget/doctors/', get_doctors, name='widget_doctors'),
     path('widget/slots/', get_slots, name='widget_slots'),
     path('widget/book/', book_appointment_widget, name='widget_book'),
+    
+    # Actions
+    path('cancel/<int:appointment_id>/', cancel_appointment, name='cancel_appointment'),
+    
+    # 📱 Mobile Booking
+    path('book/mobile/<int:doctor_id>/', mobile_booking_view, name='mobile_booking'),
+    path('api/mobile-slots/<int:doctor_id>/', get_mobile_slots, name='get_mobile_slots'),
+    path('api/mobile-book/', MobileBookingView.as_view(), name='mobile_book_api'),
 ]

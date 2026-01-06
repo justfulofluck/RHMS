@@ -10,7 +10,11 @@
 <body>
     <div class="container mt-5">
         <h2>Edit Doctor: {{ doctor.name }}</h2>
+        {% if request.user.role == 'hospital_admin' %}
         <a href="{% url 'hospital_admin_dashboard' %}" class="btn btn-secondary mb-3">Back</a>
+        {% else %}
+        <a href="{% url 'doctor_dashboard' %}" class="btn btn-secondary mb-3">Back</a>
+        {% endif %}
 
         <div id="messageBox"></div>
 
@@ -129,7 +133,7 @@
                 genderSelect.value = gender;
             }
 
-            const treatments = [{{ treatment_ids| join: ", " }}];
+            const treatments = [{{ treatment_ids }}];
         treatments.forEach(id => {
             const checkbox = document.querySelector(`input[type="checkbox"][value="${id}"]`);
             if (checkbox) checkbox.checked = true;

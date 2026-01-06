@@ -27,7 +27,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from doctors.views import (
     DoctorViewSet,
     DoctorAvailabilityViewSet as DoctorAvailabilityFromDoctors,
-    PublicAvailabilityViewSet
+    DoctorAvailabilityViewSet as DoctorAvailabilityFromDoctors,
+    PublicAvailabilityViewSet,
+    doctor_login_view
 )
 from appointments.views import (
     AppointmentViewSet,
@@ -37,6 +39,7 @@ from appointments.views import (
 )
 from hospitals.views import DepartmentViewSet, TreatmentViewSet, RegisterView
 from core.views import test_auth
+from accounts.views import logout_view
 
 # DRF Router setup
 router = DefaultRouter()
@@ -57,6 +60,10 @@ urlpatterns = [
 
     # Core API
     path('api/test-auth/', test_auth),
+    
+    # Global Login/Logout (prevents 500 and 404 errors)
+    path('login/', doctor_login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
 
     # App-specific routes
     path('hospitals/', include('hospitals.urls')),

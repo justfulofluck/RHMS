@@ -34,9 +34,6 @@ def register_doctor(request):
         if User.objects.filter(email=email).exists():
             return JsonResponse({'status': 'error', 'message': 'Email already exists.'}, status=400)
 
-        # ✅ Check for duplicate Aadhaar
-        if DoctorProfile.objects.filter(aadhaar=aadhaar).exists():
-            return JsonResponse({'status': 'error', 'message': 'Aadhaar already exists.'}, status=400)
 
         try:
             with transaction.atomic():
@@ -281,19 +278,41 @@ def doctor_login_view(request):
 @role_required('doctor')
 def doctor_dashboard(request):
     doctor = Doctor.objects.get(user=request.user)
-
+    hospital = doctor.hospital
+    
+    # Get today's date
+    today = timezone.now().date()
+    
+    # All upcoming appointments
     appointments = Appointment.objects.filter(
         doctor=doctor,
         appointment_date__gte=timezone.now()
     ).order_by('appointment_date')
-
+    
+    # Today's appointments count
+    today_appointments = Appointment.objects.filter(
+        doctor=doctor,
+        appointment_date__date=today
+    ).count()
+    
+    # Total unique patients (based on patient_name)
+    total_patients = Appointment.objects.filter(
+        doctor=doctor
+    ).values('patient_name').distinct().count()
+    
+    # Availabilities
     availabilities = DoctorAvailability.objects.filter(
         doctor=doctor.user,
-        date__gte=timezone.now().date()
+        date__gte=today
     ).order_by('date', 'start_time')
-
+    
     return render(request, 'doctors/dashboard.html', {
+        'doctor': doctor,
+        'hospital': hospital,
         'appointments': appointments,
+        'today_appointments': today_appointments,
+        'total_patients': total_patients,
+        'reports_count': 0,  # Placeholder for future feature
         'availabilities': availabilities
     })
 
@@ -371,4 +390,114 @@ def edit_doctor(request, doctor_id):
         'departments': departments,
         'treatments': treatments,
         'treatment_ids': treatment_ids,
+    })
+
+
+@csrf_exempt
+@login_required
+@role_required('doctor')
+def update_appointment_status(request, appointment_id):
+    """Update appointment status (Completed, No Show, etc.)"""
+    if request.method == 'POST':
+        try:
+            doctor = Doctor.objects.get(user=request.user)
+            appointment = get_object_or_404(Appointment, id=appointment_id, doctor=doctor)
+            
+            new_status = request.POST.get('status')
+            if new_status in ['completed', 'no_show', 'cancelled']:
+                appointment.status = new_status
+                if new_status == 'cancelled':
+                    appointment.cancelled_at = timezone.now()
+                    appointment.cancellation_reason = "Cancelled by doctor"
+                appointment.save()
+                return JsonResponse({'success': True, 'status': new_status})
+            else:
+                return JsonResponse({'error': 'Invalid status'}, status=400)
+                
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+            
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@login_required
+@role_required('doctor')
+def my_patients_view(request):
+    """List patients who have booked appointments with this doctor"""
+    doctor = Doctor.objects.get(user=request.user)
+    
+    # Aggregate patients based on name (since we don't have a direct Patient FK in Appointment currently)
+    # We want: Name, Last Visit, Total Visits
+    from django.db.models import Count, Max
+    
+    patients = Appointment.objects.filter(doctor=doctor).values('patient_name').annotate(
+        total_visits=Count('id'),
+        last_visit=Max('appointment_date')
+    ).order_by('-last_visit')
+    
+    return render(request, 'doctors/my_patients.html', {
+        'doctor': doctor,
+        'patients': patients
+    })
+
+
+@login_required
+@role_required('doctor')
+def edit_my_profile(request):
+    """Allow doctors to edit their own profile"""
+    doctor = Doctor.objects.get(user=request.user)
+    
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Doctors can update their own: Name, Specialization
+                doctor.name = request.POST.get('name', doctor.name)
+                doctor.specialization = request.POST.get('specialization', doctor.specialization)
+                doctor.save()
+
+                # Profile Details
+                if hasattr(doctor.user, 'doctorprofile'):
+                    profile = doctor.user.doctorprofile
+                    profile.contact_number = request.POST.get('contact_number', profile.contact_number)
+                    profile.gender = request.POST.get('gender', profile.gender)
+                    profile.qualification = request.POST.get('qualification', profile.qualification)
+                    profile.year_of_experience = request.POST.get('year_of_experience', profile.year_of_experience)
+                    profile.address = request.POST.get('address', profile.address)
+                    
+                    dob = request.POST.get('date_of_birth')
+                    if dob:
+                        profile.date_of_birth = dob
+                    
+                    profile.save()
+
+                # User Phone
+                phone = request.POST.get('contact_number')
+                if phone:
+                    doctor.user.phone = phone
+                    doctor.user.save()
+                
+                # Update Treatments
+                treatment_ids = request.POST.getlist('treatments')
+                if treatment_ids:
+                    doctor.treatments.clear()
+                    for t_id in treatment_ids:
+                        doctor.treatments.add(t_id)
+            
+            return JsonResponse({'success': True, 'message': 'Profile updated successfully.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    # GET Request
+    # Reuse edit_doctor.html but we need to pass context similar to what it expects
+    departments = Department.objects.filter(hospital=doctor.hospital)
+    treatments = Treatment.objects.filter(hospital=doctor.hospital)
+    treatment_ids_list = list(doctor.treatments.values_list('id', flat=True))
+    treatment_ids = ", ".join(map(str, treatment_ids_list))
+
+    return render(request, 'doctors/edit_doctor.html', {
+        'doctor': doctor,
+        'departments': departments, # Passed but maybe read-only in logic?
+        'treatments': treatments,
+        'treatment_ids': treatment_ids
     })
