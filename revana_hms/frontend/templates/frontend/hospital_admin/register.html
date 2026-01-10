@@ -12,6 +12,19 @@
   <!-- Font Awesome for icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
+
+<!-- jQuery (REQUIRED) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- ClockPicker CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.css">
+
+<!-- ClockPicker JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.js"></script>
+
+
+
+
   <style>
     :root {
       --brown-dark: #6b3f21;
@@ -42,7 +55,7 @@
     }
 
     .card-register {
-      width: auto;
+      width: 1320px;
       max-width: calc(100% - 40px);
       background: var(--card-bg);
       border-radius: 12px;
@@ -81,7 +94,7 @@
       border-radius: 0 10px 10px 0;
       border: 1px solid #e6e0dc;
       box-shadow: none;
-      height: 46px;
+      height: 36px;
     }
 
     .input-pair {
@@ -136,10 +149,63 @@
         width: 44px;
       }
     }
+
+    /* Top Loading Bar */
+    #top-loading-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: #8c6239;
+      /* App brown color */
+      z-index: 99999;
+      transition: width 0.4s ease, opacity 0.4s ease;
+      width: 0%;
+      opacity: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+   .day-time-card {
+  border: 1px solid #e6d6c6;
+  border-radius: 14px;
+  padding: 10px;
+  background: #fff;
+  height: 100%;
+}
+
+.day-title {
+  text-align: center;
+  font-weight: 600;
+  color: #8b5a2b;
+  margin-bottom: 10px;
+}
+.day-time-card .input-group{
+    border: 1px solid #c8a584;
+    border-radius: 8px !important;
+
+}
+
+.day-time-card .form-control, .custom-select, .form-control:focus {
+    border-radius: 8px;
+    border: 1px solid #c7a481;
+    box-shadow: none;
+    height: 36px;
+}
+.day-time-card  .input-group .input-group-text {
+      background: transparent;
+      border: none;
+      border-right: 0;
+      border-radius: 10px 0 0 10px;
+      color: var(--brown-dark);
+      width: 48px;
+      justify-content: center;
+    }
+
+
   </style>
 </head>
 
 <body>
+  <div id="top-loading-bar"></div>
 
   <div class="page-wrap">
     <div class="card-register">
@@ -163,79 +229,6 @@
 
           <div class="col-md-6">
             <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
-                <input class="form-control" name="phone_number" placeholder="Phone Number" required>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ROW 2 : Email + Registration Number -->
-        <div class="row">
-          <div class="col-md-6">
-            <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
-                <input class="form-control" name="email" placeholder="Email" type="email" required>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
-                <input class="form-control" name="registration_number" placeholder="Registration Number" required>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Address -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-            <input class="form-control" name="address" placeholder="Address">
-          </div>
-        </div>
-
-        <!-- ROW 3 : City + State -->
-        <div class="row">
-          <div class="col-md-6">
-            <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
-                <input class="form-control" name="city" placeholder="City">
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-solid fa-location-pin"></i></span>
-                <input class="form-control" name="state" placeholder="State">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Country -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
-            <input class="form-control" name="country" placeholder="Country">
-          </div>
-        </div>
-
-
-        <!-- Hospital Type -->
-        <div class="mb-3">
-          <!-- Hospital Type (Dropdown Styled Like Other Fields) -->
-
-          <!-- design by khushi-->
-          <div class="input-pair">
             <div class="input-group w-100">
               <span class="input-group-text">
                 <i class="fa-solid fa-stethoscope"></i>
@@ -255,114 +248,428 @@
               </select>
             </div>
           </div>
+          </div>
 
+
+         
         </div>
 
-        <!-- design by khushi -->
-        <!-- Operating Hours -->
+        <!-- ROW 2 : Phone Number + Email + Registration Number -->
+        <div class="row">
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                <input class="form-control" name="phone_number" placeholder="Phone Number" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                <input class="form-control" name="email" placeholder="Email" type="email" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
+                <input class="form-control" name="registration_number" placeholder="Registration Number" required>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="input-pair">
+          <div class="input-group w-100">
+            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+            <input class="form-control" name="address" placeholder="Address">
+          </div>
+        </div>
+
+        <!-- ROW 3 : City + State + Country -->
+        <div class="row">
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
+                <input class="form-control" name="city" placeholder="City">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-solid fa-location-pin"></i></span>
+                <input class="form-control" name="state" placeholder="State">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
+                <input class="form-control" name="country" placeholder="Country">
+              </div>
+            </div>
+          </div>
+        </div>
+
+       
+             <!-- Operating Hours Type -->
         <div class="mb-3">
           <label class="file-label">Hours:</label>
-
-          <div class="form-check">
+<div class="hours">
+          
             <input class="form-check-input" type="radio" name="hours_type" id="hours247" value="24_7" checked>
             <label class="form-check-label" for="hours247">Open 24/7</label>
-          </div>
-
-          <div class="form-check">
+     
+&nbsp;
+ 
             <input class="form-check-input" type="radio" name="hours_type" id="hoursMain" value="main_hours">
             <label class="form-check-label" for="hoursMain">Open with main hours</label>
+          
+        </div>
+</div>
+        <!-- Main Hours Section -->
+        <div id="hoursSection" style="display:none;">
+
+          <!-- Day Selector -->
+          <div class="mb-2">
+            <label class="file-label">Working Days:</label>
+            <div class="day-selector">
+              {% for day in days %}
+              <button type="button" class="day-btn" data-day="{{ day|lower }}">
+                {{ day|slice:":3" }}
+              </button>
+              {% endfor %}  
+            </div>
+          </div>
+
+      <div class="row g-3" id="daysGrid">
+
+{% for day in days %}
+  <div class="col-md-3 day-row" id="{{ day|lower }}Row" style="display:none;">
+
+    <div class="day-time-card">
+
+      <div class="day-title">{{ day }}</div>
+
+      <!-- Open + Close in ONE row -->
+      <div class="row g-2">
+
+        <div class="col-6">
+          <div class="input-group clockpicker">
+            <input type="text"
+                   class="form-control"
+                   name="{{ day|lower }}_open"
+                   placeholder="Open">
+          <span class="input-group-text clock-icon" style="cursor:pointer;">🕒</span>
+
           </div>
         </div>
 
-        <!-- Operating Hours -->
-        <div class="mb-3" id="hoursSection" style="display: none;">
-          <label class="file-label">Operating Hours:</label>
+        <div class="col-6">
+          <div class="input-group clockpicker">
+            <input type="text"
+                   class="form-control"
+                   name="{{ day|lower }}_close"
+                   placeholder="Close">
+          <span class="input-group-text clock-icon" style="cursor:pointer;">🕒</span>
 
-          {% for day in days %}
-          <div class="input-pair">
-            <label class="me-2" style="width: 90px;">{{ day }}:</label>
-            <input class="form-control me-2" type="time" name="{{ day|lower }}_open">
-            <span class="me-2">to</span>
-            <input class="form-control" type="time" name="{{ day|lower }}_close">
           </div>
-          {% endfor %}
+      </div>
+
+      </div>
+
+    </div>
+
+  </div>
+{% endfor %}
+
+</div>
+
         </div>
+        <style>
+          
+         .day-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
 
-        <script>
-          const hours247 = document.getElementById("hours247");
-          const hoursMain = document.getElementById("hoursMain");
-          const hoursSection = document.getElementById("hoursSection");
+.day-btn {
+  border: 1px solid #c9b6a2;
+  background: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
 
-          function updateHoursUI() {
-            if (hoursMain.checked) {
-              hoursSection.style.display = "block";   // show time inputs
-            } else {
-              hoursSection.style.display = "none";    // hide time inputs
-            }
-          }
+.day-btn.active {
+  background: #8b5a2b;
+  color: #fff;
+  border-color: #8b5a2b;
+}
 
-          hours247.addEventListener("change", updateHoursUI);
-          hoursMain.addEventListener("change", updateHoursUI);
+.input-pair {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
 
-          updateHoursUI(); // initialize on page load
-        </script>
+.timepicker {
+  max-width: 120px;
+}
+
+/* Dark overlay */
+.clockpicker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 999998;
+  pointer-events: none; /* 🔥 KEY FIX */
+}
+
+/* Stop background scroll */
+body.clockpicker-open {
+  overflow: hidden;
+}
+
+/* Center the popup */
+.clockpicker-popover {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 999999 !important;
+  border-radius: 14px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+}
+
+/* Popup background */
+.clockpicker-popover .popover-content {
+  background: #fff7f2;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+/* Clock colors */
+.clockpicker-tick.active,
+.clockpicker-tick:hover {
+  background-color: #a86843 !important;
+  color: #fff !important;
+}
+
+.clockpicker-canvas-bearing,
+.clockpicker-canvas-fg {
+  fill: #a86843 !important;
+}
+
+.clockpicker-canvas line {
+  stroke: #a86843 !important;
+}
+.text-primary {
+  color: #a86843 !important;
+}
+
+
+        </style>
+      <script>
+const hours247 = document.getElementById("hours247");
+const hoursMain = document.getElementById("hoursMain");
+const hoursSection = document.getElementById("hoursSection");
+
+/* Toggle main hours */
+function updateHoursUI() {
+  hoursSection.style.display = hoursMain.checked ? "block" : "none";
+}
+hours247.addEventListener("change", updateHoursUI);
+hoursMain.addEventListener("change", updateHoursUI);
+updateHoursUI();
+
+/* Day toggle */
+document.querySelectorAll(".day-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn.classList.toggle("active");
+    const row = document.getElementById(btn.dataset.day + "Row");
+    row.style.display = btn.classList.contains("active") ? "flex" : "none";
+  });
+});
 
 
 
+
+/* Overlay helpers (keep unchanged) */
+function showOverlay() {
+  if (!document.querySelector('.clockpicker-overlay')) {
+    const overlay = document.createElement('div');
+    overlay.className = 'clockpicker-overlay';
+    document.body.appendChild(overlay);
+    document.body.classList.add('clockpicker-open');
+    overlay.addEventListener('click', hideOverlay);
+  }
+}
+
+function hideOverlay() {
+  const overlay = document.querySelector('.clockpicker-overlay');
+  if (overlay) overlay.remove();
+  document.body.classList.remove('clockpicker-open');
+}
+
+/* ClockPicker init (keep, but ensure autoclose: true) */
+$('.clockpicker').clockpicker({
+  autoclose: false,          // 🔥 DO NOT auto close
+  placement: 'top',
+  align: 'left',
+  donetext: 'OK',
+  afterShow: function () {
+    showOverlay();
+  },
+  afterDone: function () {
+    hideOverlay();
+  }
+});
+
+/* Icon click (keep, but add delay) */
+document.querySelectorAll('.clock-icon').forEach(icon => {
+  icon.addEventListener('click', function (e) {
+    e.stopPropagation();
+    $(this).closest('.clockpicker').clockpicker('show');
+  });
+});
+
+/* Input focus - FIXED with delay */
+$('.clockpicker input').on('focus', function(){
+  showOverlay();
+  const $input = $(this);
+  setTimeout(() => $input.clockpicker('show'), 100);  // Key fix: delay after overlay
+});
+</script>
+
+<br>
         <!-- Logo -->
         <div class="mb-3">
           <label class="file-label">Hospital Logo:</label>
           <input class="form-control" type="file" name="logo" id="logo" accept="image/*">
         </div>
 
-        <div class="pt-2">
-          <button type="submit" class="btn btn-submit w-100">Register Hospital</button>
+        <!-- Open + Close in ONE row -->
+      <div class="row g-2">
+
+        <div class="col-4">
+           <button type="submit" class="btn btn-submit w-100">Back</button>
         </div>
-         <div class="text-center mt-3">
-    <p>Already registered? 
-        <a href="{% url 'hospital_login'%}" style="color:#864d26; font-weight:600; text-decoration:none;">
-            Login here
-        </a>
-    </p>
-</div>
+        <div class="col-4">
+           <button type="submit" class="btn btn-submit w-100">Register </button>
+        </div>
+
+        <div class="col-4">
+           <button type="submit" class="btn btn-submit w-100">Clear </button>
+
+          </div>
+      </div>
+
+       
+        <div class="text-center mt-3">
+          <p>Already registered?
+            <a href="{% url 'hospital_login'%}" style="color:#864d26; font-weight:600; text-decoration:none;">
+              Login here
+            </a>
+          </p>
+        </div>
       </form>
 
     </div>
   </div>
+
+  <!-- Toastr & JQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
   <!-- Bootstrap bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Optional: small JS to show file name in placeholder (no layout change) -->
   <script>
+    // Toastr Options
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "positionClass": "toast-top-right",
+      "timeOut": "3000"
+    };
+
+    // --- Top Loading Bar Logic ---
+    const loaderBar = document.getElementById('top-loading-bar');
+
+    function startLoader() {
+      loaderBar.style.opacity = '1';
+      loaderBar.style.width = '30%';
+      setTimeout(() => {
+        if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
+      }, 500);
+    }
+
+    function stopLoader() {
+      loaderBar.style.width = '100%';
+      setTimeout(() => {
+        loaderBar.style.opacity = '0';
+        setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
+      }, 500);
+    }
+
+    // Show on Page Load
+    startLoader();
+    window.addEventListener('load', stopLoader);
+    // -----------------------------
+
     document.getElementById('logo').addEventListener('change', function (e) {
       const file = this.files[0];
-      // no UI change required — this is optional
-      // if you'd like a preview, we can show a small thumbnail; left out to keep screenshot parity
       if (file) {
         // do nothing: browser will show chosen filename in control
       }
     });
 
-    // submit handler (keeps same FormData usage)
+    // submit handler
     document.getElementById('hospitalForm').addEventListener('submit', async function (e) {
       e.preventDefault();
+      startLoader(); // Start loader on submit
+
       const form = e.target;
       const data = new FormData(form);
 
       try {
-        // POST to your endpoint - keeps same as your earlier code
         const resp = await fetch('/api/register-hospital/', { method: 'POST', body: data });
         const json = await resp.json();
-        // simple feedback (you can replace with nicer toast)
-        alert(json.message || (resp.ok ? 'Registered' : 'Error'));
 
         if (resp.ok) {
-          window.location.href = "{% url 'hospital_login' %}";
+          toastr.success(json.message || 'Registered successfully!');
+          // Keep loader full while redirecting
+          loaderBar.style.width = '100%';
+          setTimeout(() => {
+            window.location.href = "{% url 'hospital_login' %}";
+          }, 2000);
+        } else {
+          stopLoader(); // Stop on error
+          toastr.error(json.message || 'Error occurred');
         }
       } catch (err) {
+        stopLoader(); // Stop on error
         console.error(err);
-        alert('Network error');
+        toastr.error('Network error');
       }
     });
   </script>

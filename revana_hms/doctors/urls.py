@@ -5,6 +5,8 @@ from .monthly_views import create_monthly_availability, doctor_availability_list
 urlpatterns = [
     path('', views.doctor_register_page, name='doctor_register_page'),
     path('register/', views.register_doctor, name='register_doctor'),
+    path('add-doctor/', views.add_doctor_page, name='add_doctor_page'),
+    path('add-doctor/submit/', views.add_doctor_submit, name='add_doctor_submit'),
     path('pending/', views.pending_doctors, name='pending_doctors'),
     path('approve/<int:doctor_id>/', views.approve_doctor, name='approve_doctor'),
     path('edit/<int:doctor_id>/', views.edit_doctor, name='edit_doctor'),

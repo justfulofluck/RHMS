@@ -135,10 +135,7 @@ def register_hospital_ajax(request):
 
 
 
-# 👨‍⚕️ Doctor registration via AJAX
-
-
-
+# Doctor registration via AJAX
 
 @login_required
 @role_required('hospital_admin')

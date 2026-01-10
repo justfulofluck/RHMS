@@ -12,6 +12,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
+from notifications.signals import notify
+import uuid # Added for uuid.uuid4()
 
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital, IsSelfDoctor
 from appointments.models import Appointment, DoctorAvailability
@@ -51,16 +53,27 @@ class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
         department = self.request.query_params.get('department')
         qs = super().get_queryset()
 
-        if hasattr(user, 'patient') and department:
-            qs = qs.filter(doctor__department__name__icontains=department)
+        if hasattr(user, 'patient'):
+            # Patients should only see availability for doctors in their hospital or all if no hospital
+            if hasattr(user.patient, 'hospital') and user.patient.hospital:
+                qs = qs.filter(doctor__hospital=user.patient.hospital)
+            if department:
+                qs = qs.filter(doctor__department__name__icontains=department)
         elif hasattr(user, 'doctor'):
             qs = qs.filter(doctor=user.doctor)
         elif hasattr(user, 'hospital_admin'):
             qs = qs.filter(doctor__hospital=user.hospital_admin.hospital)
         elif user.is_superuser:
             return qs
-
-        return qs.none()
+        else: # Unauthenticated users or other roles
+            # For public view, maybe filter by hospital if provided, or show all
+            hospital_id = self.request.query_params.get('hospital_id')
+            if hospital_id:
+                qs = qs.filter(doctor__hospital_id=hospital_id)
+            if department:
+                qs = qs.filter(doctor__department__name__icontains=department)
+            
+        return qs
 
     def perform_create(self, serializer):
         doctor = serializer.validated_data['doctor']
@@ -81,7 +94,6 @@ class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
             raise ValueError("Overlapping availability for this doctor on the given date.")
 
         serializer.save()
-
 
 # 📆 Calendar View for Doctors & Patients
 class CalendarView(APIView):
@@ -194,7 +206,7 @@ def book_appointment_ajax(request):
         doctor = Doctor.objects.get(id=doctor_id)
         hospital = Hospital.objects.get(id=hospital_id)
         
-        # \u2705 Verify hospital is approved before allowing booking
+        # ✅ Verify hospital is approved before allowing booking
         if hospital.status != Hospital.STATUS_APPROVED:
             return JsonResponse({
                 'success': False, 
@@ -204,12 +216,27 @@ def book_appointment_ajax(request):
         appointment_datetime = datetime.fromisoformat(appointment_date)
         token = str(uuid.uuid4())[:8]
 
-        Appointment.objects.create(
+        new_appointment = Appointment.objects.create(
             hospital=hospital,
             doctor=doctor,
             patient_name=patient.name,
             appointment_date=appointment_datetime,
-            created_at=timezone.now()
+            created_at=timezone.now(),
+            status='scheduled'  # Default status
+        )
+        
+        # Send notification to Doctor
+        # For unauthenticated requests, the sender can be the patient's user object or a system user
+        sender = patient.user if patient.user else None # Assuming patient always has a user
+        if not sender: # Fallback if patient.user is somehow None
+            sender = new_appointment # Use the appointment instance itself as sender
+
+        notify.send(
+            sender, 
+            recipient=doctor.user, 
+            verb='booked an appointment', 
+            target=new_appointment,
+            description=f"New appointment with {name} on {appointment_datetime.strftime('%Y-%m-%d %H:%M')}"
         )
 
         return JsonResponse({
@@ -286,6 +313,24 @@ def cancel_appointment(request, appointment_id):
         appointment.cancellation_reason = request.POST.get('reason', 'Cancelled by user')
         appointment.save()
         
+        # Send notification to Doctor
+        # Assuming the cancellation is initiated by the patient or a system process
+        sender = request.user if request.user.is_authenticated else None
+        if not sender:
+            # Fallback for unauthenticated cancellation (e.g., via a public link)
+            # You might want a dedicated system user for this or infer from appointment.patient
+            sender = appointment.patient.user if hasattr(appointment, 'patient') and appointment.patient else None
+            if not sender:
+                sender = appointment # Use the appointment instance itself as sender
+
+        notify.send(
+            sender,
+            recipient=appointment.doctor.user,
+            verb='cancelled an appointment',
+            target=appointment,
+            description=f"Appointment with {appointment.patient_name} on {appointment.appointment_date.strftime('%Y-%m-%d %H:%M')} has been cancelled."
+        )
+
         # Send email to patient
         # We need to find the patient's email. 
         # In the current model, we don't store email directly on Appointment, 

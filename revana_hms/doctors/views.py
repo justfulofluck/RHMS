@@ -105,9 +105,120 @@ def register_doctor(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
 
 
+
 def doctor_register_page(request):
     hospitals = Hospital.objects.filter(status='approved') # Only show approved hospitals
     return render(request, 'doctors/register.html', {'hospitals': hospitals})
+
+
+@login_required
+@role_required('hospital_admin')
+def add_doctor_page(request):
+    """Page for hospital admin to add a new doctor"""
+    try:
+        hospital_admin = HospitalAdmin.objects.get(user=request.user)
+        hospital = hospital_admin.hospital
+    except HospitalAdmin.DoesNotExist:
+        messages.error(request, "You are not authorized as a hospital admin.")
+        return redirect('homepage')
+        
+    return render(request, 'doctors/add_doctor.html', {'hospital': hospital})
+
+
+@csrf_exempt
+@login_required
+@role_required('hospital_admin')
+def add_doctor_submit(request):
+    """Handle submission of new doctor by hospital admin"""
+    if request.method == 'POST':
+        try:
+            hospital_admin = HospitalAdmin.objects.get(user=request.user)
+            hospital = hospital_admin.hospital
+        except HospitalAdmin.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
+            
+        data = request.POST
+        email = data.get('email')
+        aadhaar = data.get('aadhaar')
+        
+        # Verify hospital ID matches (security check)
+        form_hospital_id = data.get('hospital')
+        if str(hospital.id) != str(form_hospital_id):
+             return JsonResponse({'status': 'error', 'message': 'Hospital mismatch'}, status=400)
+
+        # Check for duplicate email
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists.')
+            return redirect('add_doctor_page')
+
+        try:
+            with transaction.atomic():
+                # Generate random password for doctor
+                password = get_random_string(length=12)
+                
+                # Create User with password and active status
+                user = User.objects.create_user(
+                    email=email,
+                    password=password,
+                    phone=data.get('contact_number'),
+                    role='doctor',
+                    is_active=True
+                )
+
+                DoctorProfile.objects.create(
+                    user=user,
+                    gender=data.get('gender'),
+                    date_of_birth=data.get('date_of_birth'),
+                    contact_number=data.get('contact_number'),
+                    address=data.get('address'),
+                    medical_certificate=request.FILES.get('medical_certificate'),
+                    qualification=data.get('qualification'),
+                    specialization=data.get('specialization'),
+                    year_of_experience=data.get('year_of_experience'),
+                    registration_certificate=request.FILES.get('registration_certificate'),
+                    degree_certificates=request.FILES.get('degree_certificates'),
+                    aadhaar=aadhaar,
+                    passport_photo=request.FILES.get('passport_photo'),
+                    experience_certificate=request.FILES.get('experience_certificate')
+                )
+
+                # Link to Hospital & Auto-Approve
+                Doctor.objects.create(
+                    user=user,
+                    name=data.get('name'),
+                    hospital=hospital,
+                    specialization=data.get('specialization'),
+                    status=Doctor.STATUS_APPROVED,  # Auto-approved since admin added
+                    is_approved=True
+                )
+
+                # Send registration email with login credentials
+                login_url = request.build_absolute_uri(reverse('doctor_login'))
+                send_mail(
+                    subject='Doctor Account Created - Login Credentials',
+                    message=f'Welcome to RHMS!\n\n'
+                            f'Your doctor account has been created by {hospital.name}.\n\n'
+                            f'Login Credentials:\n'
+                            f'Email: {user.email}\n'
+                            f'Password: {password}\n\n'
+                            f'Login URL: {login_url}\n\n'
+                            f'Your account is ACTIVE and ready to use.\n'
+                            f'Please login to update your availability.\n\n'
+                            f'Thank you for joining RHMS!',
+                    from_email='blueglobalcloud@gmail.com',
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+
+            messages.success(request, f'Doctor {data.get("name")} added successfully.')
+            return redirect('pending_doctors') # Or back to dashboard
+
+        except Exception as e:
+            messages.error(request, f'Error adding doctor: {str(e)}')
+            return redirect('add_doctor_page')
+
+    return redirect('add_doctor_page')
+
 
 
 class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
@@ -251,12 +362,32 @@ def hospital_admin_dashboard(request):
 
     pending_doctors = doctors.filter(status=Doctor.STATUS_PENDING)
 
+    import json
+    from django.core.serializers.json import DjangoJSONEncoder
+
+    # Serialize appointments for the calendar widget
+    appointments_list = []
+    for appt in appointments:
+        appointments_list.append({
+            'id': appt.id,
+            'patient_name': appt.patient_name,
+            'doctor_name': appt.doctor.name if appt.doctor else "Unknown",
+            'date': appt.appointment_date.strftime('%Y-%m-%d'),
+            'time': appt.appointment_date.strftime('%I:%M %p'),
+            'status': appt.status,
+            'type': "General Visit", # Placeholder as 'type' isn't in model yet
+            'doctor_image': appt.doctor.user.doctorprofile.passport_photo.url if hasattr(appt.doctor.user, 'doctorprofile') and appt.doctor.user.doctorprofile.passport_photo else None
+        })
+    
+    appointments_json = json.dumps(appointments_list, cls=DjangoJSONEncoder)
+
     return render(request, 'frontend/hospital_admin/dashboard.html', {
         'hospital': hospital,
         'departments': departments,
         'treatments': treatments,
         'doctors': doctors,
         'appointments': appointments,
+        'appointments_json': appointments_json,
         'pending_doctors': pending_doctors,
     })
 
@@ -281,19 +412,23 @@ def doctor_dashboard(request):
     hospital = doctor.hospital
     
     # Get today's date
-    today = timezone.now().date()
+    today = timezone.localdate()
     
-    # All upcoming appointments
-    appointments = Appointment.objects.filter(
+    # All upcoming appointments (for generic list or future needs)
+    upcoming_appointments = Appointment.objects.filter(
         doctor=doctor,
         appointment_date__gte=timezone.now()
     ).order_by('appointment_date')
-    
-    # Today's appointments count
-    today_appointments = Appointment.objects.filter(
+
+    # ✅ Today's Appointments (Show ALL for today, even if time passed)
+    # This ensures the doctor can mark earlier appointments as completed/no-show
+    appointments_today = Appointment.objects.filter(
         doctor=doctor,
         appointment_date__date=today
-    ).count()
+    ).order_by('appointment_date')
+    
+    # Today's appointments count
+    today_appointments_count = appointments_today.count()
     
     # Total unique patients (based on patient_name)
     total_patients = Appointment.objects.filter(
@@ -309,10 +444,11 @@ def doctor_dashboard(request):
     return render(request, 'doctors/dashboard.html', {
         'doctor': doctor,
         'hospital': hospital,
-        'appointments': appointments,
-        'today_appointments': today_appointments,
+        'appointments': appointments_today, # ✅ Show today's list in the main table
+        'upcoming_appointments': upcoming_appointments, # Pass if needed for other sections
+        'today_appointments': today_appointments_count,
         'total_patients': total_patients,
-        'reports_count': 0,  # Placeholder for future feature
+        'reports_count': 0,  
         'availabilities': availabilities
     })
 
@@ -320,15 +456,22 @@ def doctor_dashboard(request):
 @login_required
 @role_required('hospital_admin')
 def edit_doctor(request, doctor_id):
-    """Edit doctor information - only accessible by hospital admin"""
-    try:
-        hospital = HospitalAdmin.objects.get(user=request.user).hospital
-    except HospitalAdmin.DoesNotExist:
-        messages.error(request, "You are not authorized as a hospital admin.")
-        return redirect('homepage')
+    """Edit doctor information - accessible by hospital admin and superuser"""
     
-    # Get doctor and ensure they belong to this hospital
-    doctor = get_object_or_404(Doctor, id=doctor_id, hospital=hospital)
+    if request.user.is_superuser:
+        # Superuser can edit any doctor
+        doctor = get_object_or_404(Doctor, id=doctor_id)
+        hospital = doctor.hospital
+    else:
+        # Hospital Admin can only edit doctors in their hospital
+        try:
+            hospital = HospitalAdmin.objects.get(user=request.user).hospital
+        except HospitalAdmin.DoesNotExist:
+            messages.error(request, "You are not authorized as a hospital admin.")
+            return redirect('homepage')
+        
+        # Get doctor and ensure they belong to this hospital
+        doctor = get_object_or_404(Doctor, id=doctor_id, hospital=hospital)
     
     if request.method == 'POST':
         try:
@@ -442,9 +585,10 @@ def my_patients_view(request):
 
 
 @login_required
+@login_required
 @role_required('doctor')
 def edit_my_profile(request):
-    """Allow doctors to edit their own profile"""
+    """Allow doctors to edit their own profile (Restricted Fields)"""
     doctor = Doctor.objects.get(user=request.user)
     
     if request.method == 'POST':
@@ -456,48 +600,63 @@ def edit_my_profile(request):
                 doctor.save()
 
                 # Profile Details
+                # Check if profile exists; if not, create it
                 if hasattr(doctor.user, 'doctorprofile'):
                     profile = doctor.user.doctorprofile
-                    profile.contact_number = request.POST.get('contact_number', profile.contact_number)
-                    profile.gender = request.POST.get('gender', profile.gender)
-                    profile.qualification = request.POST.get('qualification', profile.qualification)
-                    profile.year_of_experience = request.POST.get('year_of_experience', profile.year_of_experience)
-                    profile.address = request.POST.get('address', profile.address)
-                    
-                    dob = request.POST.get('date_of_birth')
-                    if dob:
-                        profile.date_of_birth = dob
-                    
-                    profile.save()
+                else:
+                    # Create new profile with default values for required fields
+                    profile = DoctorProfile(
+                        user=doctor.user,
+                        gender='Other',
+                        date_of_birth=timezone.now().date(),
+                        contact_number='',
+                        address='',
+                        qualification='',
+                        specialization=doctor.specialization,
+                        year_of_experience=0,
+                        aadhaar='', # Assuming generic default
+                        medical_certificate='',
+                        registration_certificate='',
+                        degree_certificates=''
+                    )
+
+                # Update fields with submitted data
+                profile.contact_number = request.POST.get('contact_number', profile.contact_number)
+                profile.gender = request.POST.get('gender', profile.gender)
+                profile.qualification = request.POST.get('qualification', profile.qualification)
+                
+                # Careful with integer conversion for year_of_experience
+                yoe = request.POST.get('year_of_experience')
+                if yoe:
+                    profile.year_of_experience = int(yoe)
+                
+                profile.address = request.POST.get('address', profile.address)
+                
+                dob = request.POST.get('date_of_birth')
+                if dob:
+                    profile.date_of_birth = dob
+
+                # Handle Photo Upload
+                if request.FILES.get('passport_photo'):
+                    profile.passport_photo = request.FILES.get('passport_photo')
+                
+                profile.save()
 
                 # User Phone
                 phone = request.POST.get('contact_number')
                 if phone:
                     doctor.user.phone = phone
                     doctor.user.save()
-                
-                # Update Treatments
-                treatment_ids = request.POST.getlist('treatments')
-                if treatment_ids:
-                    doctor.treatments.clear()
-                    for t_id in treatment_ids:
-                        doctor.treatments.add(t_id)
             
-            return JsonResponse({'success': True, 'message': 'Profile updated successfully.'})
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('doctor_profile_edit')
 
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            messages.error(request, f'Error updating profile: {str(e)}')
+            return redirect('doctor_profile_edit')
 
     # GET Request
-    # Reuse edit_doctor.html but we need to pass context similar to what it expects
-    departments = Department.objects.filter(hospital=doctor.hospital)
-    treatments = Treatment.objects.filter(hospital=doctor.hospital)
-    treatment_ids_list = list(doctor.treatments.values_list('id', flat=True))
-    treatment_ids = ", ".join(map(str, treatment_ids_list))
-
-    return render(request, 'doctors/edit_doctor.html', {
+    return render(request, 'doctors/edit_my_profile.html', {
         'doctor': doctor,
-        'departments': departments, # Passed but maybe read-only in logic?
-        'treatments': treatments,
-        'treatment_ids': treatment_ids
     })
+
