@@ -5,7 +5,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import action
+from appointments.models import Appointment, DoctorAvailability, DailyQueue # Added DailyQueue
+from rest_framework.decorators import action, api_view, permission_classes # Added decorators
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -16,7 +17,6 @@ from notifications.signals import notify
 import uuid # Added for uuid.uuid4()
 
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital, IsSelfDoctor
-from appointments.models import Appointment, DoctorAvailability
 from patients.models import Patient
 from appointments.serializers import AppointmentSerializer, DoctorAvailabilitySerializer
 from doctors.models import Doctor
@@ -206,7 +206,7 @@ def book_appointment_ajax(request):
         doctor = Doctor.objects.get(id=doctor_id)
         hospital = Hospital.objects.get(id=hospital_id)
         
-        # ✅ Verify hospital is approved before allowing booking
+        # Verify hospital is approved before allowing booking
         if hospital.status != Hospital.STATUS_APPROVED:
             return JsonResponse({
                 'success': False, 
@@ -220,6 +220,7 @@ def book_appointment_ajax(request):
             hospital=hospital,
             doctor=doctor,
             patient_name=patient.name,
+            patient_email=email, # ✅ Save email for history tracking
             appointment_date=appointment_datetime,
             created_at=timezone.now(),
             status='scheduled'  # Default status
@@ -282,7 +283,7 @@ def get_available_slots(request):
 
     return JsonResponse({'slots': slot_data})
 
-class AppointmentViewSet(viewsets.ModelViewSet):  # ✅ Correct name
+class AppointmentViewSet(viewsets.ModelViewSet):  # Correct name
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
     #permission_classes = [permissions.IsAuthenticated]
@@ -401,3 +402,138 @@ def get_mobile_slots(request, doctor_id):
         return JsonResponse({'success': False, 'error': 'Doctor not found'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def call_next_patient(request):
+    """
+    1. Mark current appointment as completed (if any) & save notes.
+    2. Increment queue to next available token.
+    """
+    try:
+        doctor = request.user.doctor
+    except Exception:
+        return Response({'error': 'You are not a registered doctor.'}, status=403)
+        
+    today = timezone.now().date()
+    queue, created = DailyQueue.objects.get_or_create(doctor=doctor, date=today)
+    
+    # 1. Complete Current Appointment Logic
+    notes = request.data.get('notes', '')
+    report_file = request.FILES.get('report_file')
+    
+    if queue.current_token > 0:
+        try:
+            current_appt = Appointment.objects.get(
+                doctor=doctor, 
+                appointment_date__date=today, 
+                token_number=queue.current_token
+            )
+            if current_appt.status in ['scheduled', 'confirmed']:
+                current_appt.status = 'completed'
+                current_appt.notes = notes
+                if report_file:
+                    current_appt.report_file = report_file
+                current_appt.save()
+        except Appointment.DoesNotExist:
+            pass 
+
+    # 2. Find Next Patient
+    next_appt = Appointment.objects.filter(
+        doctor=doctor,
+        appointment_date__date=today,
+        token_number__gt=queue.current_token,
+        status__in=['scheduled', 'confirmed']
+    ).order_by('token_number').first()
+    
+    if next_appt:
+        queue.current_token = next_appt.token_number
+        queue.save()
+        
+        # Check if returning patient
+        previous_visits = Appointment.objects.filter(
+            patient_name__iexact=next_appt.patient_name, 
+            status='completed'
+        ).exclude(id=next_appt.id).exists()
+        
+        visit_status = "Returning" if previous_visits else "New"
+        
+        return Response({
+            'success': True,
+            'message': f'Called Token {queue.current_token} - {next_appt.patient_name}',
+            'current_token': queue.current_token,
+            'patient_name': next_appt.patient_name,
+            'visit_status': visit_status
+        })
+    else:
+        # If we were serving a patient (token > 0), we just finished them.
+        # So this is a SUCCESSful action ("Finish"), even if queue is empty.
+        # If token was 0, we were already idle, so this is just information.
+        
+        message = 'No more patients in queue.'
+        if queue.current_token > 0:
+            message = 'Appointment completed. No more patients in queue.'
+            
+        return Response({
+            'success': True, # Changed to True so frontend closes modal/reloads
+            'message': message, 
+            'current_token': queue.current_token,
+             'patient_name': None,
+            'visit_status': None
+        })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_queue_status(request):
+    if not hasattr(request.user, 'doctor'):
+         return Response({'current_token': 0})
+
+    try:
+        doctor = request.user.doctor
+        today = timezone.now().date()
+        queue, _ = DailyQueue.objects.get_or_create(doctor=doctor, date=today)
+        
+        data = {'current_token': queue.current_token, 'patient_name': None, 'visit_status': None}
+        
+        if queue.current_token > 0:
+            try:
+                current_appt = Appointment.objects.filter(
+                    doctor=doctor, 
+                    appointment_date__date=today, 
+                    token_number=queue.current_token
+                ).first()
+                
+                if current_appt:
+                    # ONLY show patient if they are active (not completed)
+                    if current_appt.status in ['scheduled', 'confirmed']:
+                        data['patient_name'] = current_appt.patient_name
+                        # Check history
+                        previous_visits = Appointment.objects.filter(
+                            patient_name__iexact=current_appt.patient_name, 
+                            status='completed'
+                        ).exclude(id=current_appt.id).exists()
+                        data['visit_status'] = "Returning" if previous_visits else "New"
+                    else:
+                        # Current token is done.
+                        # Check if any more patients exist
+                        has_more = Appointment.objects.filter(
+                            doctor=doctor,
+                            appointment_date__date=today,
+                            token_number__gt=queue.current_token,
+                            status__in=['scheduled', 'confirmed']
+                        ).exists()
+                        
+                        if not has_more:
+                            data['current_token'] = 0 # Hide token
+                            data['status_message'] = "All appointments completed for today."
+                        else:
+                             # Waiting for doctor to call next
+                             # We can keep showing current token or show waiting
+                             pass
+            except Exception:
+                pass
+                
+        return Response(data)
+    except Exception:
+        return Response({'current_token': 0})

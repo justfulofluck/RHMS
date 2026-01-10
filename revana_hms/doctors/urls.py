@@ -24,4 +24,6 @@ urlpatterns = [
     # Appointment Actions
     path('appointment/update-status/<int:appointment_id>/', views.update_appointment_status, name='update_appointment_status'),
     path('my-patients/', views.my_patients_view, name='my_patients'),
+    path('my-patients/<str:patient_name>/', views.patient_history_view, name='patient_history'),
+    path('patient-history/partial/<str:patient_name>/', views.patient_history_partial, name='patient_history_partial'),
 ]

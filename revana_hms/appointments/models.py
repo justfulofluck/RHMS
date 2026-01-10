@@ -47,6 +47,7 @@ class Appointment(models.Model):
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name="appointments")
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name="appointments")
     patient_name = models.CharField(max_length=150)
+    patient_email = models.EmailField(blank=True, null=True) # ✅ Added for returning patient logic
     appointment_date = models.DateTimeField()
     token_number = models.PositiveIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -58,9 +59,25 @@ class Appointment(models.Model):
         default='scheduled'
     )
     notes = models.TextField(blank=True, null=True)
+    report_file = models.FileField(upload_to='patient_reports/', blank=True, null=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancellation_reason = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Appointment with {self.doctor.name} on {self.appointment_date}"
+
+
+class DailyQueue(models.Model):
+    """
+    Tracks the current serving token for a doctor on a specific date.
+    """
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='daily_queues')
+    date = models.DateField(default=timezone.now)
+    current_token = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        unique_together = ('doctor', 'date')
+        
+    def __str__(self):
+        return f"{self.doctor.name} - {self.date} - Token {self.current_token}"
         

@@ -88,24 +88,23 @@ def get_slots(request):
     ).order_by('date', 'start_time')
     
     # Generate individual slots from availabilities
-    all_slots = []
+    data = []
     for availability in availabilities:
         individual_slots = generate_time_slots(availability)
-        all_slots.extend(individual_slots)
-    
-    # Format for JSON response
-    data = []
-    for idx, slot in enumerate(all_slots):
-        # Create unique ID combining availability ID and slot index
-        slot_id = f"{slot['availability_id']}_{idx}"
-        data.append({
-            'id': slot_id,
-            'date': slot['date'].strftime('%Y-%m-%d'),
-            'start_time': slot['start_time'].strftime('%H:%M'),
-            'end_time': slot['end_time'].strftime('%H:%M'),
-            'duration': slot['duration']
-        })
         
+        # Enumerate individual slots for THIS availability to get correct local index
+        for idx, slot in enumerate(individual_slots):
+            # Create unique ID combining availability ID and local slot index
+            slot_id = f"{slot['availability_id']}_{idx}"
+            
+            data.append({
+                'id': slot_id,
+                'date': slot['date'].strftime('%Y-%m-%d'),
+                'start_time': slot['start_time'].strftime('%H:%M'),
+                'end_time': slot['end_time'].strftime('%H:%M'),
+                'duration': slot['duration']
+            })
+
     return JsonResponse({'slots': data})
 
 @csrf_exempt
@@ -174,9 +173,10 @@ def book_appointment_widget(request):
             appointment_date = selected_slot['date']
             hospital = availability.doctor.hospital
             
-            # Count appointments for this hospital on this date to generate token
+            # Count appointments for this specific doctor on this date to generate token
             current_count = Appointment.objects.filter(
                 hospital=hospital,
+                doctor=availability.doctor,
                 appointment_date__date=appointment_date
             ).count()
             
@@ -190,6 +190,13 @@ def book_appointment_widget(request):
                 selected_slot['date'],
                 selected_slot['start_time']
             )
+
+            # Validation: Check if slot is already booked
+            if Appointment.objects.filter(
+                doctor=availability.doctor,
+                appointment_date=appointment_start
+            ).exclude(status='cancelled').exists():
+                 return JsonResponse({'error': 'This time slot is already booked'}, status=400)
             
             appointment = Appointment.objects.create(
                 hospital=hospital,
