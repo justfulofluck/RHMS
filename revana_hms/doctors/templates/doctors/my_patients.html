@@ -19,6 +19,13 @@
             background-color: #f5ede5;
         }
 
+.rounded-circle {
+    border-radius: 50% !important;
+    background: #d0e8ff !important;
+    color: #24437a !important;
+    font-weight: 700;
+}
+
         .sidebar {
             width: 260px;
             height: 100vh;
@@ -71,12 +78,39 @@
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-
+        .bg-success{
+           background-color: #f8d8ad !important;
+           color: #1c4278;
+        }
         .appointment-list {
             background: white;
             border-radius: 10px;
             padding: 20px;
         }
+        .bg-primary{
+            background-color: #24437a !important;
+        }
+        .text-primary{
+           color: #24437a!important; 
+        }
+
+        .btn-outline-primary {
+    --bs-btn-color: #24437a;
+    --bs-btn-border-color: #24437a;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #24437a;
+    --bs-btn-hover-border-color: #24437a;
+    --bs-btn-focus-shadow-rgb: 13, 110, 253;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #24437a;
+    --bs-btn-active-border-color: #24437a;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #24437a;
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: #24437a;
+    --bs-gradient: none;
+}
+
     </style>
 </head>
 
@@ -175,7 +209,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Patient History: <span id="modalPatientName" class="fw-bold"></span>
+                  <h5 class="modal-title">Patient History: <span id="modalPatientName" class="fw-bold"></span>
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>

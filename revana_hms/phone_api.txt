@@ -1,0 +1,104 @@
+REVANA HMS - PHONE APP API DOCUMENTATION
+========================================
+
+Base URL: (Your Server URL, e.g., http://192.168.x.x:8000)
+
+----------------------------------------------------
+1. AUTHENTICATION (JWT)
+----------------------------------------------------
+- Login (Get Tokens):
+  POST /api/token/
+  Body: { "email": "user@example.com", "password": "yourpassword" }
+  Response: { "access": "...", "refresh": "..." }
+
+- Refresh Token:
+  POST /api/token/refresh/
+  Body: { "refresh": "your_refresh_token" }
+
+- Password Reset Request:
+  POST /api/accounts/password-reset/
+  Body: { "email": "user@example.com" }
+
+- Password Reset Confirm:
+  POST /api/accounts/password-reset-confirm/
+  Body: { "uidb64": "...", "token": "...", "password": "..." }
+
+
+----------------------------------------------------
+2. PATIENT MANAGEMENT
+----------------------------------------------------
+- Register Patient:
+  POST /patients/register/
+  Body: {
+    "email": "user@email.com",
+    "password": "password123",
+    "name": "Full Name",
+    "age": 25,
+    "gender": "Male",  # Options: Male, Female, Other
+    "phone": "9876543210",
+    "address": "Full Address"
+  }
+
+- Get Profile:
+  GET /patients/api/profile/
+  Headers: { "Authorization": "Bearer <access_token>" }
+
+- Update Profile:
+  PATCH /patients/api/profile/
+  Headers: { "Authorization": "Bearer <access_token>" }
+  Body: { "phone": "...", "address": "...", "age": ... } (Partial update)
+
+- Medical History:
+  GET /patients/api/medical-history/
+  Headers: { "Authorization": "Bearer <access_token>" }
+
+- Notifications:
+  GET /patients/api/notifications/
+  Headers: { "Authorization": "Bearer <access_token>" }
+
+- Mark Notification as Read:
+  PATCH /patients/api/notifications/<id>/mark-read/
+  Headers: { "Authorization": "Bearer <access_token>" }
+
+
+----------------------------------------------------
+3. APPOINTMENTS
+----------------------------------------------------
+- Mobile Booking:
+  POST /mobile/book/
+  Headers: { "Authorization": "Bearer <access_token>" }
+  Body: {
+    "doctor_id": 123,
+    "slot_id": 456,  # ID from availability slot
+    "date": "YYYY-MM-DD",
+    "reason": "Consultation"
+  }
+
+- Get Available Slots (Mobile Optimized):
+  GET /api/appointments/api/mobile-slots/<doctor_id>/?date=YYYY-MM-DD
+  Headers: { "Authorization": "Bearer <access_token>" }
+
+- My Appointments:
+  GET /api/appointments/my-appointments/
+  Headers: { "Authorization": "Bearer <access_token>" }
+
+- Cancel Appointment:
+  POST /api/appointments/cancel/<appointment_id>/
+  Headers: { "Authorization": "Bearer <access_token>" }
+
+
+----------------------------------------------------
+4. CORE DATA (Doctors, Departments, etc.)
+----------------------------------------------------
+- List Departments:
+  GET /api/departments/
+
+- List Treatments:
+  GET /api/treatments/
+
+- List Doctors:
+  GET /api/doctors/
+  Query Params: ?department=<id>&treatment=<id> (Check if filters are implemented in DoctorViewSet)
+
+- Check Doctor Availability (Public/Doctors):
+  GET /api/public-availability/?doctor=<id>&date=YYYY-MM-DD
