@@ -660,3 +660,25 @@ def edit_my_profile(request):
         'doctor': doctor,
     })
 
+
+@login_required
+@role_required('doctor')
+def patient_history_view(request, patient_name):
+    """
+    Returns the partial HTML for a specific patient's history.
+    Used by the dashboard for the right-side panel.
+    """
+    doctor = Doctor.objects.get(user=request.user)
+    
+    # Fetch history
+    history = Appointment.objects.filter(
+        doctor=doctor,
+        patient_name__iexact=patient_name,
+        status='completed'
+    ).order_by('-appointment_date')
+    
+    return render(request, 'doctors/partials/patient_history_partial.html', {
+        'patient_name': patient_name,
+        'history': history
+    })
+patient_history_partial = patient_history_view

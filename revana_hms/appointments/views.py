@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -401,3 +401,109 @@ def get_mobile_slots(request, doctor_id):
         return JsonResponse({'success': False, 'error': 'Doctor not found'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+# 🏥 Queue Management APIs (Doctor Console)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_queue_status(request):
+    try:
+        doctor = request.user.doctor
+        today = timezone.localtime().date()
+        
+        queue, _ = DailyQueue.objects.get_or_create(doctor=doctor, date=today)
+        
+        # Get current appointment details if token > 0
+        patient_name = None
+        visit_status = None
+        
+        if queue.current_token > 0:
+            current_appt = Appointment.objects.filter(
+                doctor=doctor,
+                appointment_date__date=today,
+                token_number=queue.current_token
+            ).first()
+            
+            if current_appt:
+                patient_name = current_appt.patient_name
+                
+                # Check history logic (Duplicated from dashboard view for consistency)
+                has_history = False
+                if current_appt.patient_email:
+                     has_history = Appointment.objects.filter(
+                        doctor=doctor,
+                        patient_email=current_appt.patient_email,
+                        status='completed'
+                    ).exclude(id=current_appt.id).exists()
+                else: 
+                     has_history = Appointment.objects.filter(
+                        doctor=doctor,
+                        patient_name__iexact=current_appt.patient_name,
+                        status='completed'
+                    ).exclude(id=current_appt.id).exists()
+                    
+                visit_status = "Returning" if has_history else "New"
+
+        return Response({
+            'current_token': queue.current_token,
+            'patient_name': patient_name,
+            'visit_status': visit_status
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def call_next_patient(request):
+    try:
+        doctor = request.user.doctor
+        today = timezone.localtime().date()
+        queue, _ = DailyQueue.objects.get_or_create(doctor=doctor, date=today)
+
+        # 1. Complete Previous Patient (if any)
+        if queue.current_token > 0:
+            prev_appt = Appointment.objects.filter(
+                doctor=doctor,
+                appointment_date__date=today,
+                token_number=queue.current_token
+            ).first()
+            
+            if prev_appt:
+                prev_appt.status = 'completed'
+                
+                # Save notes if provided
+                notes = request.data.get('notes')
+                report = request.FILES.get('report_file')
+                
+                if notes:
+                    prev_appt.notes = notes
+                if report:
+                    prev_appt.report_file = report
+                    
+                prev_appt.save()
+
+        # 2. Advance Queue
+        queue.current_token += 1
+        queue.save()
+
+        # 3. Check if we have a patient for this new token
+        next_appt = Appointment.objects.filter(
+            doctor=doctor,
+            appointment_date__date=today,
+            token_number=queue.current_token
+        ).first()
+        
+        # If no appointment found for this token (e.g. end of list), 
+        # usually we just stay on this token but show "No Patient"
+        # The frontend handles knowing when to disable 'Next' based on list size, 
+        # but here we just process the token.
+
+        data = {
+            'success': True,
+            'message': f'Called Token #{queue.current_token}',
+            'current_token': queue.current_token,
+            'patient_name': next_appt.patient_name if next_appt else None
+        }
+        return Response(data)
+
+    except Exception as e:
+        return Response({'success': False, 'message': str(e)}, status=500)
