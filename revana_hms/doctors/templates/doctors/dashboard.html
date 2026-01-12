@@ -82,6 +82,10 @@
             border-radius: 10px;
             padding: 20px;
         }
+        .btn.disabled, .btn:disabled, fieldset:disabled .btn{
+            background-color: #24437a;
+            border-color: #24437a;
+        }
 
         .mb-3 {
             margin-bottom: 1rem !important;
@@ -174,12 +178,111 @@
                     </ul>
                 </div>
 
+<<<<<<< Updated upstream
                 <div class="d-flex align-items-center gap-3">
                     <div class="text-end">
                         <div class="fw-bold" style="color:#1c4278">{{ doctor.name }}</div>
                         <small class="text-muted">{{ doctor.specialization }}</small>
                         {% if doctor.status == 'pending' %}
                         <br><span class="badge bg-warning text-dark">Draft Mode</span>
+=======
+        <!-- MAIN TWO-COLUMN LAYOUT -->
+        <div class="row">
+
+            <!-- LEFT COLUMN: APPOINTMENT LIST -->
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm h-100 border-0">
+                    <!-- CURRENT SERVING SECTION (Always Visible) -->
+                    <div id="currentServingSection" class="p-4"
+                        style="background-color: #d0e8ff; border-radius: 10px 10px 0 0;">
+                        <small class="text-secondary fw-bold text-uppercase ls-1">Current Serving</small>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <!-- Big Token Number -->
+                                <div class="display-3 fw-bold text-primary lh-1" id="servingTokenDisplay">--</div>
+                                <div>
+                                    <h3 class="fw-bold mb-0 text-dark" id="servingPatientName">No Active Patient</h3>
+                                    <span class="badge bg-warning text-dark mt-2 d-none" id="servingPatientBadge">New
+                                        Patient</span>
+                                </div>
+                            </div>
+
+                            <!-- Main Action Buttons -->
+                            <div class="d-flex align-items-center">
+                                <!-- START BUTTON (Visible when Idle) -->
+                                <button id="startQueueBtn" class="btn btn-success px-4 py-2 shadow-sm fw-bold d-none"
+                                    onclick="startQueue()" {% if not appointments %}disabled{% endif %}>
+                                    <i class="bi bi-play-circle-fill me-2"></i> Start List
+                                </button>
+
+                                <!-- ACTION DROPDOWN (Visible when Serving) -->
+                                <div class="dropdown d-none" id="actionDropdownWrapper">
+                                    <button class="btn btn-primary dropdown-toggle px-4 py-2 shadow-sm" type="button"
+                                        data-bs-toggle="dropdown">
+                                        <i class="bi bi-lightning-fill me-1"></i> Actions
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                        <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
+                                                data-bs-target="#notesModal">
+                                                Add Notes & Call Next</a></li>
+                                        <li><a class="dropdown-item py-2" href="#" onclick="quickCallNext()">
+                                                Quick Complete (No Notes)</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Patient Name</th>
+                                        <th>Time</th>
+                                        <th>Token</th>
+                                        <th>Type</th>
+                                        <th class="text-end pe-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appt in appointments %}
+                                    <tr id="appt-row-{{ appt.id }}" data-token="{{ appt.token_number }}"
+                                        class="table-row-clickable border-bottom">
+                                        <td class="ps-3 fw-bold text-dark patient-name">
+                                            {{ appt.patient_name }}
+                                        </td>
+                                        <td>{{ appt.appointment_date|date:"h:i A" }}</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border rounded-pill px-3">
+                                                #{{ appt.token_number|default:"-" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="badge {% if appt.visit_status == 'Returning' %}bg-info text-dark{% else %}bg-info text-dark{% endif %} visit-type">
+                                                {{ appt.visit_status|default:"General" }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <!-- View History Button (Yellow) -->
+                                            <button class="btn  btn-sm text-white fw-bold px-3"
+                                                onclick="loadPatientHistory('{{ appt.patient_name }}')"
+                                                {% if not appt.has_history %}disabled style="opacity: 0.0; cursor: not-allowed;" title="First time visitor - No history"{% endif %}>
+                                                History
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="p-5 text-center text-muted">
+                            <p class="mb-0">No appointments scheduled for today.</p>
+                        </div>
+>>>>>>> Stashed changes
                         {% endif %}
                     </div>
                 </div>
