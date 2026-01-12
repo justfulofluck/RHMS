@@ -14,6 +14,9 @@
     <!-- Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
         body {
             background-color: #f4ede5;
@@ -192,27 +195,550 @@
                                     No dates selected.
                                 </div>
 
-                                <h6 class="border-bottom pb-2 mb-3">Time Slots</h6>
-                                <div id="slots-container">
-                                    <!-- Slot rows generated here -->
-                                    <div class="slot-row row mb-2 g-2">
-                                        <div class="col-5">
-                                            <label class="small text-muted">Start</label>
-                                            <input type="time" class="form-control" name="start_time" value="09:00"
-                                                required>
+                                
+                                 <div class="row ">
+                                            <div class="col-md-8 col-lg-6">
+                                                <h6 class="border-bottom pb-2 mb-4 text-brown">Time Slots</h6>
+                                                
+                                                <div class="row g-4">
+                                                    <div class="col-md-6">
+                                                        <label class="small text-muted d-block mb-2">Start</label>
+                                                        <div class="position-relative">
+                                                            <input type="text" class="form-control time-display" 
+                                                                id="startTime" value="09:12 AM" readonly>
+                                                            <button class="time-trigger" data-target="start">
+                                                                <i class="fas fa-clock"></i>
+                                                            </button>
+                                                            <input type="hidden" name="start_time" id="startHidden" value="09:12">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="small text-muted d-block mb-2">End</label>
+                                                        <div class="position-relative">
+                                                            <input type="text" class="form-control time-display" 
+                                                                id="endTime" value="05:00 PM" readonly>
+                                                            <button class="time-trigger" data-target="end">
+                                                                <i class="fas fa-clock"></i>
+                                                            </button>
+                                                            <input type="hidden" name="end_time" id="endHidden" value="17:00">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-5">
-                                            <label class="small text-muted">End</label>
-                                            <input type="time" class="form-control" name="end_time" value="17:00"
-                                                required>
-                                        </div>
-                                        <div class="col-2 d-flex align-items-end">
-                                            <button type="button" class="btn btn-outline-danger w-100" disabled>
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                        <!-- EXACT CLOCK PICKER FROM YOUR CODE -->
+                                    <div id="timePickerModal" class="time-picker-modal">
+                                        <div class="time-picker-card">
+                                            <div class="header p-3">
+                                                <span class="text-uppercase small fw-bold text-muted" id="header-label">Select Time</span>
+                                            </div>
+
+                                            <!-- Clock Picker View -->
+                                            <div id="clock-view" class="content d-flex p-4">
+                                                <div class="time-display-section d-flex flex-column  me-4">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="time-box hour-box active" id="display-hour">9</div>
+                                                        <div class="time-separator mx-2">:</div>
+                                                        <div class="time-box minute-box" id="display-minute">12</div>
+                                                    </div>
+
+                                                    <div class="am-pm-toggle d-flex border rounded">
+                                                        <button class="btn am-btn active btn-am">AM</button>
+                                                        <button class="btn pm-btn btn-pm">PM</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="clock-face-section position-relative">
+                                                    <div class="clock-face rounded-circle d-flex align-items-center justify-content-center">
+                                                        <div class="clock-center"></div>
+                                                        <div class="clock-hand" id="clock-hand">
+                                                            <div class="clock-hand-tip"></div>
+                                                        </div>
+                                                        <div id="clock-numbers"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="footer d-flex justify-content-between align-items-center p-3 border-top">
+                                                <button class="btn btn-link text-dark p-0" id="toggle-view-btn">
+                                                    
+                                                </button>
+                                                <div>
+                                                    <button class="btn text-brown fw-bold me-3 px-4 py-2 border rounded" id="btn-cancel">CANCEL</button>
+                                                    <button class="btn text-brown fw-bold px-4 py-2 bg-warning border-0 rounded" id="btn-ok">OK</button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+
+
+
+
+
+                                    </div>
                                 </div>
+
+
+<!-- khushi-->
+<style>
+:root {
+    --primary-brown: #8D4F2A;
+    --light-brown: #F5EBE4;
+    --active-bg: #EFE5DD;
+    --text-muted: #757575;
+}
+
+.time-picker-card {
+    background: #fff;
+    border-radius: 8px;
+    width: 640px;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.time-box {
+    background: #F1E9E4;
+    color: var(--primary-brown);
+    font-size: 4rem;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 100px;
+    text-align: center;
+    line-height: 1;
+}
+
+.time-box.active {
+    background: #F5EBE4;
+}
+
+.minute-box {
+    background: #E8E2DE;
+    color: #333;
+}
+
+.time-separator {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.am-pm-toggle {
+    overflow: hidden;
+}
+
+.am-pm-toggle .btn {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    padding: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.am-pm-toggle .btn.active {
+    background: var(--active-bg);
+    color: var(--primary-brown);
+}
+
+.clock-face {
+    width: 250px;
+    height: 250px;
+    background: #F1E9E4;
+    position: relative;
+    border-radius: 50%;
+    margin: auto;
+}
+
+.clock-center {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-brown);
+    border-radius: 50%;
+    z-index: 10;
+}
+
+.clock-hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 2px;
+    height: 105px;
+    background: var(--primary-brown);
+    transform-origin: bottom center;
+    z-index: 5;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clock-hand.no-transition {
+    transition: none !important;
+}
+
+.clock-hand-tip {
+    position: absolute;
+    top: -15px;
+    left: -19px;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-brown);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight:600;
+    font-size: 1rem;
+    transform: rotate(0deg);
+}
+
+.clock-hand-tip::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    bottom: 5px;
+}
+
+.clock-tick {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #BDBDBD;
+    border-radius: 50%;
+    z-index: 4;
+}
+
+.clock-tick.major {
+    width: 4px;
+    height: 4px;
+    background: #9E9E9E;
+}
+
+.clock-number {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+  
+}
+
+.clock-number.active {
+    color: white;
+}
+
+.time-picker-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.time-picker-modal.show {
+    display: flex;
+}
+
+.time-display {
+    padding-right: 50px !important;
+    background: #f8f9fa;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.time-trigger {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--primary-brown);
+    font-size: 1.2rem;
+}
+    </style>
+    
+
+    <script>
+class ClockPicker {
+    constructor() {
+        this.currentMode = 'hour';
+        this.selectedHour = 9;
+        this.selectedMinute = 12;
+        this.isAm = true;
+        this.isDragging = false;
+        this.targetInput = null;
+        this.targetHidden = null;
+        
+        this.init();
+    }
+
+    init() {
+        this.bindTriggers();
+        this.bindClockEvents();
+    }
+
+    bindTriggers() {
+        document.querySelectorAll('.time-trigger').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                this.targetInput = btn.parentNode.querySelector('.time-display');
+                this.targetHidden = this.targetInput.nextElementSibling;
+                
+                this.parseCurrentTime();
+                this.openPicker();
+            });
+        });
+    }
+
+    parseCurrentTime() {
+        if (this.targetInput.value) {
+            const [time, period] = this.targetInput.value.split(' ');
+            const [h, m] = time.split(':');
+            this.selectedHour = parseInt(h) || 12;
+            this.selectedMinute = parseInt(m) || 0;
+            this.isAm = period === 'AM';
+        }
+    }
+
+    openPicker() {
+        const modal = document.getElementById('timePickerModal');
+        modal.classList.add('show');
+        this.renderNumbers();
+        this.updateDisplay();
+        this.updateHand();
+    }
+
+    closePicker() {
+        document.getElementById('timePickerModal').classList.remove('show');
+    }
+
+    bindClockEvents() {
+        // Modal controls
+        document.getElementById('btn-cancel').onclick = () => this.closePicker();
+        document.getElementById('btn-ok').onclick = () => this.confirmSelection();
+        document.getElementById('timePickerModal').onclick = (e) => {
+            if (e.target.id === 'timePickerModal') this.closePicker();
+        };
+
+        // AM/PM
+        document.querySelectorAll('.btn-am').forEach(btn => {
+            btn.onclick = () => {
+                this.isAm = true;
+                document.querySelectorAll('.btn-am').forEach(b => b.classList.add('active'));
+                document.querySelectorAll('.btn-pm').forEach(b => b.classList.remove('active'));
+            };
+        });
+
+        document.querySelectorAll('.btn-pm').forEach(btn => {
+            btn.onclick = () => {
+                this.isAm = false;
+                document.querySelectorAll('.btn-pm').forEach(b => b.classList.add('active'));
+                document.querySelectorAll('.btn-am').forEach(b => b.classList.remove('active'));
+            };
+        });
+
+        // Hour/Minute click
+        document.getElementById('display-hour').onclick = () => {
+            this.currentMode = 'hour';
+            this.renderNumbers();
+            this.updateDisplay();
+            this.updateHand();
+        };
+
+        document.getElementById('display-minute').onclick = () => {
+            this.currentMode = 'minute';
+            this.renderNumbers();
+            this.updateDisplay();
+            this.updateHand();
+        };
+
+        this.setupDragging();
+    }
+
+    setupDragging() {
+        const clockFace = document.querySelector('.clock-face');
+        const clockHand = document.getElementById('clock-hand');
+
+        const handleMove = (e) => {
+            if (!this.isDragging) return;
+            e.preventDefault();
+
+            const rect = clockFace.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const dx = clientX - centerX;
+            const dy = clientY - centerY;
+
+            let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+            if (angle < 0) angle += 360;
+
+            const total = this.currentMode === 'hour' ? 12 : 60;
+            let val = Math.round((angle / 360) * total);
+
+            if (this.currentMode === 'hour') {
+                if (val === 0) val = 12;
+                this.selectedHour = val;
+            } else {
+                if (val === 60) val = 0;
+                this.selectedMinute = val;
+            }
+
+            this.updateDisplay();
+            this.updateHand();
+        };
+
+        const startDragging = (e) => {
+            this.isDragging = true;
+            clockHand.classList.add('no-transition');
+            handleMove(e);
+        };
+
+        const stopDragging = () => {
+            if (this.isDragging) {
+                clockHand.classList.remove('no-transition');
+                if (this.currentMode === 'hour') {
+                    this.currentMode = 'minute';
+                    this.renderNumbers();
+                }
+            }
+            this.isDragging = false;
+        };
+
+        // Mouse events
+        clockFace.addEventListener('mousedown', startDragging);
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', stopDragging);
+
+        // Touch events
+        clockFace.addEventListener('touchstart', startDragging, { passive: false });
+        document.addEventListener('touchmove', handleMove, { passive: false });
+        document.addEventListener('touchend', stopDragging);
+    }
+
+    renderNumbers() {
+        const clockNumbers = document.getElementById('clock-numbers');
+        clockNumbers.innerHTML = '';
+        const radius = 105;
+
+        if (this.currentMode === 'minute') {
+            for (let i = 0; i < 60; i++) {
+                const angle = (i * 6) * (Math.PI / 180);
+                const x = 125 + radius * Math.sin(angle) - 1;
+                const y = 125 - radius * Math.cos(angle) - 1;
+
+                const tick = document.createElement('div');
+                tick.className = `clock-tick ${i % 5 === 0 ? 'major' : ''}`;
+                tick.style.left = `${x}px`;
+                tick.style.top = `${y}px`;
+                clockNumbers.appendChild(tick);
+            }
+        }
+
+        for (let i = 1; i <= 12; i++) {
+            const val = this.currentMode === 'hour' ? i : (i * 5) % 60;
+            const displayVal = (this.currentMode === 'minute' && val === 0) ? '00' : val;
+
+            const angle = (i * 30) * (Math.PI / 180);
+            const x = 125 + radius * Math.sin(angle) - 15;
+            const y = 125 - radius * Math.cos(angle) - 15;
+
+            const numDiv = document.createElement('div');
+            numDiv.className = 'clock-number';
+            numDiv.style.left = `${x}px`;
+            numDiv.style.top = `${y}px`;
+            numDiv.textContent = displayVal;
+
+            numDiv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (this.currentMode === 'hour') {
+                    this.selectedHour = val;
+                    this.currentMode = 'minute';
+                    this.renderNumbers();
+                } else {
+                    this.selectedMinute = val;
+                }
+                this.updateDisplay();
+                this.updateHand();
+            });
+
+            clockNumbers.appendChild(numDiv);
+        }
+    }
+
+    updateDisplay() {
+        document.getElementById('display-hour').textContent = this.selectedHour;
+        document.getElementById('display-minute').textContent = 
+            this.selectedMinute.toString().padStart(2, '0');
+
+        if (this.currentMode === 'hour') {
+            document.getElementById('display-hour').classList.add('active');
+            document.getElementById('display-minute').classList.remove('active');
+        } else {
+            document.getElementById('display-hour').classList.remove('active');
+            document.getElementById('display-minute').classList.add('active');
+        }
+    }
+
+    updateHand() {
+        const val = this.currentMode === 'hour' ? this.selectedHour : this.selectedMinute;
+        const total = this.currentMode === 'hour' ? 12 : 60;
+        const angle = (val / total) * 360;
+        
+        const clockHand = document.getElementById('clock-hand');
+        clockHand.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+
+        const tip = clockHand.querySelector('.clock-hand-tip');
+        tip.textContent = this.currentMode === 'hour' ? 
+            this.selectedHour : this.selectedMinute.toString().padStart(2, '0');
+        tip.style.transform = `rotate(${-angle}deg)`;
+    }
+
+    confirmSelection() {
+        const displayHour = this.selectedHour === 12 && !this.isAm ? 12 : this.selectedHour;
+        const displayTime = `${displayHour.toString().padStart(2, '0')}:${this.selectedMinute.toString().padStart(2, '0')} ${this.isAm ? 'AM' : 'PM'}`;
+        
+        const hour24 = this.selectedHour === 12 ? 
+            (this.isAm ? 0 : 12) : 
+            (this.isAm ? this.selectedHour : this.selectedHour + 12);
+        const formTime = `${hour24.toString().padStart(2, '0')}:${this.selectedMinute.toString().padStart(2, '0')}`;
+        
+        this.targetInput.value = displayTime;
+        this.targetHidden.value = formTime;
+        
+        this.closePicker();
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    new ClockPicker();
+});
+    </script>
+
+<!-- khushi-->
+
+
+
+
+
 
                                 <button type="button" class="btn btn-sm  mb-4"
                                     style="background:#f4ede5; color: #24437a; padding: 10px; border-radius: 8px; border-bottom: #6b3f21;"

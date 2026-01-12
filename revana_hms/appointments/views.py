@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -16,7 +16,7 @@ from notifications.signals import notify
 import uuid # Added for uuid.uuid4()
 
 from core.permissions import IsSuperAdmin, IsHospitalAdminOfSameHospital, IsSelfDoctor
-from appointments.models import Appointment, DoctorAvailability
+from appointments.models import Appointment, DoctorAvailability, DailyQueue
 from patients.models import Patient
 from appointments.serializers import AppointmentSerializer, DoctorAvailabilitySerializer
 from doctors.models import Doctor
@@ -214,15 +214,27 @@ def book_appointment_ajax(request):
             }, status=400)
         
         appointment_datetime = datetime.fromisoformat(appointment_date)
-        token = str(uuid.uuid4())[:8]
+        
+        # ✅ Generate Sequential Token
+        last_token = Appointment.objects.filter(
+            doctor=doctor,
+            appointment_date__date=appointment_datetime.date()
+        ).order_by('-token_number').values_list('token_number', flat=True).first()
+        
+        next_token = (last_token or 0) + 1
+        
+        # Token string for frontend display (keep UUID logic separate if needed, or use next_token)
+        token_display = f"#{next_token}" 
 
         new_appointment = Appointment.objects.create(
             hospital=hospital,
             doctor=doctor,
             patient_name=patient.name,
+            patient_email=email, # Saved for history
             appointment_date=appointment_datetime,
             created_at=timezone.now(),
-            status='scheduled'  # Default status
+            status='scheduled',
+            token_number=next_token # ✅ Save the integer token
         )
         
         # Send notification to Doctor
@@ -451,8 +463,11 @@ def get_queue_status(request):
         return Response({'error': str(e)}, status=500)
 
 
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def call_next_patient(request):
     try:
         doctor = request.user.doctor
@@ -467,8 +482,13 @@ def call_next_patient(request):
                 token_number=queue.current_token
             ).first()
             
+            print(f"DEBUG: Processing Token {queue.current_token}")
+            print(f"DEBUG: Found Appt: {prev_appt}")
+            print(f"DEBUG: Files: {request.FILES}, Data: {request.data}")
+            
             if prev_appt:
-                prev_appt.status = 'completed'
+                if prev_appt.status in ['scheduled', 'confirmed']:
+                    prev_appt.status = 'completed'
                 
                 # Save notes if provided
                 notes = request.data.get('notes')
@@ -481,7 +501,7 @@ def call_next_patient(request):
                     
                 prev_appt.save()
 
-        # 2. Advance Queue
+        # 2. Advance Queue (Simple Increment)
         queue.current_token += 1
         queue.save()
 
@@ -492,18 +512,18 @@ def call_next_patient(request):
             token_number=queue.current_token
         ).first()
         
-        # If no appointment found for this token (e.g. end of list), 
-        # usually we just stay on this token but show "No Patient"
-        # The frontend handles knowing when to disable 'Next' based on list size, 
-        # but here we just process the token.
+        # Note: If no patient is found (next_appt is None), the frontend will show
+        # "No Active Patient" for this token, but the token number will still update.
+        # The doctor can simply click "Next" again to skip empty slots.
 
-        data = {
+        return Response({
             'success': True,
-            'message': f'Called Token #{queue.current_token}',
+            'message': f'Moved to Token #{queue.current_token}',
             'current_token': queue.current_token,
             'patient_name': next_appt.patient_name if next_appt else None
-        }
-        return Response(data)
+        })
 
     except Exception as e:
         return Response({'success': False, 'message': str(e)}, status=500)
+
+

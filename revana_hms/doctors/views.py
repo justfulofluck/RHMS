@@ -411,29 +411,59 @@ def doctor_dashboard(request):
     doctor = Doctor.objects.get(user=request.user)
     hospital = doctor.hospital
     
-    # Get today's date
     today = timezone.localdate()
     
-    # All upcoming appointments (for generic list or future needs)
-    upcoming_appointments = Appointment.objects.filter(
-        doctor=doctor,
-        appointment_date__gte=timezone.now()
-    ).order_by('appointment_date')
+    # Get Queue Status
+    from appointments.models import DailyQueue
+    queue, _ = DailyQueue.objects.get_or_create(doctor=doctor, date=today)
+    current_token = queue.current_token
 
-    # ✅ Today's Appointments (Show ALL for today, even if time passed)
-    # This ensures the doctor can mark earlier appointments as completed/no-show
-    appointments_today = Appointment.objects.filter(
+    # ✅ Today's Appointments (Waiting List Only)
+    # Exclude Completed/Cancelled AND Current Serving
+    # We evaluate to a list to allow attribute assignment
+    appointments_today_qs = Appointment.objects.filter(
+        doctor=doctor,
+        appointment_date__date=today,
+        status__in=['scheduled', 'confirmed']
+    ).exclude(token_number=current_token).order_by('appointment_date')
+    
+    appointments_today = []
+    for appt in appointments_today_qs:
+        # Check for history
+        if appt.patient_email:
+            has_history = Appointment.objects.filter(
+                doctor=doctor,
+                patient_email__iexact=appt.patient_email,
+                status='completed'
+            ).exclude(id=appt.id).exists()
+        else:
+            has_history = Appointment.objects.filter(
+                doctor=doctor,
+                patient_name__iexact=appt.patient_name,
+                status='completed'
+            ).exclude(id=appt.id).exists()
+        
+        appt.has_history = has_history
+        appt.visit_status = "Returning" if has_history else "New" # Also populate for badge
+        appointments_today.append(appt)
+
+    
+    # Today's appointments count (Total for the day, not just waiting)
+    today_appointments_count = Appointment.objects.filter(
         doctor=doctor,
         appointment_date__date=today
-    ).order_by('appointment_date')
-    
-    # Today's appointments count
-    today_appointments_count = appointments_today.count()
+    ).count()
     
     # Total unique patients (based on patient_name)
     total_patients = Appointment.objects.filter(
         doctor=doctor
     ).values('patient_name').distinct().count()
+    
+    # All upcoming appointments (restored)
+    upcoming_appointments = Appointment.objects.filter(
+        doctor=doctor,
+        appointment_date__gte=timezone.now()
+    ).order_by('appointment_date')
     
     # Availabilities
     availabilities = DoctorAvailability.objects.filter(
@@ -444,8 +474,8 @@ def doctor_dashboard(request):
     return render(request, 'doctors/dashboard.html', {
         'doctor': doctor,
         'hospital': hospital,
-        'appointments': appointments_today, # ✅ Show today's list in the main table
-        'upcoming_appointments': upcoming_appointments, # Pass if needed for other sections
+        'appointments': appointments_today, # ✅ Now a list with annotated attributes
+        'upcoming_appointments': upcoming_appointments, 
         'today_appointments': today_appointments_count,
         'total_patients': total_patients,
         'reports_count': 0,  
@@ -583,6 +613,21 @@ def my_patients_view(request):
         'patients': patients
     })
 
+@login_required
+@role_required('doctor')
+def patient_history_view(request, patient_name):
+    """Details of a specific patient's history with this doctor"""
+    doctor = Doctor.objects.get(user=request.user)
+    appointments = Appointment.objects.filter(
+        doctor=doctor, 
+        patient_name=patient_name
+    ).order_by('-appointment_date')
+    
+    return render(request, 'doctors/patient_history.html', {
+        'patient_name': patient_name,
+        'appointments': appointments
+    })
+
 
 @login_required
 @login_required
@@ -663,22 +708,18 @@ def edit_my_profile(request):
 
 @login_required
 @role_required('doctor')
-def patient_history_view(request, patient_name):
+def patient_history_partial(request, patient_name):
     """
-    Returns the partial HTML for a specific patient's history.
-    Used by the dashboard for the right-side panel.
+    Returns HTML fragment for patient history (timeline).
+    Used for AJAX loading in the dashboard.
     """
     doctor = Doctor.objects.get(user=request.user)
-    
-    # Fetch history
-    history = Appointment.objects.filter(
-        doctor=doctor,
-        patient_name__iexact=patient_name,
-        status='completed'
+    appointments = Appointment.objects.filter(
+        doctor=doctor, 
+        patient_name__iexact=patient_name
     ).order_by('-appointment_date')
     
     return render(request, 'doctors/partials/patient_history_partial.html', {
         'patient_name': patient_name,
-        'history': history
+        'appointments': appointments
     })
-patient_history_partial = patient_history_view
