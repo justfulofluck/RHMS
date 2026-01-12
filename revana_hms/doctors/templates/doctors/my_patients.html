@@ -25,27 +25,27 @@
             position: fixed;
             left: 0;
             top: 0;
-            background: #6b3f21;
+            background: #1c4278;;
             padding-top: 20px;
         }
 
         .sidebar a {
-            padding: 15px;
+            padding: 15px 25px;
             color: #ddd;
             display: block;
             text-decoration: none;
             font-size: 16px;
         }
 
-        .sidebar .active {
-            background: #f5ede5;
-            color: #6b3f21;
+       .sidebar .active {
+            background: #f4ede5;
+            color: #1c4278;
         }
 
 
-        .sidebar a:hover {
-            background: #f5ede5;
-            color: #6b3f21;
+         .sidebar a:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
 
         .content {
@@ -82,95 +82,93 @@
 <body>
 
     <!-- Sidebar -->
-    <div class="sidebar">
+   <div class="sidebar">
 
 
-        <a href="{% url 'doctor_dashboard' %}" class="active"><i class="bi bi-grid-1x2 me-2"></i> Dashboard</a>
-        <a href="#appointments"><i class="bi bi-calendar-check me-2"></i> Today's Appointments</a>
+        <a href="{% url 'doctor_dashboard' %}" ><i class="bi bi-grid-1x2 me-2"></i> Dashboard</a>
+    
 
         <!-- Availability Management -->
-        <a href="{% url 'monthly_availability' %}"><i class="bi bi-calendar-month me-2"></i> Set Monthly
+        <a href="{% url 'doctor_availability_list' %}"><i class="bi bi-calendar-month me-2"></i> Set Monthly
             Availability</a>
-        <a href="{% url 'doctor_availability_list' %}"><i class="bi bi-calendar3 me-2"></i> My Availability</a>
-
-        <a href="{% url 'my_patients' %}"><i class="bi bi-people me-2"></i> My Patients</a>
+         <a href="{% url 'my_patients' %}" class="active"><i class="bi bi-people me-2"></i> My Patients</a>
         <a href="#"><i class="bi bi-file-medical me-2"></i> Patient Reports</a>
-        <a href="{% url 'edit_doctor' doctor.id %}"><i class="bi bi-person-lines-fill me-2"></i> Profile</a>
+        <a href="{% url 'doctor_profile_edit' %}"><i class="bi bi-person-lines-fill me-2"></i> Profile</a>
         <a href="/logout/"><i class="bi bi-box-arrow-right me-2"></i> Logout</a>
     </div>
 
 
-
-    <!-- MAIN CONTENT -->
+    <!-- MAIN CONTENT -->   
 
     <div class="content">
 
-{% load static %}
+        {% load static %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2><i class="bi bi-people"></i> My Patients</h2>
-            <p class="text-muted">List of patients who have visited you.</p>
-        </div>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-            {% if patients %}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Patient Name</th>
-                            <th>Last Visit</th>
-                            <th>Total Visits</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for patient in patients %}
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-circle me-3 bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center"
-                                        style="width: 40px; height: 40px;">
-                                        {{ patient.patient_name|make_list|first|upper }}
-                                    </div>
-                                    <div class="fw-bold">{{ patient.patient_name }}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <i class="bi bi-clock-history text-muted me-1"></i>
-                                {{ patient.last_visit|date:"M d, Y" }}
-                            </td>
-                            <td>
-                                <span class="badge bg-primary rounded-pill">{{ patient.total_visits }}</span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary" disabled title="Details coming soon">
-                                    View History
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-5">
-                <div class="mb-3">
-                    <i class="bi bi-person-slash display-1 text-muted"></i>
+        {% block content %}
+        <div class="container mt-4">
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h2><i class="bi bi-people"></i> My Patients</h2>
+                    <p class="text-muted">List of patients who have visited you.</p>
                 </div>
-                <h4>No Patients Yet</h4>
-                <p class="text-muted">Patients will appear here once they book appointments with you.</p>
             </div>
-            {% endif %}
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {% if patients %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Patient Name</th>
+                                    <th>Last Visit</th>
+                                    <th>Total Visits</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in patients %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-3 bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center"
+                                                style="width: 40px; height: 40px;">
+                                                {{ patient.patient_name|make_list|first|upper }}
+                                            </div>
+                                            <div class="fw-bold">{{ patient.patient_name }}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-clock-history text-muted me-1"></i>
+                                        {{ patient.last_visit|date:"M d, Y" }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary rounded-pill">{{ patient.total_visits }}</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" disabled
+                                            title="Details coming soon">
+                                            View History
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-person-slash display-1 text-muted"></i>
+                        </div>
+                        <h4>No Patients Yet</h4>
+                        <p class="text-muted">Patients will appear here once they book appointments with you.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+        {% endblock %}
     </div>
 
 

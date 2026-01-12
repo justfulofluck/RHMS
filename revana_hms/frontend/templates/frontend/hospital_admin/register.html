@@ -12,6 +12,19 @@
   <!-- Font Awesome for icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
+
+<!-- jQuery (REQUIRED) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- ClockPicker CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.css">
+
+<!-- ClockPicker JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.js"></script>
+
+
+
+
   <style>
     :root {
       --brown-dark: #6b3f21;
@@ -42,7 +55,7 @@
     }
 
     .card-register {
-      width: auto;
+      width: 1320px;
       max-width: calc(100% - 40px);
       background: var(--card-bg);
       border-radius: 12px;
@@ -81,7 +94,7 @@
       border-radius: 0 10px 10px 0;
       border: 1px solid #e6e0dc;
       box-shadow: none;
-      height: 46px;
+      height: 36px;
     }
 
     .input-pair {
@@ -136,10 +149,63 @@
         width: 44px;
       }
     }
+
+    /* Top Loading Bar */
+    #top-loading-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: #8c6239;
+      /* App brown color */
+      z-index: 99999;
+      transition: width 0.4s ease, opacity 0.4s ease;
+      width: 0%;
+      opacity: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+   .day-time-card {
+  border: 1px solid #e6d6c6;
+  border-radius: 14px;
+  padding: 10px;
+  background: #fff;
+  height: 100%;
+}
+
+.day-title {
+  text-align: center;
+  font-weight: 600;
+  color: #8b5a2b;
+  margin-bottom: 10px;
+}
+.day-time-card .input-group{
+    border: 1px solid #c8a584;
+    border-radius: 8px !important;
+
+}
+
+.day-time-card .form-control, .custom-select, .form-control:focus {
+    border-radius: 8px;
+    border: 1px solid #c7a481;
+    box-shadow: none;
+    height: 36px;
+}
+.day-time-card  .input-group .input-group-text {
+      background: transparent;
+      border: none;
+      border-right: 0;
+      border-radius: 10px 0 0 10px;
+      color: var(--brown-dark);
+      width: 48px;
+      justify-content: center;
+    }
+
+
   </style>
 </head>
 
 <body>
+  <div id="top-loading-bar"></div>
 
   <div class="page-wrap">
     <div class="card-register">
@@ -163,79 +229,6 @@
 
           <div class="col-md-6">
             <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
-                <input class="form-control" name="phone_number" placeholder="Phone Number" required>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ROW 2 : Email + Registration Number -->
-        <div class="row">
-          <div class="col-md-6">
-            <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
-                <input class="form-control" name="email" placeholder="Email" type="email" required>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
-                <input class="form-control" name="registration_number" placeholder="Registration Number" required>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Address -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-            <input class="form-control" name="address" placeholder="Address">
-          </div>
-        </div>
-
-        <!-- ROW 3 : City + State -->
-        <div class="row">
-          <div class="col-md-6">
-            <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
-                <input class="form-control" name="city" placeholder="City">
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="input-pair">
-              <div class="input-group w-100">
-                <span class="input-group-text"><i class="fa-solid fa-location-pin"></i></span>
-                <input class="form-control" name="state" placeholder="State">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Country -->
-        <div class="input-pair">
-          <div class="input-group w-100">
-            <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
-            <input class="form-control" name="country" placeholder="Country">
-          </div>
-        </div>
-
-
-        <!-- Hospital Type -->
-        <div class="mb-3">
-          <!-- Hospital Type (Dropdown Styled Like Other Fields) -->
-
-          <!-- design by khushi-->
-          <div class="input-pair">
             <div class="input-group w-100">
               <span class="input-group-text">
                 <i class="fa-solid fa-stethoscope"></i>
@@ -255,114 +248,939 @@
               </select>
             </div>
           </div>
+          </div>
 
+
+         
         </div>
 
-        <!-- design by khushi -->
-        <!-- Operating Hours -->
+        <!-- ROW 2 : Phone Number + Email + Registration Number -->
+        <div class="row">
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                 <input
+        type="text"
+        class="form-control"
+        name="phone_number"
+        placeholder="+91XXXXXXXXXX"
+        maxlength="13"
+        required
+        oninput="allowPhoneNumber(this)">
+              </div>
+            </div>
+          </div>
+              <script>
+                        function allowPhoneNumber(input) {
+                          let value = input.value;
+
+                          // Allow + only at the start
+                          if (value.startsWith('+')) {
+                            value = '+' + value.slice(1).replace(/[^0-9]/g, '');
+                          } else {
+                            value = value.replace(/[^0-9]/g, '');
+                          }
+
+                          // Limit to +91 + 10 digits OR 12 digits without +
+                          if (value.startsWith('+')) {
+                            value = value.slice(0, 13); // + + 12 digits
+                          } else {
+                            value = value.slice(0, 12);
+                          }
+
+                          input.value = value;
+                        }
+              </script>
+
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                <input class="form-control" name="email" placeholder="Email" type="email" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
+                <input class="form-control" name="registration_number" placeholder="Registration Number" required>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="input-pair">
+          <div class="input-group w-100">
+            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+            <input class="form-control" name="address" placeholder="Address">
+          </div>
+        </div>
+
+        <!-- ROW 3 : City + State + Country -->
+        <div class="row">
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
+                <input class="form-control" name="city" placeholder="City">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-solid fa-location-pin"></i></span>
+                <input class="form-control" name="state" placeholder="State">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="input-pair">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fa-solid fa-globe"></i></span>
+                <input class="form-control" name="country" placeholder="Country">
+              </div>
+            </div>
+          </div>
+        </div>
+
+       
+             <!-- Operating Hours Type -->
         <div class="mb-3">
-          <label class="file-label">Hours:</label>
+         <h4 class="mb-4">Operating Hours</h4>
 
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="hours_type" id="hours247" value="24_7" checked>
-            <label class="form-check-label" for="hours247">Open 24/7</label>
-          </div>
+  <div class="mb-4">
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" id="hours247" name="hours_type" checked>
+      <label class="form-check-label" for="hours247">Open 24/7</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" id="hoursMain" name="hours_type">
+      <label class="form-check-label" for="hoursMain">Open with main hours</label>
+    </div>
+  </div>
 
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="hours_type" id="hoursMain" value="main_hours">
-            <label class="form-check-label" for="hoursMain">Open with main hours</label>
+  <div id="hoursSection" style="display:none;">
+    <label class="form-label fw-bold mb-3 d-block">Working Days</label>
+    <div class="day-selector mb-4">
+      <button class="day-btn" data-day="mon">Mon</button>
+      <button class="day-btn" data-day="tue">Tue</button>
+      <button class="day-btn" data-day="wed">Wed</button>
+      <button class="day-btn" data-day="thu">Thu</button>
+      <button class="day-btn" data-day="fri">Fri</button>
+      <button class="day-btn" data-day="sat">Sat</button>
+      <button class="day-btn" data-day="sun">Sun</button>
+    </div>
+
+      <div class="row g-4">
+          <div class="col-md-3 day-row" id="monRow">
+              <label class="form-label d-block text-muted small mb-2">Monday</label>
+              <div class="row g-2">
+                <div class="col-6">
+                <input class="form-control time-input mb-2" placeholder="Open" readonly>
+              </div>
+              <div class="col-6">
+                <input class="form-control time-input" placeholder="Close" readonly>
+              </div>
           </div>
+      </div>
+
+
+      <div class="col-md-3 day-row" id="tueRow">
+          <label class="form-label d-block text-muted small mb-2">Tuesday</label>
+            <div class="row g-2">
+            <div class="col-6">
+              <input class="form-control time-input mb-2" placeholder="Open" readonly>
+            </div>
+            <div class="col-6">
+              <input class="form-control time-input" placeholder="Close" readonly>
+            </div>
+          </div>
+      </div>
+
+
+      <div class="col-md-3 day-row" id="wedRow">
+        <label class="form-label d-block text-muted small mb-2">Wednesday</label>
+          <div class="row g-2">
+            <div class="col-6">
+              <input class="form-control time-input mb-2" placeholder="Open" readonly>
+            </div>
+            <div class="col-6">
+              <input class="form-control time-input" placeholder="Close" readonly>
+            </div>
+          </div>
+      </div>
+
+      <div class="col-md-3 day-row" id="thuRow">
+        <label class="form-label d-block text-muted small mb-2">Thursday</label>
+          <div class="row g-2">
+            <div class="col-6">
+                <input class="form-control time-input mb-2" placeholder="Open" readonly>
+            </div>
+              <div class="col-6">
+                <input class="form-control time-input" placeholder="Close" readonly>
+              </div>
+          </div>
+      </div>
+
+
+      <div class="col-md-3 day-row" id="friRow">
+        <label class="form-label d-block text-muted small mb-2">Friday</label>
+          <div class="row g-2">
+            <div class="col-6">
+                <input class="form-control time-input mb-2" placeholder="Open" readonly>
+            </div>
+            <div class="col-6">
+                <input class="form-control time-input" placeholder="Close" readonly>
+            </div>
+           </div>
+      </div>
+
+
+
+      <div class="col-md-3 day-row" id="satRow">
+        <label class="form-label d-block text-muted small mb-2">Saturday</label>
+          <div class="row g-2">
+            <div class="col-6">
+                <input class="form-control time-input mb-2" placeholder="Open" readonly>
+            </div>
+             <div class="col-6">
+                <input class="form-control time-input" placeholder="Close" readonly>
+             </div>
+           </div>
+      </div>
+
+
+      <div class="col-md-3 day-row" id="sunRow">
+        <label class="form-label d-block text-muted small mb-2">Sunday</label>
+          <div class="row g-2">
+            <div class="col-6">
+                <input class="form-control time-input mb-2" placeholder="Open" readonly>
+             </div>
+             <div class="col-6">
+                <input class="form-control time-input" placeholder="Close" readonly>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TIME PICKER OVERLAY ================= -->
+<div id="timePickerOverlay" class="tp-overlay d-none">
+  <div class="time-picker-card">
+    <div class="header p-3 border-bottom">
+      <span class="fw-bold text-muted fs-6">SELECT TIME</span>
+    </div>
+
+    <div class="content d-flex p-4">
+      <div class="me-4">
+        <div class="d-flex mb-4 align-items-center">
+          <div class="time-box active" id="display-hour">12</div>
+          <div class="time-separator mx-3">:</div>
+          <div class="time-box minute-box" id="display-minute">00</div>
         </div>
 
-        <!-- Operating Hours -->
-        <div class="mb-3" id="hoursSection" style="display: none;">
-          <label class="file-label">Operating Hours:</label>
-
-          {% for day in days %}
-          <div class="input-pair">
-            <label class="me-2" style="width: 90px;">{{ day }}:</label>
-            <input class="form-control me-2" type="time" name="{{ day|lower }}_open">
-            <span class="me-2">to</span>
-            <input class="form-control" type="time" name="{{ day|lower }}_close">
-          </div>
-          {% endfor %}
+        <div class="am-pm-toggle border rounded">
+          <button class="btn btn-am active px-3" data-period="AM">AM</button>
+          <button class="btn btn-pm px-3" data-period="PM">PM</button>
         </div>
+      </div>
 
-        <script>
-          const hours247 = document.getElementById("hours247");
-          const hoursMain = document.getElementById("hoursMain");
-          const hoursSection = document.getElementById("hoursSection");
+      <div class="clock-face position-relative">
+        <div class="clock-center"></div>
+        <div class="clock-hand" id="clock-hand">
+          <div class="clock-hand-tip" id="hand-tip">12</div>
+        </div>
+        <div id="clock-numbers"></div>
+      </div>
+    </div>
 
-          function updateHoursUI() {
-            if (hoursMain.checked) {
-              hoursSection.style.display = "block";   // show time inputs
-            } else {
-              hoursSection.style.display = "none";    // hide time inputs
-            }
-          }
-
-          hours247.addEventListener("change", updateHoursUI);
-          hoursMain.addEventListener("change", updateHoursUI);
-
-          updateHoursUI(); // initialize on page load
-        </script>
+    <div class="footer p-3 border-top text-end">
+      <button class="btn text-brown btn-text me-2" id="btn-cancel">
+        <i class="fas fa-times me-1"></i>CANCEL
+      </button>
+      <button class="btn text-brown fw-bold px-4" id="btn-ok">
+        <i class="fas fa-check me-1"></i>OK
+      </button>
+    </div>
+  </div>
+</div>
 
 
+        
+       <style>
+/* ================= OPERATING HOURS UI ================= */
+.day-selector {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.day-btn {
+  border: 1px solid #c9b6a2;
+  background: #fff;
+  padding: 6px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.day-btn.active {
+  background: #8b5a2b;
+  color: #fff;
+}
+.day-row { display: none; }
 
+/* ================= OVERLAY ================= */
+.tp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+.tp-overlay.d-none { display: none; }
+
+/* ================= MATERIAL TIME PICKER ================= */
+:root {
+  --primary-brown: #8D4F2A;
+  --light-brown: #F5EBE4;
+  --active-bg: #EFE5DD;
+  --text-muted: #757575;
+}
+
+.time-picker-card {
+    background: #fff;
+    border-radius: 8px;
+    width: 640px;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.time-picker-card.input-mode {
+    width: 380px;
+}
+
+.time-box {
+    background: #F1E9E4;
+    color: var(--primary-brown);
+    font-size: 4rem;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 100px;
+    text-align: center;
+    line-height: 1;
+    user-select: none;
+}
+
+.time-box.active {
+    background: #F5EBE4;
+    box-shadow: 0 0 0 2px var(--primary-brown);
+}
+
+.minute-box {
+    background: #E8E2DE;
+    color: #333;
+}
+
+.time-separator {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--primary-brown);
+}
+
+.am-pm-toggle {
+    overflow: hidden;
+    width: 50%;
+}
+
+.am-pm-toggle .btn {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    padding: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.am-pm-toggle .btn.active {
+    background: var(--active-bg);
+    color: var(--primary-brown);
+}
+
+.am-pm-toggle .btn:hover {
+    background: rgba(141, 79, 42, 0.05);
+}
+
+.clock-face {
+    width: 250px;
+    height: 250px;
+    background: #F1E9E4;
+    position: relative;
+    border-radius: 50%;
+    margin: auto;
+    border: 3px solid #E8E2DE;
+}
+
+.clock-center {
+    width: 12px;
+    height: 12px;
+    background: var(--primary-brown);
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+.clock-hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 3px;
+    height: 105px;
+    background: var(--primary-brown);
+    transform-origin: bottom center;
+    z-index: 5;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clock-hand.no-transition {
+    transition: none !important;
+}
+
+.clock-hand-tip {
+    position: absolute;
+    top: -18px;
+    left: -22px;
+    width: 44px;
+    height: 44px;
+    background: var(--primary-brown);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    transform: rotate(0deg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.clock-hand-tip::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: white;
+    border-radius: 50%;
+    bottom: 6px;
+}
+
+.clock-tick {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #BDBDBD;
+    border-radius: 50%;
+    z-index: 4;
+}
+
+.clock-tick.major {
+    width: 5px;
+    height: 5px;
+    background: #9E9E9E;
+}
+
+.clock-number {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.clock-number:hover {
+    background: rgba(141, 79, 42, 0.1);
+    color: var(--primary-brown);
+}
+
+.clock-number.active {
+    background: var(--primary-brown);
+    color: white;
+}
+
+.text-brown {
+    color: var(--primary-brown);
+}
+
+.btn-text:hover {
+    background: rgba(141, 79, 42, 0.05);
+}
+
+.time-input-box {
+    width: 100px;
+    height: 80px;
+    background: #E8E2DE;
+    border: none;
+    border-radius: 8px;
+    font-size: 3rem;
+    text-align: center;
+    color: var(--primary-brown);
+    outline: none;
+    font-weight: 600;
+}
+
+.time-input-box:focus {
+    background: #F5EBE4;
+    border: 2px solid var(--primary-brown);
+    box-shadow: 0 0 0 3px rgba(141, 79, 42, 0.1);
+}
+
+.am-pm-toggle-vertical {
+    width: 60px;
+    overflow: hidden;
+}
+
+.am-pm-toggle-vertical .btn {
+    border: none;
+    border-radius: 0;
+    padding: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.am-pm-toggle-vertical .btn.active {
+    background: var(--active-bg);
+    color: var(--primary-brown);
+}
+
+.am-pm-toggle-vertical .btn:first-child {
+    border-bottom: 1px solid #ddd;
+}
+
+.time-input-box::-webkit-inner-spin-button,
+.time-input-box::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.time-input-box {
+    -moz-appearance: textfield;
+}
+
+/* Footer buttons */
+.footer .btn {
+    padding: 8px 24px;
+    margin-left: 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.footer .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+</style>
+  <script>
+class MaterialTimePicker {
+  constructor() {
+    this.activeInput = null;
+    this.selectedHour = 12;  // Default 12
+    this.selectedMinute = 0; // Default 00
+    this.isAm = true;
+    this.currentMode = 'hour';
+    this.isDragging = false;
+    
+    this.init();
+  }
+
+  init() {
+    this.bindHoursToggle();
+    this.bindDaySelectors();
+    this.bindTimeInputs();
+    this.renderClock();
+  }
+
+  bindHoursToggle() {
+    const hours247 = document.getElementById('hours247');
+    const hoursMain = document.getElementById('hoursMain');
+    const hoursSection = document.getElementById('hoursSection');
+    
+    hours247.onchange = hoursMain.onchange = () => {
+      hoursSection.style.display = hoursMain.checked ? 'block' : 'none';
+    };
+  }
+
+  bindDaySelectors() {
+    document.querySelectorAll('.day-btn').forEach(btn => {
+      btn.onclick = () => {
+        btn.classList.toggle('active');
+        const dayRow = document.getElementById(btn.dataset.day + 'Row');
+        dayRow.style.display = btn.classList.contains('active') ? 'block' : 'none';
+      };
+    });
+  }
+
+  bindTimeInputs() {
+    document.querySelectorAll('.time-input').forEach(input => {
+      input.onclick = () => {
+        this.activeInput = input;
+        this.openPicker();
+      };
+    });
+  }
+
+  openPicker() {
+    document.getElementById('timePickerOverlay').classList.remove('d-none');
+    this.updateDisplay();
+    this.updateHand();
+  }
+
+  closePicker() {
+    document.getElementById('timePickerOverlay').classList.add('d-none');
+    this.activeInput = null;
+  }
+
+  renderClock() {
+    this.renderNumbers();
+    this.setupEventListeners();
+  }
+
+  setupEventListeners() {
+    // OK Button
+    document.getElementById('btn-ok').onclick = () => {
+      if (this.activeInput) {
+        const time = `${this.selectedHour}:${String(this.selectedMinute).padStart(2,'0')} ${this.isAm ? 'AM' : 'PM'}`;
+        this.activeInput.value = time;
+      }
+      this.closePicker();
+    };
+
+    // Cancel Button
+    document.getElementById('btn-cancel').onclick = () => this.closePicker();
+
+    // AM/PM Toggle
+    document.querySelectorAll('.btn-am, .btn-pm').forEach(btn => {
+      btn.onclick = () => {
+        this.isAm = btn.dataset.period === 'AM';
+        document.querySelectorAll('.btn-am').forEach(b => b.classList.toggle('active', this.isAm));
+        document.querySelectorAll('.btn-pm').forEach(b => b.classList.toggle('active', !this.isAm));
+      };
+    });
+
+    // Clock interactions
+    this.setupDragging();
+    this.bindDisplayClicks();
+  }
+
+  setupDragging() {
+    const clockFace = document.querySelector('.clock-face');
+    const clockHand = document.getElementById('clock-hand');
+
+    const handleMove = (e) => {
+      if (!this.isDragging) return;
+      e.preventDefault();
+
+      const rect = clockFace.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      const dx = clientX - centerX;
+      const dy = clientY - centerY;
+
+      let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+      if (angle < 0) angle += 360;
+
+      const total = this.currentMode === 'hour' ? 12 : 60;
+      let val = Math.round((angle / 360) * total);
+
+      if (this.currentMode === 'hour') {
+        if (val === 0) val = 12;
+        this.selectedHour = val;
+      } else {
+        if (val === 60) val = 0;
+        this.selectedMinute = val;
+      }
+
+      this.updateDisplay();
+      this.updateHand();
+    };
+
+    const startDragging = (e) => {
+      this.isDragging = true;
+      clockHand.classList.add('no-transition');
+      handleMove(e);
+    };
+
+    const stopDragging = () => {
+      if (this.isDragging) {
+        clockHand.classList.remove('no-transition');
+        if (this.currentMode === 'hour') {
+          this.currentMode = 'minute';
+          this.renderNumbers();
+        }
+      }
+      this.isDragging = false;
+    };
+
+    // Mouse events
+    clockFace.addEventListener('mousedown', startDragging);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', stopDragging);
+
+    // Touch events
+    clockFace.addEventListener('touchstart', startDragging, { passive: false });
+    document.addEventListener('touchmove', handleMove, { passive: false });
+    document.addEventListener('touchend', stopDragging);
+  }
+
+  bindDisplayClicks() {
+    document.getElementById('display-hour').onclick = () => {
+      this.currentMode = 'hour';
+      this.renderNumbers();
+      this.updateDisplay();
+      this.updateHand();
+    };
+
+    document.getElementById('display-minute').onclick = () => {
+      this.currentMode = 'minute';
+      this.renderNumbers();
+      this.updateDisplay();
+      this.updateHand();
+    };
+  }
+
+  renderNumbers() {
+    const clockNumbers = document.getElementById('clock-numbers');
+    clockNumbers.innerHTML = '';
+    const radius = 105;
+
+    // Render ticks for minutes
+    if (this.currentMode === 'minute') {
+      for (let i = 0; i < 60; i++) {
+        const angle = (i * 6) * (Math.PI / 180);
+        const x = 125 + radius * Math.sin(angle) - 1;
+        const y = 125 - radius * Math.cos(angle) - 1;
+
+        const tick = document.createElement('div');
+        tick.className = `clock-tick ${i % 5 === 0 ? 'major' : ''}`;
+        tick.style.left = `${x}px`;
+        tick.style.top = `${y}px`;
+        clockNumbers.appendChild(tick);
+      }
+    }
+
+    // Render numbers
+    for (let i = 1; i <= 12; i++) {
+      const val = this.currentMode === 'hour' ? i : (i * 5) % 60;
+      const displayVal = (this.currentMode === 'minute' && val === 0) ? '00' : val;
+
+      const angle = (i * 30) * (Math.PI / 180);
+      const x = 125 + radius * Math.sin(angle) - 16;
+      const y = 125 - radius * Math.cos(angle) - 16;
+
+      const numDiv = document.createElement('div');
+      numDiv.className = 'clock-number';
+      numDiv.style.left = `${x}px`;
+      numDiv.style.top = `${y}px`;
+      numDiv.textContent = displayVal;
+      numDiv.dataset.value = val;
+
+      numDiv.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.currentMode === 'hour') {
+          this.selectedHour = val;
+          this.currentMode = 'minute';
+          this.renderNumbers();
+        } else {
+          this.selectedMinute = val;
+        }
+        this.updateDisplay();
+        this.updateHand();
+      });
+
+      clockNumbers.appendChild(numDiv);
+    }
+  }
+
+  updateDisplay() {
+    document.getElementById('display-hour').textContent = this.selectedHour;
+    document.getElementById('display-minute').textContent = 
+      this.selectedMinute.toString().padStart(2, '0');
+
+    const hourEl = document.getElementById('display-hour');
+    const minuteEl = document.getElementById('display-minute');
+    
+    if (this.currentMode === 'hour') {
+      hourEl.classList.add('active');
+      minuteEl.classList.remove('active');
+    } else {
+      hourEl.classList.remove('active');
+      minuteEl.classList.add('active');
+    }
+  }
+
+  updateHand() {
+    const val = this.currentMode === 'hour' ? this.selectedHour : this.selectedMinute;
+    const total = this.currentMode === 'hour' ? 12 : 60;
+    const angle = (val / total) * 360;
+    
+    const clockHand = document.getElementById('clock-hand');
+    clockHand.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+
+    const handTip = document.getElementById('hand-tip');
+    handTip.textContent = this.currentMode === 'hour' ? 
+      this.selectedHour : this.selectedMinute.toString().padStart(2, '0');
+    handTip.style.transform = `rotate(${-angle}deg)`;
+  }
+}
+
+// Initialize the time picker when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new MaterialTimePicker();
+});
+</script>
+<br>
         <!-- Logo -->
         <div class="mb-3">
           <label class="file-label">Hospital Logo:</label>
           <input class="form-control" type="file" name="logo" id="logo" accept="image/*">
         </div>
 
-        <div class="pt-2">
-          <button type="submit" class="btn btn-submit w-100">Register Hospital</button>
+        <!-- Open + Close in ONE row -->
+      <div class="row g-2">
+        
+        <div class="col-3">
+          <!-- <button class="btn btn-submit w-100">Clear </button>-->
+
+          </div>
+
+        <div class="col-3" style="text-align: right;">
+  <button  class="btn btn-submit w-50"> <a href="{% url 'logout' %}" style="color: #fff;"> Back</a></button>
         </div>
-         <div class="text-center mt-3">
-    <p>Already registered? 
-        <a href="{% url 'hospital_login'%}" style="color:#864d26; font-weight:600; text-decoration:none;">
-            Login here
-        </a>
-    </p>
-</div>
+        <div class="col-3" style="text-align: left;">
+        <button type="submit" class="btn btn-submit w-50">Register </button>
+        </div>
+
+        <div class="col-3">
+          <!-- <button class="btn btn-submit w-100">Clear </button>-->
+
+          </div>
+      </div>
+
+       
+        <div class="text-center mt-3">
+          <p>Already registered?
+            <a href="{% url 'hospital_login'%}" style="color:#864d26; font-weight:600; text-decoration:none;">
+              Login here
+            </a>
+          </p>
+        </div>
       </form>
 
     </div>
   </div>
+
+  <!-- Toastr & JQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
   <!-- Bootstrap bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Optional: small JS to show file name in placeholder (no layout change) -->
   <script>
+    // Toastr Options
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "positionClass": "toast-top-right",
+      "timeOut": "3000"
+    };
+
+    // --- Top Loading Bar Logic ---
+    const loaderBar = document.getElementById('top-loading-bar');
+
+    function startLoader() {
+      loaderBar.style.opacity = '1';
+      loaderBar.style.width = '30%';
+      setTimeout(() => {
+        if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
+      }, 500);
+    }
+
+    function stopLoader() {
+      loaderBar.style.width = '100%';
+      setTimeout(() => {
+        loaderBar.style.opacity = '0';
+        setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
+      }, 500);
+    }
+
+    // Show on Page Load
+    startLoader();
+    window.addEventListener('load', stopLoader);
+    // -----------------------------
+
     document.getElementById('logo').addEventListener('change', function (e) {
       const file = this.files[0];
-      // no UI change required — this is optional
-      // if you'd like a preview, we can show a small thumbnail; left out to keep screenshot parity
       if (file) {
         // do nothing: browser will show chosen filename in control
       }
     });
 
-    // submit handler (keeps same FormData usage)
+    // submit handler
     document.getElementById('hospitalForm').addEventListener('submit', async function (e) {
       e.preventDefault();
+      startLoader(); // Start loader on submit
+
       const form = e.target;
       const data = new FormData(form);
 
       try {
-        // POST to your endpoint - keeps same as your earlier code
         const resp = await fetch('/api/register-hospital/', { method: 'POST', body: data });
         const json = await resp.json();
-        // simple feedback (you can replace with nicer toast)
-        alert(json.message || (resp.ok ? 'Registered' : 'Error'));
 
         if (resp.ok) {
-          window.location.href = "{% url 'hospital_login' %}";
+          toastr.success(json.message || 'Registered successfully!');
+          // Keep loader full while redirecting
+          loaderBar.style.width = '100%';
+          setTimeout(() => {
+            window.location.href = "{% url 'hospital_login' %}";
+          }, 2000);
+        } else {
+          stopLoader(); // Stop on error
+          toastr.error(json.message || 'Error occurred');
         }
       } catch (err) {
+        stopLoader(); // Stop on error
         console.error(err);
-        alert('Network error');
+        toastr.error('Network error');
       }
     });
   </script>

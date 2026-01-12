@@ -1,176 +1,203 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Doctor - {{ doctor.name }}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to top, #8b5e3c, #f0e2d3);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .card-header {
+            background: #8b5e3c;
+            color: #fff;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 6px;
+            padding: 8px 15px;
+            text-decoration: none;
+        }
+
+        .card-body {
+            padding: 40px;
+        }
+
+        .section-title {
+            color: #8b5e3c;
+            font-weight: 600;
+            border-bottom: 2px solid #eaddd3;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h2>Edit Doctor: {{ doctor.name }}</h2>
-        {% if request.user.role == 'hospital_admin' %}
-        <a href="{% url 'hospital_admin_dashboard' %}" class="btn btn-secondary mb-3">Back</a>
-        {% else %}
-        <a href="{% url 'doctor_dashboard' %}" class="btn btn-secondary mb-3">Back</a>
-        {% endif %}
 
-        <div id="messageBox"></div>
+    <div class="container">
+        <div class="card">
 
-        <form id="editDoctorForm" method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+            <!-- HEADER -->
+            <div class="card-header">
+                <h3>Edit Doctor Profile</h3>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <label>Name:</label>
-                    <input type="text" class="form-control mb-3" name="name" value="{{ doctor.name }}" required>
-                </div>
-                <div class="col-md-6">
-                    <label>Email:</label>
-                    <input type="email" class="form-control mb-3" value="{{ doctor.user.email }}" disabled>
-                </div>
+                {% if request.user.role == 'hospital_admin' %}
+                <a href="{% url 'hospital_admin_dashboard' %}" class="btn-back">← Back</a>
+                {% else %}
+                <a href="{% url 'doctor_dashboard' %}" class="btn-back">← Back</a>
+                {% endif %}
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <label>Specialization:</label>
-                    <input type="text" class="form-control mb-3" name="specialization"
-                        value="{{ doctor.specialization }}" required>
-                </div>
-                <div class="col-md-6">
-                    <label>Department:</label>
-                    <select class="form-control mb-3" name="department">
-                        <option value="">-- Select --</option>
-                        {% for dept in departments %}
-                        {% if doctor.department and doctor.department.id == dept.id %}
-                        <option value="{{ dept.id }}" selected>{{ dept.name }}</option>
-                        {% else %}
-                        <option value="{{ dept.id }}">{{ dept.name }}</option>
-                        {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
+            <!-- BODY -->
+            <div class="card-body">
+                <div id="messageBox"></div>
 
-            {% if doctor.user.doctorprofile %}
-            <h4>Profile Details</h4>
-            <div class="row">
-                <div class="col-md-6">
-                    <label>Contact:</label>
-                    <input type="text" class="form-control mb-3" name="contact_number"
-                        value="{{ doctor.user.doctorprofile.contact_number }}">
-                </div>
-                <div class="col-md-6">
-                    <label>Gender:</label>
-                    <select class="form-control mb-3" name="gender" id="genderSelect">
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-            </div>
+                <form id="editDoctorForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
 
-            <div class="row">
-                <div class="col-md-6">
-                    <label>Date of Birth:</label>
-                    <input type="date" class="form-control mb-3" name="date_of_birth"
-                        value="{{ doctor.user.doctorprofile.date_of_birth|date:'Y-m-d' }}">
-                </div>
-                <div class="col-md-6">
-                    <label>Qualification:</label>
-                    <input type="text" class="form-control mb-3" name="qualification"
-                        value="{{ doctor.user.doctorprofile.qualification }}">
-                </div>
-            </div>
+                    <!-- BASIC INFO -->
+                    <div class="section-title">Basic Information</div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <label>Experience (years):</label>
-                    <input type="number" class="form-control mb-3" name="year_of_experience"
-                        value="{{ doctor.user.doctorprofile.year_of_experience|default:0 }}" min="0">
-                </div>
-                <div class="col-md-6">
-                    <label>Aadhaar:</label>
-                    <input type="text" class="form-control mb-3" value="{{ doctor.user.doctorprofile.aadhaar }}"
-                        disabled>
-                </div>
-            </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" name="name" value="{{ doctor.name }}" required>
+                        </div>
 
-            <div class="mb-3">
-                <label>Address:</label>
-                <textarea class="form-control" name="address"
-                    rows="3">{{ doctor.user.doctorprofile.address }}</textarea>
-            </div>
-            {% endif %}
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ doctor.user.email }}" disabled>
+                        </div>
 
-            <h4>Treatments:</h4>
-            <div class="row mb-4" id="treatmentsRow">
-                {% for treatment in treatments %}
-                <div class="col-md-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input treatment-checkbox" type="checkbox" name="treatments"
-                            value="{{ treatment.id }}" id="treatment{{ treatment.id }}">
-                        <label class="form-check-label" for="treatment{{ treatment.id }}">
-                            {{ treatment.name }}
-                        </label>
+                        <div class="col-md-6">
+                            <label class="form-label">Specialization</label>
+                            <input type="text" class="form-control" name="specialization"
+                                value="{{ doctor.specialization }}" required>
+                        </div>
+
+                        <!-- ✅ FIXED DEPARTMENT DROPDOWN -->
+                        <div class="col-md-6">
+                            <label class="form-label">Department</label>
+                            <select class="form-select" name="department">
+                                <option value="">-- Select Department --</option>
+
+                                {% for dept in departments %}
+                                {% if doctor.department and doctor.department.id == dept.id %}
+                                <option value="{{ dept.id }}" selected>
+                                    {{ dept.name }}
+                                </option>
+                                {% else %}
+                                <option value="{{ dept.id }}">
+                                    {{ dept.name }}
+                                </option>
+                                {% endif %}
+                                {% endfor %}
+
+                            </select>
+                        </div>
                     </div>
-                </div>
-                {% endfor %}
+
+                    <!-- PERSONAL DETAILS -->
+                    {% if doctor.user.doctorprofile %}
+                    <div class="section-title">Personal Details</div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label>Contact Number</label>
+                            <input type="text" class="form-control" name="contact_number"
+                                value="{{ doctor.user.doctorprofile.contact_number }}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Gender</label>
+                            <select class="form-select" name="gender" id="genderSelect">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Date of Birth</label>
+                            <input type="date" class="form-control" name="date_of_birth"
+                                value="{{ doctor.user.doctorprofile.date_of_birth|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- TREATMENTS -->
+                    <div class="section-title">Treatments & Procedures</div>
+
+                    <div class="row g-3">
+                        {% for treatment in treatments %}
+                        <div class="col-md-4">
+                            <label>
+                                <input type="checkbox" name="treatments" value="{{ treatment.id }}">
+                                {{ treatment.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-4">
+                        Save Changes
+                    </button>
+                </form>
             </div>
 
-            <button type="submit" class="btn btn-primary" id="submitBtn">Save Changes</button>
-        </form>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
             const gender = "{{ doctor.user.doctorprofile.gender|default:''|escapejs }}";
             const genderSelect = document.getElementById('genderSelect');
             if (genderSelect && gender) {
                 genderSelect.value = gender;
             }
 
-            const treatments = [{{ treatment_ids }}];
+            const treatments = {{ treatment_ids| safe
+        }};
         treatments.forEach(id => {
             const checkbox = document.querySelector(`input[type="checkbox"][value="${id}"]`);
             if (checkbox) checkbox.checked = true;
         });
 
-        document.getElementById('editDoctorForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const messageBox = document.getElementById('messageBox');
-            messageBox.innerHTML = '';
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
-
-            try {
-                const formData = new FormData(this);
-                const response = await fetch('', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-                } else {
-                    messageBox.innerHTML = `<div class="alert alert-danger">${data.error || 'Something went wrong.'}</div>`;
-                }
-            } catch (err) {
-                messageBox.innerHTML = `<div class="alert alert-danger">Network error. Please try again.</div>`;
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Save Changes';
-            }
-        });
-    });
+});
     </script>
 
 </body>

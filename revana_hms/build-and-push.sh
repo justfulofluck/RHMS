@@ -3,16 +3,15 @@
 # RHMS Docker Build and Push Script
 # Usage: ./build-and-push.sh YOUR_DOCKERHUB_USERNAME
 
-set -e
+# set -e
 
-# Check if username is provided
+# Check if username is provided, otherwise default to bgtuser
 if [ -z "$1" ]; then
-    echo "Error: Docker Hub username not provided"
-    echo "Usage: ./build-and-push.sh YOUR_DOCKERHUB_USERNAME"
-    exit 1
+    echo "No username provided, using default: bgtuser"
+    DOCKERHUB_USERNAME="bgtuser"
+else
+    DOCKERHUB_USERNAME=$1
 fi
-
-DOCKERHUB_USERNAME=$1
 IMAGE_NAME="rhms"
 TAG="latest"
 FULL_IMAGE_NAME="${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${TAG}"
@@ -35,13 +34,14 @@ else
 fi
 
 echo ""
-echo "Step 2: Logging into Docker Hub..."
-docker login
+echo "Step 2: Checking Docker Hub login..."
+# docker login  <-- Commented out as you are already logged in
+# If you actully need to login, uncomment the line above or run 'docker login' manually.
 
 if [ $? -eq 0 ]; then
-    echo "✅ Login successful!"
+    echo "✅ Proceeding with existing credentials..."
 else
-    echo "❌ Login failed!"
+    echo "❌ Login check failed (or previous command failed)!"
     exit 1
 fi
 

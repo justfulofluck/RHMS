@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Add Doctor - {{ hospital.name }}</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --brown-dark: #6b3f21;
+            --brown: #8c6239;
+            --cream: #f6eee8;
+            --card-bg: #ffffff;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: "Poppins", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            align-content: center;
+            background: linear-gradient(90deg, #e7dacf 0%, #c9a07e 100%, #a2683566 100%);
+
+        }
+
+        .btn-submit {
+            background: #c7896d;
+            border-color: #c7896d;
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px 18px;
+        }
+
+        .btn-submit:hover {
+            background: #b26a49;
+            border-color: #b26a49;
+            color: #fff;
+        }
+
+
+        /* center container vertically */
+        .page-wrap {
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            width: 700px;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--brown);
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        .card-register {
+            width: auto;
+            max-width: calc(100% - 40px);
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 28px 30px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-register h2 {
+            color: var(--brown-dark);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .card-sub {
+            text-align: center;
+            color: rgba(74, 47, 23, 0.6);
+            margin-bottom: 18px;
+            font-size: 0.95rem;
+        }
+
+        /* input group style (pill look) */
+        .input-group .input-group-text {
+            background: transparent;
+            border: 1px solid #e6e0dc;
+            border-right: 0;
+            border-radius: 10px 0 0 10px;
+            color: var(--brown-dark);
+            width: 48px;
+            justify-content: center;
+        }
+
+        .form-control,
+        .custom-select,
+        .form-control:focus {
+            border-radius: 0 10px 10px 0;
+            border: 1px solid #e6e0dc;
+            box-shadow: none;
+            height: auto;
+            font-size: 15px;
+            justify-content: center;
+            align-content: center;
+        }
+
+        .input-pair {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* file input style (Bootstrap default, but padded) */
+        .file-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #4a2f17;
+            font-weight: 600;
+        }
+
+        .btn-submit {
+            background: #c7896d;
+            border-color: #c7896d;
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px 18px;
+        }
+
+        .btn-submit:hover {
+            background: #b26a49;
+            border-color: #b26a49;
+        }
+
+        /* small adjustments */
+        .form-control::placeholder {
+            color: #9a8b83;
+        }
+
+        .form-check-input:checked {
+            background-color: #683f1e;
+            border-color: #683f1e;
+        }
+
+        .small-muted {
+            color: rgba(74, 47, 23, 0.6);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 576px) {
+            .card-register {
+                padding: 18px;
+                width: 92%;
+            }
+
+            .input-group .input-group-text {
+                width: 44px;
+            }
+        }
+
+        .form-label {
+
+            color: #4a2f17;
+
+        }
+
+        .container h2 {
+            color: var(--brown-dark);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container ">
+        <a href="{% url 'hospital_dashboard' %}" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+        <h2>Add New Doctor</h2>
+        <p class="text-center text-muted">Adding doctor to <strong>{{ hospital.name }}</strong></p>
+
+        <form method="post" enctype="multipart/form-data" action="{% url 'add_doctor_submit' %}">
+            {% csrf_token %}
+
+            <!-- Hidden Hospital Field -->
+            <input type="hidden" name="hospital" value="{{ hospital.id }}">
+
+            <div class="row g-3">
+
+                <!-- Full Name -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Email Address"
+                            required>
+                    </div>
+                </div>
+
+                <!-- Contact Number -->
+                <div class="col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                        <input type="text" class="form-control" id="contact_number" name="contact_number"
+                            placeholder="Contact Number" required maxlength="10" pattern="\d{10}">
+                    </div>
+                </div>
+
+                <!-- Hospital (Visual Only - Disabled Input) -->
+                <div class="col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-hospital"></i></span>
+                        <input type="text" class="form-control" value="{{ hospital.name }}" disabled
+                            style="background-color: #f6eee8;">
+                    </div>
+                </div>
+
+                <!-- Specialization -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-stethoscope"></i></span>
+                        <input type="text" class="form-control" id="specialization" name="specialization"
+                            placeholder="Specialization" required>
+                    </div>
+                </div>
+
+                <!-- Qualification -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-graduation-cap"></i></span>
+                        <input type="text" class="form-control" id="qualification" name="qualification"
+                            placeholder="Qualification" required>
+                    </div>
+                </div>
+
+                <!-- Years of Experience -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-briefcase"></i></span>
+                        <input type="number" class="form-control" id="year_of_experience" name="year_of_experience"
+                            placeholder="Years of Experience" required>
+                    </div>
+                </div>
+
+                <!-- Aadhaar Number -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                        <input type="text" class="form-control" id="aadhaar" name="aadhaar" placeholder="Aadhaar Number"
+                            required>
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-venus-mars"></i></span>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="" disabled selected>Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Date of Birth -->
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth"
+                            placeholder="Date of Birth" required>
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="col-12">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+                        <textarea class="form-control" id="address" name="address" rows="3" placeholder="Address"
+                            required></textarea>
+                    </div>
+                </div>
+
+                <!-- Medical Certificate -->
+                <div class="col-md-6">
+                    <label for="medical_certificate" class="form-label">Medical Certificate</label>
+                    <input type="file" class="form-control" id="medical_certificate" name="medical_certificate"
+                        required>
+                </div>
+
+                <!-- Registration Certificate -->
+                <div class="col-md-6">
+                    <label for="registration_certificate" class="form-label">Registration Certificate</label>
+                    <input type="file" class="form-control" id="registration_certificate"
+                        name="registration_certificate" required>
+                </div>
+
+                <!-- Degree Certificates -->
+                <div class="col-md-6">
+                    <label for="degree_certificates" class="form-label">Degree Certificates</label>
+                    <input type="file" class="form-control" id="degree_certificates" name="degree_certificates"
+                        required>
+                </div>
+
+                <!-- Passport Photo -->
+                <div class="col-md-6">
+                    <label for="passport_photo" class="form-label">Passport Photo</label>
+                    <input type="file" class="form-control" id="passport_photo" name="passport_photo" required>
+                </div>
+
+                <!-- Experience Certificate -->
+                <div class="col-12">
+                    <label for="experience_certificate" class="form-label">Experience Certificate (Optional)</label>
+                    <input type="file" class="form-control" id="experience_certificate" name="experience_certificate"
+                        placeholder="Experience Certificate (Optional)">
+                </div>
+
+            </div>
+
+            <br>
+
+            <button type="submit" class="btn btn-submit w-100">Add Doctor</button>
+
+        </form>
+    </div>
+</body>
+
+</html>

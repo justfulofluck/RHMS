@@ -8,6 +8,11 @@ HOSPITAL_TYPES = [
 ]
 
 
+
+def hospital_logo_path(instance, filename):
+    return f'hospitals/{instance.id}/logo.{filename.split(".")[-1]}'
+
+
 class Hospital(models.Model):
     STATUS_PENDING = 'pending'
     STATUS_APPROVED = 'approved'
@@ -21,7 +26,7 @@ class Hospital(models.Model):
     name = models.CharField(max_length=200)
     registration_number = models.CharField(max_length=100, unique=True)
     email = models.EmailField(unique=True)
-    logo = models.ImageField(upload_to='hospital_logos/', blank=True, null=True)
+    logo = models.ImageField(upload_to=hospital_logo_path, blank=True, null=True)
     address = models.TextField()
     phone_number = models.CharField(max_length=20)
     city = models.CharField(max_length=100)

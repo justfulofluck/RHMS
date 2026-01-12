@@ -31,81 +31,93 @@
         }
 
         .container {
-            width: auto;
-            max-width: 1100px;
-            background: rgba(255, 255, 255, 0.72);
-            border-radius: 10px;
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-            padding: 40px 50px;
+            padding: 40px;
             text-align: center;
         }
 
         .title {
             text-align: center;
-            font-size: 36px;
-            font-weight: 600;
-            color: #f3ede7;
-            -webkit-text-stroke: 1.2px #875e39;
-
+            font-size: 38px;
+            font-weight: 700;
+            color: #8b5e3c;
+            /* Removed stroke for better readability */
+            margin-bottom: 5px;
         }
 
         .subtitle {
             text-align: center;
-            margin-top: 8px;
+            margin-top: 5px;
             margin-bottom: 40px;
-            color: #555;
-            font-size: 17px;
+            color: #666;
+            font-size: 18px;
+            font-weight: 400;
         }
 
         .cards {
             display: flex;
-            gap: 40px;
+            gap: 30px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
         .card {
-            width: 320px;
-            padding: 40px;
+            flex: 1;
+            min-width: 280px;
+            max-width: 350px;
+            padding: 30px;
             background: #fff;
-            border-radius: 10px;
+            border-radius: 12px;
             position: relative;
-            border: 2px solid #906a47;
-            z-index: 1;
+            border: 1px solid #eaddd3;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Animated border layer */
-
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 94, 60, 0.15);
+            border-color: #8b5e3c;
+        }
 
         .card img {
-            width: 70px;
+            width: 80px;
             margin-bottom: 20px;
         }
 
         .card h3 {
             color: #8b5e3c;
-            font-size: 22px;
-            margin-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 15px;
         }
 
         .card p {
-            color: #555;
-            font-size: 14px;
-            margin-bottom: 25px;
-            line-height: 1.5;
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            flex-grow: 1;
         }
 
         .btn {
-            display: block;
-            width: 80%;
-            margin: 8px auto;
-            padding: 10px;
-            border-radius: 6px;
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
             border: none;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 500;
             cursor: pointer;
             transition: 0.2s;
+            text-decoration: none;
+            margin-bottom: 10px;
         }
 
         .login-btn {
@@ -114,7 +126,8 @@
         }
 
         .login-btn:hover {
-            background: #8b5e3c;
+            background: #6d4a2e;
+            color: white;
         }
 
         .register-btn {
@@ -128,9 +141,21 @@
             color: #fff;
         }
 
+        @media (max-width: 900px) {
+            .cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .card {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+
         @media (max-width: 600px) {
             .container {
-                padding: 25px;
+                padding: 20px;
             }
 
             .title {

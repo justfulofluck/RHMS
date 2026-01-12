@@ -4,6 +4,10 @@ from hospitals.models import Hospital
 
 User = get_user_model()
 
+
+def patient_photo_path(instance, filename):
+    return f'patients/{instance.id}/profile.{filename.split(".")[-1]}'
+
 class Patient(models.Model):
     GENDER_CHOICES = [
         ("Male", "Male"),
@@ -18,7 +22,7 @@ class Patient(models.Model):
     phone = models.CharField(max_length=15)
     address = models.TextField()
     medical_history = models.TextField(blank=True, null=True)
-    photo = models.ImageField(upload_to="patients/photos/", blank=True, null=True)
+    photo = models.ImageField(upload_to=patient_photo_path, blank=True, null=True)
 
     def __str__(self):
         return self.user.email

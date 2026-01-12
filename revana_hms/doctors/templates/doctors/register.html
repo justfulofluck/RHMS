@@ -48,13 +48,14 @@
 
 
     /* center container vertically */
+   
     .page-wrap {
-      min-height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-    }
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
 
     .container {
       background: #fff;
@@ -64,8 +65,9 @@
     }
 
     .card-register {
-      width: auto;
+     
       max-width: calc(100% - 40px);
+      width: 1320px;
       background: var(--card-bg);
       border-radius: 12px;
       padding: 28px 30px;
@@ -175,22 +177,39 @@
       margin-bottom: 20px;
 
     }
+
+    /* Top Loading Bar */
+    #top-loading-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: #8c6239;
+      /* App brown color */
+      z-index: 99999;
+      transition: width 0.4s ease, opacity 0.4s ease;
+      width: 0%;
+      opacity: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 
 <body>
-
-  <div class="container ">
+  
+  <div id="top-loading-bar"></div>
+ <div class="page-wrap">
+  
+    <div class="card-register">
     <h2>Doctor Registration</h2>
-    <form method="post" enctype="multipart/form-data" action="{% url 'register_doctor' %}">
+    <form id="doctorForm" method="post" enctype="multipart/form-data" action="{% url 'register_doctor' %}">
       {% csrf_token %}
-
 
 
       <div class="row g-3">
 
         <!-- Full Name -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
             <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
@@ -198,7 +217,7 @@
         </div>
 
         <!-- Email -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
             <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
@@ -206,16 +225,46 @@
         </div>
 
         <!-- Contact Number -->
-        <div class="col-md-12">
+        <div class="col-md-4">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
-            <input type="text" class="form-control" id="contact_number" name="contact_number"
-              placeholder="Contact Number" required maxlength="10" pattern="\d{10}">
+            <input
+        type="text"
+        class="form-control"
+        name="phone_number"
+        placeholder="+91XXXXXXXXXX"
+        maxlength="13"
+        required
+        oninput="allowPhoneNumber(this)">
           </div>
         </div>
+          <script>
+                   function allowPhoneNumber(input) {
+                          let value = input.value;
+
+                          // Allow + only at the start
+                          if (value.startsWith('+')) {
+                            value = '+' + value.slice(1).replace(/[^0-9]/g, '');
+                          } else {
+                            value = value.replace(/[^0-9]/g, '');
+                          }
+
+                          // Limit to +91 + 10 digits OR 12 digits without +
+                          if (value.startsWith('+')) {
+                            value = value.slice(0, 13); // + + 12 digits
+                          } else {
+                            value = value.slice(0, 12);
+                          }
+
+                          input.value = value;
+                        }
+              </script>
+
+
+
 
         <!-- Select Hospital -->
-        <div class="col-md-12">
+        <div class="col-md-4">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-hospital"></i></span>
             <select class="form-select" id="hospital" name="hospital" required>
@@ -228,7 +277,7 @@
         </div>
 
         <!-- Specialization -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-stethoscope"></i></span>
             <input type="text" class="form-control" id="specialization" name="specialization"
@@ -237,7 +286,7 @@
         </div>
 
         <!-- Qualification -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-graduation-cap"></i></span>
             <input type="text" class="form-control" id="qualification" name="qualification" placeholder="Qualification"
@@ -246,16 +295,49 @@
         </div>
 
         <!-- Years of Experience -->
-        <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-briefcase"></i></span>
-            <input type="number" class="form-control" id="year_of_experience" name="year_of_experience"
-              placeholder="Years of Experience" required>
-          </div>
+        <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="fa-solid fa-briefcase"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control"
+                id="year_of_experience"
+                name="year_of_experience"
+                placeholder="Years of Experience"
+                maxlength="2"
+                required
+                oninput="allowExperience(this)">
         </div>
+      </div>
+
+
+      <script>
+          function allowExperience(input) {
+            // Remove non-numeric characters
+            let value = input.value.replace(/[^0-9]/g, '');
+
+            // Convert to number
+            let num = parseInt(value, 10);
+
+            // If empty, allow clearing
+            if (value === '') {
+              input.value = '';
+              return;
+            }
+
+            // Enforce range 1–50
+            if (num < 1) num = 1;
+            if (num > 50) num = 50;
+
+            input.value = num;
+          }
+      </script>
+
 
         <!-- Aadhaar Number -->
-        <div class="col-md-6">
+        <div class="col-md-3">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
             <input type="text" class="form-control" id="aadhaar" name="aadhaar" placeholder="Aadhaar Number" required>
@@ -263,7 +345,7 @@
         </div>
 
         <!-- Gender -->
-        <div class="col-md-6">
+        <div class="col-md-3">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-venus-mars"></i></span>
             <select class="form-select" id="gender" name="gender" required>
@@ -276,7 +358,7 @@
         </div>
 
         <!-- Date of Birth -->
-        <div class="col-md-6">
+        <div class="col-md-3">
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
             <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" placeholder="Date of Birth"
@@ -289,38 +371,38 @@
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
 
-            <textarea class="form-control" id="address" name="address" rows="3" placeholder="Address"
+            <textarea class="form-control" id="address" name="address" rows="1" placeholder="Address"
               required></textarea>
           </div>
         </div>
 
         <!-- Medical Certificate -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <label for="medical_certificate" class="form-label">Medical Certificate</label>
           <input type="file" class="form-control" id="medical_certificate" name="medical_certificate" required>
         </div>
 
         <!-- Registration Certificate -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <label for="registration_certificate" class="form-label">Registration Certificate</label>
           <input type="file" class="form-control" id="registration_certificate" name="registration_certificate"
             required>
         </div>
 
         <!-- Degree Certificates -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <label for="degree_certificates" class="form-label">Degree Certificates</label>
           <input type="file" class="form-control" id="degree_certificates" name="degree_certificates" required>
         </div>
 
         <!-- Passport Photo -->
-        <div class="col-md-6">
+        <div class="col-md-4">
           <label for="passport_photo" class="form-label">Passport Photo</label>
           <input type="file" class="form-control" id="passport_photo" name="passport_photo" required>
         </div>
 
         <!-- Experience Certificate -->
-        <div class="col-12">
+        <div class="col-4">
           <label for="experience_certificate" class="form-label">Experience Certificate (Optional)</label>
           <input type="file" class="form-control" id="experience_certificate" name="experience_certificate"
             placeholder="Experience Certificate (Optional)">
@@ -341,61 +423,38 @@
       </div>
     </form>
   </div>
-  <!--
-<script>
-function validateAadhaar(input) {
-    let value = input.value.replace(/\D/g, ''); // only digits
-    input.value = value;
+  </div>
 
-    if (value.length === 12) {
-        if (!verhoeffCheck(value)) {
-            input.setCustomValidity("Invalid Aadhaar Number");
-        } else {
-            input.setCustomValidity("");
-        }
-    } else {
-        input.setCustomValidity("Aadhaar must be 12 digits");
+  <script>
+    // --- Top Loading Bar Logic ---
+    const loaderBar = document.getElementById('top-loading-bar');
+
+    function startLoader() {
+      loaderBar.style.opacity = '1';
+      loaderBar.style.width = '30%';
+      setTimeout(() => {
+        if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
+      }, 500);
     }
-}
 
-Verhoeff Algorithm
-const d = [
-    [0,1,2,3,4,5,6,7,8,9],
-    [1,2,3,4,0,6,7,8,9,5],
-    [2,3,4,0,1,7,8,9,5,6],
-    [3,4,0,1,2,8,9,5,6,7],
-    [4,0,1,2,3,9,5,6,7,8],
-    [5,9,8,7,6,0,4,3,2,1],
-    [6,5,9,8,7,1,0,4,3,2],
-    [7,6,5,9,8,2,1,0,4,3],
-    [8,7,6,5,9,3,2,1,0,4],
-    [9,8,7,6,5,4,3,2,1,0]
-];
-
-const p = [
-    [0,1,2,3,4,5,6,7,8,9],
-    [1,5,7,6,2,8,3,0,9,4],
-    [5,8,0,3,7,9,6,1,4,2],
-    [8,9,1,6,0,4,3,5,2,7],
-    [9,4,5,3,1,2,6,8,7,0],
-    [4,2,8,6,5,7,3,9,0,1],
-    [2,7,9,3,8,0,6,4,1,5],
-    [7,0,4,6,9,1,3,2,5,8]
-];
-
-const inv = [0,4,3,2,1,5,6,7,8,9];
-
-function verhoeffCheck(num) {
-    let c = 0;
-    let inverted = num.split("").reverse().join("");
-
-    for (let i = 0; i < inverted.length; i++) {
-        c = d[c][p[(i % 8)][parseInt(inverted[i])]];
+    function stopLoader() {
+      loaderBar.style.width = '100%';
+      setTimeout(() => {
+        loaderBar.style.opacity = '0';
+        setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
+      }, 500);
     }
-    return c === 0;
-}
-</script>
--->
+
+    // Show on Page Load
+    startLoader();
+    window.addEventListener('load', stopLoader);
+
+    // Show on Submit
+    document.querySelector('form').addEventListener('submit', function () {
+      startLoader();
+    });
+    // -----------------------------
+  </script>
 </body>
 
 </html>

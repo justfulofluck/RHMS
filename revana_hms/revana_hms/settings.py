@@ -12,7 +12,7 @@ ALLOWED_HOSTS = ['*']
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.User'
-#LOGIN_URL = '/login/'
+LOGIN_URL = 'login'
 
 
 # REST Framework
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'patients',
     'core',
     'frontend',
+    'notifications',
 ]
 
 # Middleware
@@ -138,4 +139,13 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://rhms.blueglobaltechnology.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
