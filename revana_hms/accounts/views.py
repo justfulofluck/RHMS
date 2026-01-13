@@ -39,21 +39,33 @@ class PasswordResetRequestView(generics.GenericAPIView):
 
         try:
             user = User.objects.get(email=email)
+            print(f"DEBUG: User found for email {email}")
         except User.DoesNotExist:
+            print(f"DEBUG: No user found for email {email}")
             return Response({"message": "If this email exists, a reset link has been sent."}, status=status.HTTP_200_OK)
 
         token = PasswordResetTokenGenerator().make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"http://192.168.1.208:8000/reset-password-confirm/?uid={uid}&token={token}"
+        
+        # Dynamic host
+        current_site = request.get_host()
+        reset_link = f"http://{current_site}/reset-password-confirm/?uid={uid}&token={token}"
+        
+        print(f"DEBUG: Attempting to send email to {email}...")
+        try:
+            send_mail(
+                subject="Password Reset Request",
+                message=f"Click the link to reset your password: {reset_link}",
+                from_email=None,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            print("DEBUG: Mail sent successfully via SMTP.")
+        except Exception as e:
+            print(f"DEBUG: Mail sending FAILED. Error: {e}")
+            # We still return 200 to avoid leaking info, but logs will show error
+            return Response({"message": "If this email exists, a reset link has been sent."}, status=status.HTTP_200_OK)
 
-        send_mail(
-            subject="Password Reset Request",
-            message=f"Click the link to reset your password: {reset_link}",
-            from_email=None,
-            recipient_list=[email],
-        )
-
-        print("mail sent to user")
         return Response({"message": "If this email exists, a reset link has been sent."}, status=status.HTTP_200_OK)
 
 class PasswordResetConfirmView(generics.GenericAPIView):

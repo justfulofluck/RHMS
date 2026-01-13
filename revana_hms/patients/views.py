@@ -9,7 +9,7 @@ from .models import Patient
 User = get_user_model()
 
 # ----------------------------------------------------
-# Patient Dashboard
+# Patient Dashboard ----------------------------------
 # ----------------------------------------------------
 @login_required
 def patient_dashboard(request):
@@ -25,19 +25,20 @@ def patient_dashboard(request):
 
 
 # ----------------------------------------------------
-# Render Registration Page
+# Render Registration Page ---------------------------
 # ----------------------------------------------------
 def patient_register_page(request):
     return render(request, "patients/register.html")
 
 
 # ----------------------------------------------------
-# Handle Patient Registration (API)
+# Handle Patient Registration (API) ------------------
 # ----------------------------------------------------
 @csrf_exempt
 def register_patient(request):
     if request.method == "POST":
         try:
+            print(f"DEBUG: Register API Body: {request.body}")
             data = json.loads(request.body.decode("utf-8"))
 
             email = data.get("email")
@@ -49,9 +50,11 @@ def register_patient(request):
             address = data.get("address")
 
             if not email:
+                print("DEBUG: Email missing in request")
                 return JsonResponse({"message": "Email is required."}, status=400)
 
             if User.objects.filter(email=email).exists():
+                print(f"DEBUG: Email {email} already registered")
                 return JsonResponse({"message": "Email already registered!"}, status=400)
 
             # Create User
@@ -81,14 +84,14 @@ def register_patient(request):
 
 
 # ----------------------------------------------------
-# Render Login Page
+# Render Login Page ----------------------------------
 # ----------------------------------------------------
 def login_page(request):
     return render(request, "patients/login.html")
 
 
 # ----------------------------------------------------
-# Handle Login API
+# Handle Login API -----------------------------------
 # ----------------------------------------------------
 @csrf_exempt
 def login_user(request):
@@ -113,7 +116,7 @@ def login_user(request):
 
 
 # ----------------------------------------------------
-# Edit Profile
+# Edit Profile ---------------------------------------
 # ----------------------------------------------------
 @login_required
 def patient_edit_profile(request):
@@ -137,7 +140,7 @@ def patient_edit_profile(request):
     return render(request, 'patients/patient_edit_profile.html')
 
 # ----------------------------------------------------
-# API Views
+# API Views ------------------------------------------
 # ----------------------------------------------------
 from rest_framework import generics, permissions
 from .serializers import PatientProfileSerializer
