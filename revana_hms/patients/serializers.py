@@ -10,20 +10,19 @@ class PatientSerializer(serializers.ModelSerializer):
 
 class PatientProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)
-    name = serializers.CharField(source='user.first_name')
+    # name is now a field on Patient model, so no source needed
+    # Aliases for Mobile App Compatibility
+    full_name = serializers.CharField(source='name', required=False)
+    phone_number = serializers.CharField(source='phone', required=False)
 
     class Meta:
         model = Patient
-        fields = ['id', 'name', 'email', 'age', 'gender', 'phone', 'address', 'photo', 'medical_history']
+        fields = ['id', 'name', 'full_name', 'email', 'age', 'gender', 'phone', 'phone_number', 'address', 'photo', 'medical_history']
 
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', {})
-        name = user_data.get('first_name')
-        
-        if name:
-            instance.user.first_name = name
-            instance.user.save()
-
+        # We don't need to pop 'user' since we are not updating User model for name anymore
+        # but just in case we need to handle other user fields later, we can keep the pattern
+        # For now, standard update is sufficient for Patient fields (including name)
         return super().update(instance, validated_data)
 
 class NotificationSerializer(serializers.ModelSerializer):

@@ -43,10 +43,11 @@ def register_patient(request):
 
             email = data.get("email")
             password = data.get("password")
-            name = data.get("name")
+            # Support Aliases for Mobile App
+            name = data.get("name") or data.get("full_name")
             age = data.get("age")
             gender = data.get("gender")
-            phone = data.get("phone")
+            phone = data.get("phone") or data.get("phone_number")
             address = data.get("address")
 
             if not email:
@@ -59,13 +60,14 @@ def register_patient(request):
 
             # Create User
             user = User.objects.create_user(email=email, password=password)
-            user.first_name = name
+            # user.first_name = name  <-- Removed as User model doesn't support it
             user.role = 'patient'  # ✅ Assign role
             user.save()
 
             # Create Patient record
             Patient.objects.create(
                 user=user,
+                name=name or "",  # ✅ Save name to Patient model
                 age=age or 0,
                 gender=gender or "Other",
                 phone=phone or "",
@@ -124,16 +126,22 @@ def patient_edit_profile(request):
 
     if request.method == "POST":
         name = request.POST.get("name")
+        phone = request.POST.get("phone")
         photo = request.FILES.get("profile_picture")
 
-        # update user name
-        request.user.first_name = name
-        request.user.save()
-
+        # update patient name
+        if name:
+            patient.name = name  # ✅ Save to Patient model
+            
+        # update patient phone
+        if phone:
+            patient.phone = phone
+        
         # update patient profile photo
         if photo:
             patient.photo = photo
-            patient.save()
+        
+        patient.save()
 
         return redirect('patient_dashboard')  # your dashboard url name
 

@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+User = get_user_model()
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -9,7 +10,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import send_mail
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models import Count
+from django.db.models import Count, Q
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -179,8 +180,8 @@ def superadmin_dashboard(request):
         .annotate(count=Count('id'))
         .order_by('day')
     )
-    chat_labels = [entry['day'].strftime('%b %d') for entry in appointment_by_day]
-    chat_data = [entry['count'] for entry in appointment_by_day]
+    chart_labels = [entry['day'].strftime('%b %d') for entry in appointment_by_day]
+    chart_data = [entry['count'] for entry in appointment_by_day]
 
     # Doctor registrations (last 12 months)
     twelve_months_ago = timezone.now() - timedelta(days=365)
@@ -206,8 +207,8 @@ def superadmin_dashboard(request):
     role_counts = [entry['count'] for entry in role_distribution]
 
     context.update({
-        'chat_labels': chat_labels,
-        'chat_data': chat_data,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
         'doctor_chart_labels': doctor_chart_labels,
         'doctor_chart_data': doctor_chart_data,
         'role_labels': role_labels,
@@ -308,3 +309,65 @@ def export_appointments_csv(request):
         ])
 
     return response
+
+@login_required
+@user_passes_test(is_superadmin)
+def superadmin_search(request):
+    try:
+        query = request.GET.get('q', '').strip()
+        print(f"DEBUG: Search Query: '{query}'") # DEBUG LOG
+        
+        if not query:
+            return JsonResponse({'results': []})
+
+        results = []
+
+        # 1. Search Users (Email)
+        # Ensure User is defined (using global variable from top of file)
+        # Check if role field exists on User model to be safe
+        users = User.objects.filter(email__icontains=query).values('id', 'email', 'role')[:5]
+        print(f"DEBUG: Found {len(users)} users") # DEBUG LOG
+        
+        for u in users:
+            results.append({
+                'category': 'User',
+                'label': f"{u['email']} ({u.get('role', 'N/A')})",
+                'id': u['id'],
+                'type': 'user'
+            })
+
+        # 2. Search Hospitals
+        hospitals = Hospital.objects.filter(
+            Q(name__icontains=query) | Q(city__icontains=query)
+        ).values('id', 'name', 'city')[:5]
+        print(f"DEBUG: Found {len(hospitals)} hospitals") # DEBUG LOG
+
+        for h in hospitals:
+            results.append({
+                'category': 'Hospital',
+                'label': f"{h['name']} - {h['city']}",
+                'id': h['id'],
+                'type': 'hospital'
+            })
+
+        # 3. Search Doctors
+        doctors = Doctor.objects.filter(
+            Q(name__icontains=query) | Q(specialization__icontains=query)
+        ).values('id', 'name', 'specialization')[:5]
+        print(f"DEBUG: Found {len(doctors)} doctors") # DEBUG LOG
+
+        for d in doctors:
+            results.append({
+                'category': 'Doctor',
+                'label': f"Dr. {d['name']} ({d['specialization']})",
+                'id': d['id'],
+                'type': 'doctor'
+            })
+
+        return JsonResponse({'results': results})
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc() # Print stack trace to console
+        print(f"ERROR in superadmin_search: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)

@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +21,7 @@
             height: 100vh;
             padding: 25px;
             border-radius: 0 20px 20px 0;
-            box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar h3 {
@@ -49,75 +50,76 @@
             border: 2px solid #8c6239;
             object-fit: cover;
         }
-        
+
         .search-card {
             background: #fff;
             padding: 25px;
             margin-top: 20px;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>
+
 <body>
 
-<div class="container-fluid">
-    <div class="row">
+    <div class="container-fluid">
+        <div class="row">
 
-        <!-- LEFT SIDEBAR -->
-        <div class="col-12 col-md-3 col-lg-2 sidebar">
-            <h3>Patient Panel</h3>
+            <!-- LEFT SIDEBAR -->
+            <div class="col-12 col-md-3 col-lg-2 sidebar">
+                <h3>Patient Panel</h3>
 
-            <a class="nav-link active" href="#">Dashboard</a>
-            <a class="nav-link" href="#">Appointment Table</a>
-            <a class="nav-link" href="#">Reports</a>
-        </div>
+                <a class="nav-link active" href="#">Dashboard</a>
+                <a class="nav-link" href="#">Appointment Table</a>
+                <a class="nav-link" href="#">Reports</a>
+            </div>
 
-        <!-- RIGHT CONTENT -->
-        <div class="col-12 col-md-9 col-lg-10 p-4">
+            <!-- RIGHT CONTENT -->
+            <div class="col-12 col-md-9 col-lg-10 p-4">
 
-            <div class="d-flex justify-content-between align-items-center">
-                <h2 style="color:#6b3f21; font-weight:600;">Universal Search</h2>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 style="color:#6b3f21; font-weight:600;">Universal Search</h2>
 
-                <div class="profile-box d-flex align-items-center gap-2">
+                    <div class="profile-box d-flex align-items-center gap-2">
 
-                    <img src="{{ patient.photo.url }}"
-                         onerror="this.src='/static/default_profile.png';">
+                        <img src="{{ patient.photo.url }}" onerror="this.src='/static/default_profile.png';">
 
-                    <div class="d-flex flex-column">
-                        <strong style="color:#4a2f17;">
-                            {{ user.first_name }}
-                        </strong>
+                        <div class="d-flex flex-column">
+                            <strong style="color:#4a2f17;">
+                                {{ patient.name }}
+                            </strong>
 
-                        <a href="{% url 'patient_edit_profile' %}" 
-                            style="font-size:13px; color:#8c6239; text-decoration:none;">
+                            <a href="{% url 'patient_edit_profile' %}"
+                                style="font-size:13px; color:#8c6239; text-decoration:none;">
                                 Edit Profile
-                        </a>
+                            </a>
+
+                        </div>
 
                     </div>
-
                 </div>
-            </div>
 
-            <!-- SEARCH -->
-            <div class="search-card">
-                <div class="row align-items-center g-3">
+                <!-- SEARCH -->
+                <div class="search-card">
+                    <div class="row align-items-center g-3">
 
-                    <div class="col-8 col-md-10">
-                        <input type="text" class="form-control" 
-                               placeholder="Search Hospital, Doctor, Department, Token…">
+                        <div class="col-8 col-md-10">
+                            <input type="text" class="form-control"
+                                placeholder="Search Hospital, Doctor, Department, Token…">
+                        </div>
+
+                        <div class="col-4 col-md-2">
+                            <button class="btn btn-dark w-100">Search</button>
+                        </div>
+
                     </div>
-
-                    <div class="col-4 col-md-2">
-                        <button class="btn btn-dark w-100">Search</button>
-                    </div>
-
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
-</div>
 
 </body>
+
 </html>

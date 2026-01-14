@@ -6,146 +6,262 @@
 {% block content %}
 <style>
     /* PAGE BACKGROUND */
-body {
-    background: linear-gradient(to bottom, #ecdccf, #ffffff);
-    font-family: "Poppins", sans-serif;
-    margin: 0;
-}
+    body {
+        background: linear-gradient(to bottom, #ecdccf, #ffffff);
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+    }
 
-/* ---------------- SIDEBAR ---------------- */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 250px;
-    background: linear-gradient(180deg, #8a5b3e 0%, #6e432d 100%);
-    color: #fff;
-    padding: 25px 20px;
-    box-shadow: 3px 0 10px rgba(0,0,0,0.25);
-    overflow-y: auto;
-}
+    /* ---------------- SIDEBAR ---------------- */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 250px;
+        background: linear-gradient(180deg, #8a5b3e 0%, #6e432d 100%);
+        color: #fff;
+        padding: 25px 20px;
+        box-shadow: 3px 0 10px rgba(0, 0, 0, 0.25);
+        overflow-y: auto;
+    }
 
-.sidebar h3 {
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 35px;
-    letter-spacing: 1px;
-}
+    .sidebar h3 {
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 35px;
+        letter-spacing: 1px;
+    }
 
-.sidebar a {
-    color: #f5e7df;
-    text-decoration: none;
-    display: block;
-    padding: 12px 15px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    font-weight: 500;
-    transition: 0.3s ease;
-}
+    .sidebar a {
+        color: #f5e7df;
+        text-decoration: none;
+        display: block;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: 0.3s ease;
+    }
 
-.sidebar a:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateX(5px);
-}
+    .sidebar a:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+    }
 
-.sidebar .active {
-    background: #ffffff;
-    color: #8a5b3e !important;
-    font-weight: 600;
-}
+    .sidebar .active {
+        background: #ffffff;
+        color: #8a5b3e !important;
+        font-weight: 600;
+    }
 
-/* ---------------- MAIN CONTENT ---------------- */
-.main-content {
-    margin-left: 260px;
-    padding: 30px;
-}
+    /* ---------------- MAIN CONTENT ---------------- */
+    .main-content {
+        margin-left: 260px;
+        padding: 30px;
+    }
 
-/* PAGE TITLES */
-h2 {
-    color: #fff;
-    font-weight: 700;
-    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
+    /* PAGE TITLES */
+    h2 {
+        color: #fff;
+        font-weight: 700;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
 
-/* ---------------- DASHBOARD METRIC CARDS ---------------- */
-.card-metric {
-    border-radius: 16px;
-    color: #fff;
-    border: none;
-    padding: 10px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    transition: transform 0.2s ease;
-}
+    /* ---------------- DASHBOARD METRIC CARDS ---------------- */
+    .card-metric {
+        border-radius: 16px;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease;
+    }
 
-.card-metric:hover {
-    transform: translateY(-5px);
-}
+    .card-metric:hover {
+        transform: translateY(-5px);
+    }
 
-.card-metric i {
-    opacity: 0.8;
-}
+    .card-metric i {
+        opacity: 0.8;
+    }
 
-/* ---------------- GENERAL CARDS ---------------- */
-.card {
-    border-radius: 14px !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    border: none !important;
-}
+    /* ---------------- GENERAL CARDS ---------------- */
+    .card {
+        border-radius: 14px !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        border: none !important;
+    }
 
-/* ---------------- TABLES ---------------- */
-.table-hover tbody tr:hover {
-    background: #fff4e6;
-    transition: 0.3s;
-}
+    /* ---------------- TABLES ---------------- */
+    .table-hover tbody tr:hover {
+        background: #fff4e6;
+        transition: 0.3s;
+    }
 
-/* Fix table header background */
-.table thead {
-    background: #8a5b3e;
-    color: #fff;
-    border-radius: 10px;
-}
+    /* Fix table header background */
+    .table thead {
+        background: #8a5b3e;
+        color: #fff;
+        border-radius: 10px;
+    }
 
-/* ---------------- BUTTONS ---------------- */
-.btn-success {
-    background: #6e432d !important;
-    border: none !important;
-}
+    /* ---------------- BUTTONS ---------------- */
+    .btn-success {
+        background: #6e432d !important;
+        border: none !important;
+    }
 
-.btn-success:hover {
-    background: #573523 !important;
-}
+    .btn-success:hover {
+        background: #573523 !important;
+    }
 
-/* Delete button */
-.btn-danger {
-    border-radius: 6px;
-}
+    /* Delete button */
+    .btn-danger {
+        border-radius: 6px;
+    }
 
-/* ---------------- SCROLLBAR STYLING ---------------- */
-.sidebar::-webkit-scrollbar {
-    width: 6px;
-}
-#dashboard h2{
-    color: #6e432d;
-}
+    /* ---------------- SCROLLBAR STYLING ---------------- */
+    .sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
 
-#approvals h2{
-    color: #6e432d;
-}
+    #dashboard h2 {
+        color: #6e432d;
+    }
 
-#users h2{
-    color: #6e432d;
-}
+    #approvals h2 {
+        color: #6e432d;
+    }
 
-#appointments h2{
-    color: #6e432d;
-}
+    #users h2 {
+        color: #6e432d;
+    }
 
-.sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.3);
-    border-radius: 10px;
-}
+    #appointments h2 {
+        color: #6e432d;
+    }
 
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+    }
+
+    /* SEARCH BAR STYLES */
+    .search-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+        max-width: 700px;
+    }
+
+    .search-icon-btn {
+        width: 50px;
+        height: 50px;
+        background-color: #1e6d7e;
+        /* Teal Blue from screenshot */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        box-shadow: 0 4px 10px rgba(30, 109, 126, 0.3);
+        border: none;
+        cursor: default;
+    }
+
+    .search-container {
+        position: relative;
+        flex-grow: 1;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 15px 45px 15px 25px;
+        /* Right padding for X button */
+        border-radius: 30px;
+        border: 1px solid #e0e0e0;
+        font-size: 16px;
+        outline: none;
+        transition: 0.3s;
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-input:focus {
+        border-color: #1e6d7e;
+        box-shadow: 0 4px 12px rgba(30, 109, 126, 0.15);
+    }
+
+    .clear-btn {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        cursor: pointer;
+        font-size: 18px;
+        display: none;
+        /* Hidden by default */
+    }
+
+    .clear-btn:hover {
+        color: #333;
+    }
+
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: #fff;
+        border-radius: 20px;
+        /* More rounded */
+        margin-top: 15px;
+        padding: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        display: none;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .search-item {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        border-radius: 10px;
+        transition: 0.2s;
+    }
+
+    .search-item:hover {
+        background: #f8f9fa;
+    }
+
+    /* "No Results" Pill Style from Screenshot */
+    .no-results {
+        background-color: #fceceb;
+        /* Light reddish pink */
+        color: #c05850;
+        /* Darker red text */
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: 500;
+        margin: 5px;
+    }
+
+    .search-category {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #1e6d7e;
+        margin-bottom: 2px;
+        display: block;
+        font-weight: 700;
+    }
 </style>
 
 <div class="sidebar">
@@ -161,6 +277,20 @@ h2 {
 </div>
 
 <div class="main-content">
+
+    <!-- SEARCH BAR -->
+    <div class="search-wrapper">
+        <button class="search-icon-btn">
+            <i class="fas fa-search"></i>
+        </button>
+        <div class="search-container">
+            <input type="text" id="universalSearch" class="search-input"
+                placeholder="Search for users, hospitals, or doctors..." autocomplete="off">
+            <i id="clearSearchBtn" class="fas fa-times clear-btn"></i>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+    </div>
+
     <div id="dashboard">
         <h2 class="mb-4">Dashboard</h2>
 
@@ -177,7 +307,7 @@ h2 {
                     </div>
                 </div>
             </div>
-            <div class="col-md-3" >
+            <div class="col-md-3">
                 <div class="card card-metric " style="background-color: #cca78a ; color: #573523;">
                     <div class="card-body">
                         <div>
@@ -287,7 +417,8 @@ h2 {
                                 <form action="{% url 'delete_user' admin.id %}" method="post" style="display:inline;"
                                     onsubmit="return confirm('Are you sure you want to delete this user?');">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm " style="background-color: #6e432d; color: #fff;">Delete</button>
+                                    <button type="submit" class="btn btn-sm "
+                                        style="background-color: #6e432d; color: #fff;">Delete</button>
                                 </form>
                             </td>
                         </tr>
@@ -318,7 +449,8 @@ h2 {
                                 <form action="{% url 'delete_user' doctor.id %}" method="post" style="display:inline;"
                                     onsubmit="return confirm('Are you sure you want to delete this user?');">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm" style="background-color: #6e432d; color: #fff;">Delete</button>
+                                    <button type="submit" class="btn btn-sm"
+                                        style="background-color: #6e432d; color: #fff;">Delete</button>
                                 </form>
                             </td>
                         </tr>
@@ -371,7 +503,7 @@ h2 {
     const appointmentsChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: {{ chat_labels| safe }},
+            labels: {{ chart_labels| safe }},
     datasets: [{
         label: 'Appointments',
         data: {{ chart_data| safe }},
@@ -420,20 +552,99 @@ h2 {
         }
     }
     });
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchHospitalAdmins();
+
+    // Universal Search Logic
+    const searchInput = document.getElementById('universalSearch');
+    const searchResults = document.getElementById('searchResults');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    let debounceTimer;
+
+    if (searchInput) {
+        // Toggle Clear Button
+        searchInput.addEventListener('input', function () {
+            clearBtn.style.display = this.value.length > 0 ? 'block' : 'none';
+        });
+
+        clearBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            searchResults.style.display = 'none';
+            this.style.display = 'none';
+            searchInput.focus();
+        });
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetch(`/accounts/superadmin/search/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(`Backend Error: ${data.error}`);
+                            console.error('Backend Error:', data.error);
+                            return;
+                        }
+
+                        const results = data.results;
+                        searchResults.innerHTML = '';
+
+                        if (results.length === 0) {
+                            // Updated to match screenshot pill style
+                            searchResults.innerHTML = '<div class="no-results">No Results Found!</div>';
+                        } else {
+                            results.forEach(item => {
+                                const div = document.createElement('div');
+                                div.className = 'search-item';
+                                div.innerHTML = `
+                                <div>
+                                    <span class="search-category">${item.category}</span>
+                                    <div>${item.label}</div>
+                                </div>
+                            `;
+                                div.addEventListener('click', () => {
+                                    searchInput.value = item.label;
+                                    searchResults.style.display = 'none';
+                                    alert(`Selected ${item.category}: ${item.label}`);
+                                });
+                                searchResults.appendChild(div);
+                            });
+                        }
+                        searchResults.style.display = 'block';
+                    })
+                    .catch(err => {
+                        console.error('Search Network Error:', err);
+                        alert('Network Error: Failed to fetch search results.');
+                    });
+            }, 300);
+        });
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchHospitalAdmins();
         fetchDoctors();
     });
 
-        function fetchHospitalAdmins() {
-            fetch('/api/admin/hospital_admins/')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('hospital-admins-table');
-                    tableBody.innerHTML = '';
-                    data.forEach(user => {
-                        const row = `
+    function fetchHospitalAdmins() {
+        fetch('/api/admin/hospital_admins/')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('hospital-admins-table');
+                tableBody.innerHTML = '';
+                data.forEach(user => {
+                    const row = `
                         <tr>
                             <td>${user.email}</td>
                             <td>
@@ -441,19 +652,19 @@ h2 {
                             </td>
                         </tr>
                     `;
-                        tableBody.innerHTML += row;
-                    });
+                    tableBody.innerHTML += row;
                 });
+            });
     }
 
-        function fetchDoctors() {
-            fetch('/api/admin/doctors/')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('doctors-table');
-                    tableBody.innerHTML = '';
-                    data.forEach(user => {
-                        const row = `
+    function fetchDoctors() {
+        fetch('/api/admin/doctors/')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('doctors-table');
+                tableBody.innerHTML = '';
+                data.forEach(user => {
+                    const row = `
                         <tr>
                             <td>${user.email}</td>
                             <td>
@@ -461,12 +672,12 @@ h2 {
                             </td>
                         </tr>
                     `;
-                        tableBody.innerHTML += row;
-                    });
+                    tableBody.innerHTML += row;
                 });
+            });
     }
 
-        function deleteUser(userId, userType) {
+    function deleteUser(userId, userType) {
         if (confirm('Are you sure you want to remove this user?')) {
             fetch(`/api/admin/users/${userId}/`, {
                 method: 'DELETE',

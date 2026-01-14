@@ -7,7 +7,8 @@ from .views import (
     superadmin_dashboard,
     manage_registrations,
     logout_view,
-    delete_user
+    delete_user,
+    superadmin_search
 )
 from django.contrib.auth.views import LogoutView
 
@@ -20,4 +21,5 @@ urlpatterns = [
     path('superadmin/login/', superadmin_login_ajax, name='superadmin_login'),
     path('superadmin/dashboard/', superadmin_dashboard, name='superadmin_dashboard'),
     path('superadmin/manage-registrations/', manage_registrations, name='manage_registrations'),
+    path('superadmin/search/', superadmin_search, name='superadmin_search'),
 ]
