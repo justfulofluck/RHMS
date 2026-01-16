@@ -74,6 +74,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('inbox/notifications/', include('notifications.urls', namespace='notifications')),
     path('api/appointments/', include('appointments.urls')),
+    path('appointments/', include('appointments.urls')),
 
     # DRF router endpoints
     path('api/', include(router.urls)),

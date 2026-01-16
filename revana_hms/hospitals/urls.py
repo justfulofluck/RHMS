@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import HospitalViewSet, approve_hospital_view, reject_hospital_view
+from .views import HospitalViewSet, approve_hospital_view, reject_hospital_view, get_nearby_hospitals
 from . import views
 
 app_name = 'hospitals'
@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('superadmin/hospital/approve/<int:hospital_id>/', approve_hospital_view, name='approve_hospital'),
     path('superadmin/hospital/reject/<int:hospital_id>/', reject_hospital_view, name='reject_hospital'),
+    path('nearby/', get_nearby_hospitals, name='nearby_hospitals'),
     path('register/', views.RegisterView.as_view(), name='register'),
     
     # Management URLs

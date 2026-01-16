@@ -195,3 +195,10 @@ def department_detail(request, department_id):
         'treatments': treatments,
         'doctors': doctors
     })
+
+def get_nearby_hospitals(request):
+    """
+    API for getting nearby hospitals based on lat/lng.
+    Currently returns empty list as Hospital model needs lat/lng fields.
+    """
+    return JsonResponse({'hospitals': []})

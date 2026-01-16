@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from appointments.views import (
     AppointmentViewSet, DoctorAvailabilityViewSet, MyAppointmentsViewSet, 
     get_available_slots, cancel_appointment, mobile_booking_view, get_mobile_slots,
-    MobileBookingView, call_next_patient, get_queue_status # Added
+    MobileBookingView, call_next_patient, get_queue_status, mobile_doctor_slots # Added
 )
 from appointments.widget_views import (
     get_cities, get_departments, get_hospitals, get_doctors, get_slots, book_appointment_widget
@@ -37,6 +37,7 @@ urlpatterns = [
     # 📱 Mobile Booking
     path('book/mobile/<int:doctor_id>/', mobile_booking_view, name='mobile_booking'),
     path('api/mobile-slots/<int:doctor_id>/', get_mobile_slots, name='get_mobile_slots'),
+    path('api/mobile-doctor-slots/<int:doctor_id>/', mobile_doctor_slots, name='mobile_doctor_slots'),
     path('api/mobile-book/', MobileBookingView.as_view(), name='mobile_book_api'),
     
 ]
