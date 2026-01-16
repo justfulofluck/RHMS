@@ -38,7 +38,7 @@ from appointments.views import (
     MobileBookingView
 )
 from hospitals.views import DepartmentViewSet, TreatmentViewSet, RegisterView
-from core.views import test_auth
+from core.views import test_auth, universal_search
 from accounts.views import logout_view
 
 # DRF Router setup
@@ -60,6 +60,7 @@ urlpatterns = [
 
     # Core API
     path('api/test-auth/', test_auth),
+    path('api/universal-search/', universal_search, name='universal_search'),
     
     # Global Login/Logout (prevents 500 and 404 errors)
     path('login/', doctor_login_view, name='login'),
