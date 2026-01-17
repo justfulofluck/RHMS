@@ -65,3 +65,8 @@ webencodings==0.5.1
 yarg==0.1.9
 gunicorn
 git+https://github.com/django-notifications/django-notifications.git
+
+# Semantic Search Dependencies
+sentence-transformers
+scikit-learn
+numpy
