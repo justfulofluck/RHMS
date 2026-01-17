@@ -21,6 +21,7 @@ def create_monthly_availability(request):
         try:
             # Handle JSON data from new advanced scheduler
             if request.content_type == 'application/json':
+                print(f"DEBUG: Scheduler Payload: {request.body.decode('utf-8')}")
                 data = json.loads(request.body)
                 dates = data.get('dates', [])
                 slots = data.get('slots', [])
@@ -51,14 +52,36 @@ def create_monthly_availability(request):
                         end_time = slot.get('end_time')
                         
                         if start_time and end_time:
-                            DoctorAvailability.objects.create(
-                                doctor=doctor,
-                                date=current_date,
-                                start_time=start_time, # Django handles string 'HH:MM' conversion
-                                end_time=end_time,
-                                slot_duration=slot_duration,
-                                is_available=True
-                            )
+                            # Parse times
+                            # Helper to convert string to time/datetime
+                            fmt = '%H:%M'
+                            try:
+                                t_start = datetime.strptime(start_time, fmt)
+                                t_end = datetime.strptime(end_time, fmt)
+                                
+                                # Convert to full datetime for arithmetic (using dummy date)
+                                dt_start = datetime.combine(datetime.today(), t_start.time())
+                                dt_end = datetime.combine(datetime.today(), t_end.time())
+                                
+                                # Loop to create slots
+                                current_slot_start = dt_start
+                                while current_slot_start + timedelta(minutes=slot_duration) <= dt_end:
+                                    current_slot_end = current_slot_start + timedelta(minutes=slot_duration)
+                                    
+                                    DoctorAvailability.objects.create(
+                                        doctor=doctor,
+                                        date=current_date,
+                                        start_time=current_slot_start.time(),
+                                        end_time=current_slot_end.time(),
+                                        slot_duration=slot_duration,
+                                        is_available=True
+                                    )
+                                    created_count += 1
+                                    
+                                    current_slot_start = current_slot_end
+                            except ValueError as e:
+                                print(f"Error parsing time: {e}")
+                                continue
                             created_count += 1
                             
                 return JsonResponse({'success': True, 'message': f'Successfully updated schedule for {len(dates)} days.'})

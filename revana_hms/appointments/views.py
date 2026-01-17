@@ -8,7 +8,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action, api_view, permission_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
@@ -148,18 +148,29 @@ class MobileBookingView(APIView):
         except DoctorAvailability.DoesNotExist:
             return Response({"error": "Slot not available"}, status=400)
 
+        # Token Generation
+        # Count appointments for this specific doctor on this date
+        current_count = Appointment.objects.filter(
+            doctor=slot.doctor,
+            appointment_date__date=slot.date
+        ).count()
+        token_number = current_count + 1
+
         appointment = Appointment.objects.create(
-            patient_name=request.user.get_full_name(),
+            patient_name=getattr(request.user.patient, 'name', request.user.email),
             doctor=slot.doctor,
             hospital=slot.doctor.hospital,
             appointment_date=datetime.combine(slot.date, slot.start_time),
-            created_at=timezone.now()
+            created_at=timezone.now(),
+            token_number=token_number  # ✅ Save Token
         )
         slot.is_available = False
         slot.save()
 
         return Response({
             "message": "Appointment booked",
+            "appointment_id": appointment.id,
+            "token_number": token_number, # ✅ Return Token
             "doctor": slot.doctor.name,
             "date": slot.date,
             "start": slot.start_time,
@@ -556,7 +567,8 @@ def mobile_doctor_slots(request, doctor_id):
             grouped_slots[d_str].append({
                 'id': slot.id,
                 'start_time': slot.start_time, 
-                'end_time': slot.end_time
+                'end_time': slot.end_time,
+                'time': slot.start_time.strftime('%H:%M') # ✅ EXACTLY what user requested ("09:00")
             })
             
         # Format for Mobile App (List of days with slots)

@@ -1,92 +1,117 @@
-Flutter Patient API Documentation
-jango server is running at: http://192.168.1.208:8000
+# REVANA HMS - MOBILE API DOCUMENTATION (v2.0)
 
-1. Get Mobile Availability Slots (3-Day View)
-Fetches available time slots for a specific doctor for Today, Tomorrow, and the Day After.
+**Base URL:** (Your Server URL, e.g., `http://192.168.x.x:8000`)
 
-Endpoint: /appointments/api/mobile-slots/<doctor_id>/
-Method: GET
-Parameters: None (Doctor ID is in URL)
-Response (JSON):
-{
-  "success": true,
-  "days": [
+---
+
+## 1. AUTHENTICATION (JWT)
+
+### Login (Get Tokens)
+*   **Endpoint:** `POST /api/token/`
+*   **Body:**
+    ```json
+    { "email": "user@example.com", "password": "yourpassword" }
+    ```
+*   **Response:** `{ "access": "...", "refresh": "..." }`
+
+### Refresh Token
+*   **Endpoint:** `POST /api/token/refresh/`
+*   **Body:** `{ "refresh": "your_refresh_token" }`
+
+### Password Reset
+*   **Request:** `POST /api/accounts/password-reset/` (Body: `{ "email": "..." }`)
+*   **Confirm:** `POST /api/accounts/password-reset-confirm/`
+
+---
+
+## 2. UNIVERSAL SEARCH (⚡ NEW)
+
+### Search Everything (Doctors & Hospitals)
+*   **Endpoint:** `GET /api/universal-search/`
+*   **Query Params:** `query` (e.g., "Fracture", "Heart"), `city` (e.g., "Vadodara")
+*   **Description:** Smart search that handles synonyms (e.g., "Bone break" -> "Orthopedics") and location filtering.
+*   **Response:**
+    ```json
     {
-      "date": "2023-12-12",
-      "label": "Today",
-      "slots": [
+      "doctors": [
         {
-          "id": 101,
-          "start": "09:00 AM",
-          "end": "09:30 AM"
-        },
-        {
-          "id": 102,
-          "start": "10:00 AM",
-          "end": "10:30 AM"
+          "id": 1,
+          "name": "Dr. Amit Patel",
+          "specialization": "Orthopedics",
+          "hospital_name": "Sunshine Hospital",
+          "action": "Book"
         }
+      ],
+      "hospitals": [
+        { "id": 5, "name": "Sunshine Hospital", "action": "Visit" }
       ]
-    },
-    {
-      "date": "2023-12-13",
-      "label": "Tomorrow",
-      "slots": []
-    },
-    {
-      "date": "2023-12-14",
-      "label": "Thu, 14 Dec",
-      "slots": [...]
     }
-  ]
-}
+    ```
 
+---
 
-2. Book Appointment
+## 3. BOOKING FLOW (⚡ UPDATED)
 
-Books a specific slot for the currently authenticated user.
+### Get Doctor Slots (Booking Screen)
+*   Use this when user clicks "Book" on a doctor card.
+*   **Endpoint:** `GET /appointments/api/mobile-doctor-slots/<doctor_id>/`
+*   **Response:**
+    *   Doctor Details (Name, Hospital, Address)
+    *   **Availability:** Lists next 7 days with specific time slots.
 
-Endpoint: /appointments/api/mobile-book/
-Method: POST
-Headers:
-Content-Type: application/json
-X-CSRFToken: <csrf-token> (If using session auth/cookies)
-Authorization: Token <token> (If using DRF Token Auth)
-Body:
-{
-  "availability_id": 101
-}
-
-Response (Success):
-{
-  "message": "Appointment booked",
-  "doctor": "Dr. Smith",
-  "date": "2023-12-12",
-  "start": "09:00:00",
-  "end": "09:30:00"
-}
-
-Response (Error):
-{
-  "error": "Slot not available" 
-}
-
-3. List Doctors 
-
-need to search/list doctors first.
-
-Endpoint: /appointments/widget/doctors/
-Method: GET
-Parameters:
-hospital_id: (Required) Int
-department
-: (Required) String name
-Response:
-{
-  "doctors": [
+### Book Appointment
+*   **Endpoint:** `POST /mobile/book/`
+*   **Headers:** `Authorization: Bearer <access_token>`
+*   **Body:**
+    ```json
     {
-      "id": 1,
-      "name": "Dr. John Doe",
-      "specialization": "Cardiology"
+      "availability_id": 456  // (REQUIRED: The specific slot ID user clicked on)
     }
-  ]
-}
+    ```
+
+### Cancel Appointment
+*   **Endpoint:** `POST /api/appointments/cancel/<appointment_id>/`
+*   **Headers:** `Authorization: Bearer <access_token>`
+
+### My Appointments
+*   **Endpoint:** `GET /api/appointments/my-appointments/`
+*   **Headers:** `Authorization: Bearer <access_token>`
+
+---
+
+## 4. PATIENT MANAGEMENT
+
+### Register Patient
+*   **Endpoint:** `POST /patients/register/`
+*   **Body:**
+    ```json
+    {
+      "email": "user@email.com",
+      "password": "password123",
+      "name": "Full Name",
+      "age": 25,
+      "gender": "Male",
+      "phone": "9876543210",
+      "address": "Full Address"
+    }
+    ```
+
+### Profile & Notifications
+*   **Get Profile:** `GET /patients/api/profile/`
+*   **Update Profile:** `PATCH /patients/api/profile/`
+*   **Medical History:** `GET /patients/api/medical-history/`
+*   **Notifications:** `GET /patients/api/notifications/`
+*   **Read Notification:** `PATCH /patients/api/notifications/<id>/mark-read/`
+
+---
+
+## 5. CORE DATA & HOSPITALS
+
+### List Approved Hospitals (⚡ NEW)
+*   **Endpoint:** `GET /api/hospitals/hospitals/`
+*   **Response:** List of all approved hospitals with details.
+
+### Core Lists
+*   **Departments:** `GET /api/departments/`
+*   **Treatments:** `GET /api/treatments/`
+*   **Doctors:** `GET /api/doctors/`

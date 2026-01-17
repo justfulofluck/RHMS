@@ -6,6 +6,10 @@ from django.core.cache import cache
 from core.models import SearchKeyword
 from hospitals.models import Hospital, Department, Treatment
 from doctors.models import Doctor
+try:
+    from core.semantic_search import SemanticSearchService
+except ImportError:
+    SemanticSearchService = None
 
 # Static Synonym Dictionary (Strategy 2)
 SYNONYM_MAP = {
@@ -66,6 +70,18 @@ def universal_search(request):
     except Exception:
         pass # Fallback to ignore DB errors if any
 
+    # Strategy 0: Semantic Search (MiniLM)
+    # If pure keyword search might fail, try to find a semantic match
+    semantic_match = None
+    if SemanticSearchService:
+        try:
+            service = SemanticSearchService.get_instance()
+            # Only use if query is not very short
+            if len(query) > 3:
+                 semantic_match = service.get_best_match(query)
+        except Exception as e:
+            print(f"Semantic Search Error: {e}")
+
     # Strategy 1: Search Logic
     
     # 1. Filter Hospitals by City first (if provided)
@@ -81,7 +97,8 @@ def universal_search(request):
     
     hospital_search_results = matching_hospitals_queryset.filter(
         Q(name__icontains=normalized_query) |
-        Q(departments__name__icontains=normalized_query)
+        Q(departments__name__icontains=normalized_query) |
+        (Q(departments__name__icontains=semantic_match) if semantic_match else Q())
     ).distinct()
 
     # 3. Search for Doctors
@@ -94,7 +111,8 @@ def universal_search(request):
     ).filter(
         Q(name__icontains=normalized_query) |
         Q(specialization__icontains=normalized_query) |
-        Q(treatments__name__icontains=normalized_query)
+        Q(treatments__name__icontains=normalized_query) |
+         (Q(specialization__icontains=semantic_match) | Q(treatments__name__icontains=semantic_match) if semantic_match else Q())
     ).distinct()
 
     # Format Results

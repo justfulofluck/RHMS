@@ -235,7 +235,7 @@
                                             <span class="text-uppercase small fw-bold text-muted"
                                                 id="header-label">Select Time</span>
                                         </div>
-                              
+
                                         <!-- Clock Picker View -->
                                         <div id="clock-view" class="content1 d-flex p-4">
                                             <div class="time-display-section d-flex flex-column  me-5">
@@ -263,7 +263,7 @@
                                             </div>
                                         </div>
 
-                                       <div class="footer p-3 border-top text-end">
+                                        <div class="footer p-3 border-top text-end">
                                             <button class="btn text-brown btn-text me-2" id="btn-cancel">
                                                 <i class="fas fa-times me-1"></i>CANCEL
                                             </button>
@@ -308,6 +308,7 @@
                         --active-bg: #bfddfd;
                         --text-muted: #757575;
                     }
+
                     .footer .btn {
                         padding: 8px 24px;
                         margin-left: 8px;
@@ -315,10 +316,12 @@
                         font-weight: 500;
                         transition: all 0.2s;
                     }
+
                     .footer .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    }
+
                     .time-picker-card {
                         background: #fff;
                         border-radius: 8px;
@@ -329,7 +332,7 @@
                     }
 
                     .time-box {
-                        background: #bfddfd!important;
+                        background: #bfddfd !important;
                         color: var(--primary-brown);
                         font-size: 4rem;
                         padding: 10px 20px;
@@ -826,10 +829,7 @@
                             <div class="text-center py-5">
                                 <p class="text-muted mb-3"><i class="bi bi-calendar-x display-4"></i></p>
                                 <p class="lead">No availability scheduled yet.</p>
-                                <a style="color:#fff;background: #6b3f21;padding: 10px;border-radius: 8px;"
-                                    href="{% url 'monthly_availability' %}">
-                                    Set Availability Now
-                                </a>
+
                             </div>
                             {% endif %}
                         </div>
@@ -1121,17 +1121,21 @@
                 e.preventDefault();
 
                 if (calendar.selectedDates.size === 0) {
-                    alert('Please select at least one date.');
+                    alert('Please click on updates in the calendar to SELECT them (they will turn blue).\n\nYellow dates are just showing what is already scheduled.\nBlue dates are the ones you are about to change.');
                     return;
                 }
 
                 const slots = [];
-                document.querySelectorAll('.slot-row').forEach(row => {
+                // Fixed for Fancy Picker: grab single slot from hidden IDs
+                const startVal = document.getElementById('startHidden').value;
+                const endVal = document.getElementById('endHidden').value;
+
+                if (startVal && endVal) {
                     slots.push({
-                        start_time: row.querySelector('[name="start_time"]').value,
-                        end_time: row.querySelector('[name="end_time"]').value
+                        start_time: startVal,
+                        end_time: endVal
                     });
-                });
+                }
 
                 const data = {
                     dates: Array.from(calendar.selectedDates),
