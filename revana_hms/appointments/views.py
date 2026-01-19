@@ -278,7 +278,16 @@ class MyAppointmentsViewSet(viewsets.ReadOnlyModelViewSet):
     #permission_classes = [IsAuthenticated]
     permission_classes = [permissions.AllowAny]
     def get_queryset(self):
-        return Appointment.objects.filter(patient_name=self.request.user.get_full_name())
+        user = self.request.user
+        if not user.is_authenticated:
+            return Appointment.objects.none()
+        
+        if hasattr(user, 'patient') and user.patient:
+            patient_name = user.patient.name
+        else:
+            patient_name = user.email
+
+        return Appointment.objects.filter(patient_name=patient_name)
 
 def get_available_slots(request):
     doctor_id = request.GET.get('doctor_id')
