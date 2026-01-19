@@ -237,7 +237,7 @@ class DoctorAvailabilityViewSet(viewsets.ModelViewSet):
 
 
 class DoctorViewSet(viewsets.ModelViewSet):
-    queryset = Doctor.objects.select_related('hospital', 'department', 'treatment').all()
+    queryset = Doctor.objects.select_related('hospital', 'department').prefetch_related('treatments').all()
     serializer_class = DoctorSerializer
     permission_classes = [permissions.IsAuthenticated]
 
