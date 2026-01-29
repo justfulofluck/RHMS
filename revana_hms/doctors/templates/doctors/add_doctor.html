@@ -28,7 +28,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             align-content: center;
-            background: linear-gradient(90deg, #e7dacf 0%, #c9a07e 100%, #a2683566 100%);
+            background: #f6eee8;
 
         }
 
@@ -56,16 +56,16 @@
             padding: 40px 20px;
         }
 
-        .container {
+          .main {
             background: #fff;
             border-radius: 10px;
             padding: 30px;
-            width: 700px;
-            position: relative;
+            margin-left: 300px;
+            margin-right: 50px;
         }
 
         .back-btn {
-            position: absolute;
+            position: relative;
             top: 20px;
             left: 20px;
             color: var(--brown);
@@ -74,27 +74,29 @@
         }
 
         .card-register {
-            width: auto;
-            max-width: calc(100% - 40px);
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 28px 30px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-        }
+     
+      max-width: calc(100% - 40px);
+      width: 1320px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 28px 30px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
 
-        .card-register h2 {
-            color: var(--brown-dark);
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 6px;
-        }
+        
+    .card-register h2 {
+      color: var(--brown-dark);
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 6px;
+    }
 
         .card-sub {
-            text-align: center;
-            color: rgba(74, 47, 23, 0.6);
-            margin-bottom: 18px;
-            font-size: 0.95rem;
-        }
+      text-align: center;
+      color: rgba(74, 47, 23, 0.6);
+      margin-bottom: 18px;
+      font-size: 0.95rem;
+    }
 
         /* input group style (pill look) */
         .input-group .input-group-text {
@@ -183,16 +185,77 @@
             font-weight: 800;
             text-align: center;
             margin-bottom: 20px;
-
         }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar h4 {
+            font-weight: 800;
+            color: var(--brown-dark);
+            margin-bottom: 20px;
+        }
+        .side-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--brown-dark);
+            font-weight: 600;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .side-link.active,
+        .side-link:hover {
+            background: var(--brown);
+            color: white !important;
+        }
+        
     </style>
 </head>
 
 <body>
+    <div class="sidebar">
+        <h4>Admin Panel</h4>
 
-    <div class="container ">
-        <a href="{% url 'hospital_dashboard' %}" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
-        <h2>Add New Doctor</h2>
+        <a class="side-link" href="{% url 'hospital_admin_dashboard' %}">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+
+        <a class="side-link active" href="{% url 'pending_doctors' %}">
+            <i class="fa-solid fa-user-doctor"></i> Doctors
+        </a>
+
+        <a class="side-link" href="{% url 'hospitals:manage_departments' %}">
+            <i class="fa-solid fa-users"></i> Departments
+        </a>
+
+        <a class="side-link" href="{% url 'hospitals:manage_treatments' %}">
+            <i class="fa-solid fa-stethoscope"></i> Treatments
+        </a>
+
+        <a class="side-link" href="#">
+            <i class="fa-regular fa-calendar-check"></i> Appointments
+        </a>
+
+        <a class="side-link" href="{% url 'logout' %}">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+    </div>
+
+    <div class="main "> 
+        <a href="{% url 'pending_doctors' %}" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+
+        <h2 class="text-center">Add New Doctor</h2>
         <p class="text-center text-muted">Adding doctor to <strong>{{ hospital.name }}</strong></p>
 
         <form method="post" enctype="multipart/form-data" action="{% url 'add_doctor_submit' %}">
@@ -202,9 +265,9 @@
             <input type="hidden" name="hospital" value="{{ hospital.id }}">
 
             <div class="row g-3">
-
+                
                 <!-- Full Name -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                         <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
@@ -212,7 +275,7 @@
                 </div>
 
                 <!-- Email -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                         <input type="email" class="form-control" id="email" name="email" placeholder="Email Address"
@@ -221,16 +284,43 @@
                 </div>
 
                 <!-- Contact Number -->
-                <div class="col-md-12">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
-                        <input type="text" class="form-control" id="contact_number" name="contact_number"
-                            placeholder="Contact Number" required maxlength="10" pattern="\d{10}">
-                    </div>
-                </div>
+                <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+            <input
+        type="text"
+        class="form-control"
+        name="phone_number"
+        placeholder="+91XXXXXXXXXX"
+        maxlength="13"
+        required
+        oninput="allowPhoneNumber(this)">
+          </div>
+        </div>
+          <script>
+                   function allowPhoneNumber(input) {
+                          let value = input.value;
+
+                          // Allow + only at the start
+                          if (value.startsWith('+')) {
+                            value = '+' + value.slice(1).replace(/[^0-9]/g, '');
+                          } else {
+                            value = value.replace(/[^0-9]/g, '');
+                          }
+
+                          // Limit to +91 + 10 digits OR 12 digits without +
+                          if (value.startsWith('+')) {
+                            value = value.slice(0, 13); // + + 12 digits
+                          } else {
+                            value = value.slice(0, 12);
+                          }
+
+                          input.value = value;
+                        }
+              </script>
 
                 <!-- Hospital (Visual Only - Disabled Input) -->
-                <div class="col-md-12">
+                <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-hospital"></i></span>
                         <input type="text" class="form-control" value="{{ hospital.name }}" disabled
@@ -239,7 +329,7 @@
                 </div>
 
                 <!-- Specialization -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-stethoscope"></i></span>
                         <input type="text" class="form-control" id="specialization" name="specialization"
@@ -248,7 +338,7 @@
                 </div>
 
                 <!-- Qualification -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-graduation-cap"></i></span>
                         <input type="text" class="form-control" id="qualification" name="qualification"
@@ -257,25 +347,57 @@
                 </div>
 
                 <!-- Years of Experience -->
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa-solid fa-briefcase"></i></span>
-                        <input type="number" class="form-control" id="year_of_experience" name="year_of_experience"
-                            placeholder="Years of Experience" required>
-                    </div>
-                </div>
+                <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="fa-solid fa-briefcase"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control"
+                id="year_of_experience"
+                name="year_of_experience"
+                placeholder="Years of Experience"
+                maxlength="2"
+                required
+                oninput="allowExperience(this)">
+        </div>
+      </div>
+
+
+      <script>
+          function allowExperience(input) {
+            // Remove non-numeric characters
+            let value = input.value.replace(/[^0-9]/g, '');
+
+            // Convert to number
+            let num = parseInt(value, 10);
+
+            // If empty, allow clearing
+            if (value === '') {
+              input.value = '';
+              return;
+            }
+
+            // Enforce range 1–50
+            if (num < 1) num = 1;
+            if (num > 50) num = 50;
+
+            input.value = num;
+          }
+      </script>
 
                 <!-- Aadhaar Number -->
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
                         <input type="text" class="form-control" id="aadhaar" name="aadhaar" placeholder="Aadhaar Number"
-                            required>
+                            required maxlength="12" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,12);">
                     </div>
                 </div>
 
                 <!-- Gender -->
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-venus-mars"></i></span>
                         <select class="form-select" id="gender" name="gender" required>
@@ -288,7 +410,7 @@
                 </div>
 
                 <!-- Date of Birth -->
-                <div class="col-md-6">
+                <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
                         <input type="date" class="form-control" id="date_of_birth" name="date_of_birth"
@@ -300,40 +422,40 @@
                 <div class="col-12">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-                        <textarea class="form-control" id="address" name="address" rows="3" placeholder="Address"
+                        <textarea class="form-control" id="address" name="address" rows="1" placeholder="Address"
                             required></textarea>
                     </div>
                 </div>
 
                 <!-- Medical Certificate -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="medical_certificate" class="form-label">Medical Certificate</label>
                     <input type="file" class="form-control" id="medical_certificate" name="medical_certificate"
                         required>
                 </div>
 
                 <!-- Registration Certificate -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="registration_certificate" class="form-label">Registration Certificate</label>
                     <input type="file" class="form-control" id="registration_certificate"
                         name="registration_certificate" required>
                 </div>
 
                 <!-- Degree Certificates -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="degree_certificates" class="form-label">Degree Certificates</label>
                     <input type="file" class="form-control" id="degree_certificates" name="degree_certificates"
                         required>
                 </div>
 
                 <!-- Passport Photo -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="passport_photo" class="form-label">Passport Photo</label>
                     <input type="file" class="form-control" id="passport_photo" name="passport_photo" required>
                 </div>
 
                 <!-- Experience Certificate -->
-                <div class="col-12">
+                <div class="col-4">
                     <label for="experience_certificate" class="form-label">Experience Certificate (Optional)</label>
                     <input type="file" class="form-control" id="experience_certificate" name="experience_certificate"
                         placeholder="Experience Certificate (Optional)">
