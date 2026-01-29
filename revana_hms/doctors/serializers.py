@@ -36,13 +36,32 @@ class DoctorAvailabilitySerializer(serializers.ModelSerializer):
         return data
 
 class DoctorSerializer(serializers.ModelSerializer):
+    # Mapped fields from User and DoctorProfile
+    email = serializers.EmailField(source='user.email', read_only=True)
+    
+    # Profile fields (Read-Only for now as write logic is custom in views)
+    gender = serializers.CharField(source='user.doctorprofile.gender', read_only=True)
+    birth_date = serializers.DateField(source='user.doctorprofile.date_of_birth', read_only=True)
+    contact_number = serializers.CharField(source='user.doctorprofile.contact_number', read_only=True)
+    address = serializers.CharField(source='user.doctorprofile.address', read_only=True)
+    qualification = serializers.CharField(source='user.doctorprofile.qualification', read_only=True)
+    years_of_experience = serializers.IntegerField(source='user.doctorprofile.year_of_experience', read_only=True)
+    aadhaar = serializers.CharField(source='user.doctorprofile.aadhaar', read_only=True)
+    
+    # File fields
+    medical_certificate = serializers.FileField(source='user.doctorprofile.medical_certificate', read_only=True)
+    registration_certificate = serializers.FileField(source='user.doctorprofile.registration_certificate', read_only=True)
+    degree_certificates = serializers.FileField(source='user.doctorprofile.degree_certificates', read_only=True)
+    passport_photo = serializers.ImageField(source='user.doctorprofile.passport_photo', read_only=True)
+    experience_certificate = serializers.FileField(source='user.doctorprofile.experience_certificate', read_only=True)
+
     class Meta:
         model = Doctor
         fields = [
-            'id', 'hospital', 'department', 'treatment',
+            'id', 'hospital', 'department', 'treatments',
             'name', 'gender', 'birth_date', 'email', 'contact_number', 'address',
-            'registration_number', 'medical_certificate', 'qualification',
-            'specialization', 'years_of_experience', 'designation',
+            'medical_certificate', 'qualification',
+            'specialization', 'years_of_experience',
             'registration_certificate', 'degree_certificates', 'aadhaar',
             'passport_photo', 'experience_certificate',
             'status', 'is_verified', 'user', 'created_at'
