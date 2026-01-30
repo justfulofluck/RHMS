@@ -36,44 +36,77 @@ class DoctorAvailabilitySerializer(serializers.ModelSerializer):
         return data
 
 class DoctorSerializer(serializers.ModelSerializer):
-    # Mapped fields from User and DoctorProfile
-    email = serializers.EmailField(source='user.email', read_only=True)
-    
-    # Profile fields (Read-Only for now as write logic is custom in views)
-    gender = serializers.CharField(source='user.doctorprofile.gender', read_only=True)
-    birth_date = serializers.DateField(source='user.doctorprofile.date_of_birth', read_only=True)
-    contact_number = serializers.CharField(source='user.doctorprofile.contact_number', read_only=True)
-    address = serializers.CharField(source='user.doctorprofile.address', read_only=True)
-    qualification = serializers.CharField(source='user.doctorprofile.qualification', read_only=True)
-    years_of_experience = serializers.IntegerField(source='user.doctorprofile.year_of_experience', read_only=True)
-    aadhaar = serializers.CharField(source='user.doctorprofile.aadhaar', read_only=True)
-    
-    # File fields
-    medical_certificate = serializers.FileField(source='user.doctorprofile.medical_certificate', read_only=True)
-    registration_certificate = serializers.FileField(source='user.doctorprofile.registration_certificate', read_only=True)
-    degree_certificates = serializers.FileField(source='user.doctorprofile.degree_certificates', read_only=True)
-    passport_photo = serializers.ImageField(source='user.doctorprofile.passport_photo', read_only=True)
-    experience_certificate = serializers.FileField(source='user.doctorprofile.experience_certificate', read_only=True)
+    # Safe Profile Access
+    def get_profile_attr(self, obj, attr):
+        if hasattr(obj.user, 'doctorprofile'):
+            return getattr(obj.user.doctorprofile, attr, None)
+        return None
+
+    # email = serializers.EmailField(source='user.email', read_only=True)
+
+    gender = serializers.SerializerMethodField()
+    def get_gender(self, obj): return self.get_profile_attr(obj, 'gender')
+
+    birth_date = serializers.SerializerMethodField()
+    def get_birth_date(self, obj): return self.get_profile_attr(obj, 'date_of_birth')
+
+    contact_number = serializers.SerializerMethodField()
+    def get_contact_number(self, obj): return self.get_profile_attr(obj, 'contact_number')
+
+    address = serializers.SerializerMethodField()
+    def get_address(self, obj): return self.get_profile_attr(obj, 'address')
+
+    qualification = serializers.SerializerMethodField()
+    def get_qualification(self, obj): return self.get_profile_attr(obj, 'qualification')
+
+    years_of_experience = serializers.SerializerMethodField()
+    def get_years_of_experience(self, obj): return self.get_profile_attr(obj, 'year_of_experience')
+
+    aadhaar = serializers.SerializerMethodField()
+    def get_aadhaar(self, obj): return self.get_profile_attr(obj, 'aadhaar')
+
+    # File fields - Need to return URL if exists
+    def get_file_url(self, obj, attr):
+        if hasattr(obj.user, 'doctorprofile'):
+            file_field = getattr(obj.user.doctorprofile, attr, None)
+            if file_field:
+                return file_field.url
+        return None
+
+    medical_certificate = serializers.SerializerMethodField()
+    def get_medical_certificate(self, obj): return self.get_file_url(obj, 'medical_certificate')
+
+    registration_certificate = serializers.SerializerMethodField()
+    def get_registration_certificate(self, obj): return self.get_file_url(obj, 'registration_certificate')
+
+    degree_certificates = serializers.SerializerMethodField()
+    def get_degree_certificates(self, obj): return self.get_file_url(obj, 'degree_certificates')
+
+    passport_photo = serializers.SerializerMethodField()
+    def get_passport_photo(self, obj): return self.get_file_url(obj, 'passport_photo')
+
+    experience_certificate = serializers.SerializerMethodField()
+    def get_experience_certificate(self, obj): return self.get_file_url(obj, 'experience_certificate')
 
     class Meta:
         model = Doctor
         fields = [
             'id', 'hospital', 'department', 'treatments',
-            'name', 'gender', 'birth_date', 'email', 'contact_number', 'address',
+            'name', 'gender', 'birth_date', 'contact_number', 'address',
             'medical_certificate', 'qualification',
             'specialization', 'years_of_experience',
             'registration_certificate', 'degree_certificates', 'aadhaar',
             'passport_photo', 'experience_certificate',
-            'status', 'is_verified', 'user', 'created_at'
+            'status', 'is_approved', 'user'
         ]
-        read_only_fields = ['status', 'is_verified', 'user', 'created_at']
+        read_only_fields = ['status', 'is_approved', 'user']
 
         
 
     def create(self, validated_data):
         # New doctors always start as pending
         validated_data['status'] = Doctor.STATUS_PENDING
-        validated_data['is_verified'] = False
+        validated_data['is_approved'] = False
         return super().create(validated_data)
 
     def approve(self, doctor: Doctor):
@@ -87,7 +120,7 @@ class DoctorSerializer(serializers.ModelSerializer):
             )
             doctor.user = user
         doctor.status = Doctor.STATUS_APPROVED
-        doctor.is_verified = True
+        doctor.is_approved = True
         
         # Assign role and activate user
         doctor.user.role = 'doctor'
@@ -99,6 +132,6 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     def reject(self, doctor: Doctor):
         doctor.status = Doctor.STATUS_REJECTED
-        doctor.is_verified = False
+        doctor.is_approved = False
         doctor.save()
         return doctor
