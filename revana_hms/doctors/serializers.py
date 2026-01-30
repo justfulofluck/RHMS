@@ -68,6 +68,8 @@ class DoctorSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['status', 'is_verified', 'user', 'created_at']
 
+        
+
     def create(self, validated_data):
         # New doctors always start as pending
         validated_data['status'] = Doctor.STATUS_PENDING
