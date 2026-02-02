@@ -94,6 +94,42 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         user.save()
         return Response({"message": "Password has been reset successfully"}, status=status.HTTP_200_OK)
 
+def universal_login_view(request):
+    """
+    Universal login view that handles all user roles (doctor, hospital_admin, superadmin)
+    Redirects users to appropriate dashboard based on their role
+    """
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, username=email, password=password)
+        
+        if user:
+            login(request, user)
+            # Redirect based on user role
+            if user.role == 'doctor':
+                return redirect('doctor_dashboard')
+            elif user.role == 'hospital_admin':
+                return redirect('hospital_admin_dashboard')
+            elif user.is_superuser:
+                return redirect('admin:index')  # Django admin
+            else:
+                messages.error(request, f'Invalid user role: {user.role}')
+        else:
+            # Provide more specific error message
+            try:
+                user_obj = User.objects.get(email=email)
+                if not user_obj.is_active:
+                    messages.error(request, 'Your account is inactive. Please contact support.')
+                elif user_obj.role not in ['doctor', 'hospital_admin'] and not user_obj.is_superuser:
+                    messages.error(request, 'Your account type is not authorized for portal access.')
+                else:
+                    messages.error(request, 'Invalid password. Please try again.')
+            except User.DoesNotExist:
+                messages.error(request, 'No account found with this email address.')
+    
+    return render(request, 'frontend/universal_login.html')
+
 def superadmin_login_ajax(request):
     if request.method == 'POST':
         email = request.POST.get('email')

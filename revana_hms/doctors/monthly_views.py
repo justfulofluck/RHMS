@@ -84,7 +84,7 @@ def create_monthly_availability(request):
                                 continue
                             created_count += 1
                             
-                return JsonResponse({'success': True, 'message': f'Successfully updated schedule for {len(dates)} days.'})
+                return JsonResponse({'success': True, 'message': f'Successfully updated schedule for {len(dates)} days.', 'count': len(dates)})
             
             else:
                 return JsonResponse({'success': False, 'error': 'Invalid content type. Expected JSON.'})

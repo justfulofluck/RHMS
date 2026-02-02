@@ -56,7 +56,7 @@
             padding: 40px 20px;
         }
 
-          .main {
+        .main {
             background: #fff;
             border-radius: 10px;
             padding: 30px;
@@ -74,29 +74,29 @@
         }
 
         .card-register {
-     
-      max-width: calc(100% - 40px);
-      width: 1320px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 28px 30px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-    }
 
-        
-    .card-register h2 {
-      color: var(--brown-dark);
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 6px;
-    }
+            max-width: calc(100% - 40px);
+            width: 1320px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 28px 30px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+
+        .card-register h2 {
+            color: var(--brown-dark);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 6px;
+        }
 
         .card-sub {
-      text-align: center;
-      color: rgba(74, 47, 23, 0.6);
-      margin-bottom: 18px;
-      font-size: 0.95rem;
-    }
+            text-align: center;
+            color: rgba(74, 47, 23, 0.6);
+            margin-bottom: 18px;
+            font-size: 0.95rem;
+        }
 
         /* input group style (pill look) */
         .input-group .input-group-text {
@@ -186,6 +186,7 @@
             text-align: center;
             margin-bottom: 20px;
         }
+
         .sidebar {
             position: fixed;
             left: 0;
@@ -197,11 +198,13 @@
             overflow-y: auto;
             box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
         }
+
         .sidebar h4 {
             font-weight: 800;
             color: var(--brown-dark);
             margin-bottom: 20px;
         }
+
         .side-link {
             display: flex;
             align-items: center;
@@ -214,12 +217,12 @@
             text-decoration: none;
             transition: 0.3s;
         }
+
         .side-link.active,
         .side-link:hover {
             background: var(--brown);
             color: white !important;
         }
-        
     </style>
 </head>
 
@@ -252,7 +255,7 @@
         </a>
     </div>
 
-    <div class="main "> 
+    <div class="main ">
         <a href="{% url 'pending_doctors' %}" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
 
         <h2 class="text-center">Add New Doctor</h2>
@@ -265,7 +268,7 @@
             <input type="hidden" name="hospital" value="{{ hospital.id }}">
 
             <div class="row g-3">
-                
+
                 <!-- Full Name -->
                 <div class="col-md-4">
                     <div class="input-group">
@@ -285,39 +288,33 @@
 
                 <!-- Contact Number -->
                 <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
-            <input
-        type="text"
-        class="form-control"
-        name="phone_number"
-        placeholder="+91XXXXXXXXXX"
-        maxlength="13"
-        required
-        oninput="allowPhoneNumber(this)">
-          </div>
-        </div>
-          <script>
-                   function allowPhoneNumber(input) {
-                          let value = input.value;
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                        <input type="text" class="form-control" name="phone_number" placeholder="+91XXXXXXXXXX"
+                            maxlength="13" required oninput="allowPhoneNumber(this)">
+                    </div>
+                </div>
+                <script>
+                    function allowPhoneNumber(input) {
+                        let value = input.value;
 
-                          // Allow + only at the start
-                          if (value.startsWith('+')) {
+                        // Allow + only at the start
+                        if (value.startsWith('+')) {
                             value = '+' + value.slice(1).replace(/[^0-9]/g, '');
-                          } else {
+                        } else {
                             value = value.replace(/[^0-9]/g, '');
-                          }
-
-                          // Limit to +91 + 10 digits OR 12 digits without +
-                          if (value.startsWith('+')) {
-                            value = value.slice(0, 13); // + + 12 digits
-                          } else {
-                            value = value.slice(0, 12);
-                          }
-
-                          input.value = value;
                         }
-              </script>
+
+                        // Limit to +91 + 10 digits OR 12 digits without +
+                        if (value.startsWith('+')) {
+                            value = value.slice(0, 13); // + + 12 digits
+                        } else {
+                            value = value.slice(0, 12);
+                        }
+
+                        input.value = value;
+                    }
+                </script>
 
                 <!-- Hospital (Visual Only - Disabled Input) -->
                 <div class="col-md-4">
@@ -348,51 +345,45 @@
 
                 <!-- Years of Experience -->
                 <div class="col-md-3">
-            <div class="input-group">
-              <span class="input-group-text">
-                <i class="fa-solid fa-briefcase"></i>
-              </span>
-              <input
-                type="text"
-                class="form-control"
-                id="year_of_experience"
-                name="year_of_experience"
-                placeholder="Years of Experience"
-                maxlength="2"
-                required
-                oninput="allowExperience(this)">
-        </div>
-      </div>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </span>
+                        <input type="text" class="form-control" id="year_of_experience" name="year_of_experience"
+                            placeholder="Years of Experience" maxlength="2" required oninput="allowExperience(this)">
+                    </div>
+                </div>
 
 
-      <script>
-          function allowExperience(input) {
-            // Remove non-numeric characters
-            let value = input.value.replace(/[^0-9]/g, '');
+                <script>
+                    function allowExperience(input) {
+                        // Remove non-numeric characters
+                        let value = input.value.replace(/[^0-9]/g, '');
 
-            // Convert to number
-            let num = parseInt(value, 10);
+                        // Convert to number
+                        let num = parseInt(value, 10);
 
-            // If empty, allow clearing
-            if (value === '') {
-              input.value = '';
-              return;
-            }
+                        // If empty, allow clearing
+                        if (value === '') {
+                            input.value = '';
+                            return;
+                        }
 
-            // Enforce range 1–50
-            if (num < 1) num = 1;
-            if (num > 50) num = 50;
+                        // Enforce range 1–50
+                        if (num < 1) num = 1;
+                        if (num > 50) num = 50;
 
-            input.value = num;
-          }
-      </script>
+                        input.value = num;
+                    }
+                </script>
 
                 <!-- Aadhaar Number -->
                 <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
                         <input type="text" class="form-control" id="aadhaar" name="aadhaar" placeholder="Aadhaar Number"
-                            required maxlength="12" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,12);">
+                            required maxlength="12"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,12);">
                     </div>
                 </div>
 

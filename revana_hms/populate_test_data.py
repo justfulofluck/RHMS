@@ -12,17 +12,15 @@ from django.contrib.auth import get_user_model
 from hospitals.models import Hospital, HospitalAdmin, Department, Treatment
 from doctors.models import Doctor
 from patients.models import Patient
-from accounts.models import DoctorProfile, HospitalAdminProfile
-from django.utils import timezone
+# Note: DoctorProfile and HospitalAdminProfile require file uploads, so we'll skip them for demo data
 
+User = get_user_model()  # Use the custom User model
 fake = Faker('en_IN')
 
 # Constants
 CITIES = ["Surat", "Ahmedabad", "Vadodara", "Gandhinagar", "Rajkot"]
 DEPARTMENTS = ["Cardiology", "Neurology", "Orthopedics", "Pediatrics", "Dermatology", "Oncology"]
 TITLES = ["Dr. ", "Dr. (Mrs.) ", "Dr. (Ms.) "]
-
-User = get_user_model()
 
 def create_hospitals():
     print("Creating Hospitals...")
@@ -47,8 +45,7 @@ def create_hospitals():
             
             # Create Departments & Treatments
             for dept_name in random.sample(DEPARTMENTS, 3):
-                dept_code = dept_name[:3].upper() + str(random.randint(10,99))
-                dept = Department.objects.create(hospital=hospital, name=dept_name, code=dept_code)
+                dept = Department.objects.create(hospital=hospital, name=dept_name)
                 Treatment.objects.create(hospital=hospital, department=dept, name=f"{dept_name} Consultation")
                 Treatment.objects.create(hospital=hospital, department=dept, name=f"{dept_name} Surgery")
             
@@ -61,8 +58,6 @@ def create_admins(hospitals, count=20):
     for _ in range(count):
         hospital = random.choice(hospitals)
         email = fake.unique.email()
-        first_name = fake.first_name()
-        last_name = fake.last_name()
         
         user = User.objects.create_user(
             email=email,
@@ -74,95 +69,93 @@ def create_admins(hospitals, count=20):
         
         HospitalAdmin.objects.create(user=user, hospital=hospital)
         
-        HospitalAdminProfile.objects.create(
-            user=user,
-            name=f"{first_name} {last_name}",
-            contact_number=fake.phone_number(),
-            address=fake.address(),
-            hospital_type="General",
-            hours="9 AM - 6 PM",
-            doctor_id="ADMIN-" + str(random.randint(1000, 9999))
-        )
+        # Note: Skipping HospitalAdminProfile creation due to potential required fields
+        # In a real application, you would create the profile with proper data
     print("Admins created.")
 
 def create_doctors(hospitals, count=50):
     print(f"Creating {count} Doctors...")
-    for _ in range(count):
-        hospital = random.choice(hospitals)
-        department = random.choice(hospital.departments.all())
+    doctors_per_hospital = count // len(hospitals)
+    remainder = count % len(hospitals)  # Distribute remaining doctors to first hospitals
+    
+    for i, hospital in enumerate(hospitals):
+        # Distribute remainder to first few hospitals
+        doctors_for_this_hospital = doctors_per_hospital + (1 if i < remainder else 0)
         
-        first_name = fake.first_name()
-        last_name = fake.last_name()
-        name = f"{random.choice(TITLES)}{first_name} {last_name}"
-        email = fake.unique.email()
-        
-        # Create User
-        user = User.objects.create_user(
-            email=email,
-            password="password123",
-            role="doctor",
-            is_active=True
-        )
-        
-        # Create Doctor Profile
-        DoctorProfile.objects.create(
-            user=user,
-            gender=random.choice(["Male", "Female"]),
-            date_of_birth=fake.date_of_birth(minimum_age=30, maximum_age=60),
-            contact_number=fake.phone_number(),
-            address=fake.address(),
-            qualification="MBBS, MD",
-            specialization=department.name,
-            year_of_experience=random.randint(2, 30),
-            aadhaar=fake.aadhaar_id()
-        )
-        
-        # Create Doctor Record
-        doc = Doctor.objects.create(
-            user=user,
-            name=name,
-            specialization=department.name,
-            hospital=hospital,
-            department=department,
-            status=Doctor.STATUS_APPROVED,
-            is_approved=True
-        )
-        # Assign treatments
-        treatments = department.treatments.all()
-        if treatments.exists():
-            doc.treatments.set(treatments)
+        for _ in range(doctors_for_this_hospital):
+            departments = hospital.departments.all()
+            if not departments.exists():
+                print(f"Skipping hospital {hospital.name} - no departments")
+                continue
+            department = random.choice(departments)
             
+            first_name = fake.first_name()
+            last_name = fake.last_name()
+            name = f"{random.choice(TITLES)}{first_name} {last_name}"
+            email = fake.unique.email()
+            
+            # Create User
+            user = User.objects.create_user(
+                email=email,
+                password="password123",
+                role="doctor",
+                is_active=True
+            )
+            
+            # Note: Skipping DoctorProfile creation due to required file fields
+            # For demo data, we'll create only the Doctor record
+            
+            # Create Doctor Record
+            doc = Doctor.objects.create(
+                user=user,
+                name=name,
+                specialization=department.name,
+                hospital=hospital,
+                department=department,
+                status=Doctor.STATUS_APPROVED,
+                is_approved=True
+            )
+            # Assign treatments
+            treatments = department.treatments.all()
+            if treatments.exists():
+                doc.treatments.set(treatments)
+                
     print("Doctors created.")
 
 def create_patients(hospitals, count=60):
     print(f"Creating {count} Patients...")
-    locations = CITIES 
+    patients_per_hospital = count // len(hospitals)
+    remainder = count % len(hospitals)  # Distribute remaining patients to first hospitals
     
-    for _ in range(count):
-        first_name = fake.first_name()
-        last_name = fake.last_name()
-        email = fake.unique.email()
+    for i, hospital in enumerate(hospitals):
+        # Distribute remainder to first few hospitals
+        patients_for_this_hospital = patients_per_hospital + (1 if i < remainder else 0)
         
-        user = User.objects.create_user(
-            email=email,
-            password="password123",
-            role="patient",
-            is_active=True
-        )
-        
-        # Random location for address from required list
-        city = random.choice(locations)
-        
-        Patient.objects.create(
-            user=user,
-            name=f"{first_name} {last_name}",
-            hospital=random.choice(hospitals) if random.choice([True, False]) else None,
-            age=random.randint(18, 90),
-            gender=random.choice(["Male", "Female", "Other"]),
-            phone=fake.phone_number(),
-            address=f"{fake.street_address()}, {city}, Gujarat",
-            medical_history=fake.text()
-        )
+        for _ in range(patients_for_this_hospital):
+            first_name = fake.first_name()
+            last_name = fake.last_name()
+            email = fake.unique.email()
+            
+            user = User.objects.create_user(
+                email=email,
+                password="password123",
+                role="patient",
+                is_active=True
+            )
+            
+            # Use hospital's city for address
+            city = hospital.city
+            
+            Patient.objects.create(
+                user=user,
+                name=f"{first_name} {last_name}",
+                hospital=hospital,  # Guaranteed assignment
+                age=random.randint(18, 90),
+                gender=random.choice(["Male", "Female", "Other"]),
+                phone=fake.phone_number(),
+                address=f"{fake.street_address()}, {city}, Gujarat",
+                medical_history=fake.text()
+            )
     print("Patients created.")
 
 if __name__ == "__main__":

@@ -15,25 +15,7 @@ from appointments.models import Appointment
 
 def assign_patients():
     
-    # 1. Assign Unassigned Patients to Hospitals
-    unassigned_patients = Patient.objects.filter(hospital__isnull=True)
-    if unassigned_patients.exists():
-        print(f"Found {unassigned_patients.count()} unassigned patients. Assigning them to hospitals...")
-        hospitals = list(Hospital.objects.filter(status=Hospital.STATUS_APPROVED))
-        
-        if not hospitals:
-            print("No approved hospitals found! Cannot assign.")
-            return
-
-        for patient in unassigned_patients:
-            hospital = random.choice(hospitals)
-            patient.hospital = hospital
-            patient.save()
-            print(f"Assigned {patient.name} -> {hospital.name}")
-    else:
-        print("All patients are already assigned to hospitals.")
-
-    # 2. Ensure every patient has at least one appointment (Doctor Assignment)
+    # Ensure every patient has at least one appointment (Doctor Assignment)
     # We define "Assigned to Doctor" as having a history with them.
     all_patients = Patient.objects.all()
     print(f"Checking appointments for {all_patients.count()} patients...")
@@ -53,7 +35,7 @@ def assign_patients():
                 continue
 
             # Pick a doctor from this hospital
-            doctors = hospital.doctor_set.all()
+            doctors = Doctor.objects.filter(hospital=hospital)
             if not doctors.exists():
                 print(f"Skipping {patient.name} (No doctors in {hospital.name})")
                 continue

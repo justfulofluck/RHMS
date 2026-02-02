@@ -265,6 +265,11 @@ class DoctorViewSet(viewsets.ModelViewSet):
         qs = super().get_queryset()
         user = self.request.user
 
+        # Handle hospital_id filter from query parameters
+        hospital_id = self.request.query_params.get('hospital_id')
+        if hospital_id:
+            qs = qs.filter(hospital_id=hospital_id)
+
         if hasattr(user, 'doctor'):
             return qs.filter(id=user.doctor.id)  # Doctor sees only self
         elif hasattr(user, 'hospital_admin'):

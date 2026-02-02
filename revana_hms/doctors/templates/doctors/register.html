@@ -48,14 +48,14 @@
 
 
     /* center container vertically */
-   
+
     .page-wrap {
-    min-height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-}
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
 
     .container {
       background: #fff;
@@ -65,7 +65,7 @@
     }
 
     .card-register {
-     
+
       max-width: calc(100% - 40px);
       width: 1320px;
       background: var(--card-bg);
@@ -196,234 +196,221 @@
 </head>
 
 <body>
-  
+
   <div id="top-loading-bar"></div>
- <div class="page-wrap">
-  
+  <div class="page-wrap">
+
     <div class="card-register">
-    <h2>Doctor Registration</h2>
-    <form id="doctorForm" method="post" enctype="multipart/form-data" action="{% url 'register_doctor' %}">
-      {% csrf_token %}
+      <h2>Doctor Registration</h2>
+      <form id="doctorForm" method="post" enctype="multipart/form-data" action="{% url 'register_doctor' %}">
+        {% csrf_token %}
 
 
-      <div class="row g-3">
+        <div class="row g-3">
 
-        <!-- Full Name -->
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-            <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+          <!-- Full Name -->
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+              <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+            </div>
           </div>
-        </div>
 
-        <!-- Email -->
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-            <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
+          <!-- Email -->
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+              <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
+            </div>
           </div>
-        </div>
 
-        <!-- Contact Number -->
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
-            <input
-        type="text"
-        class="form-control"
-        name="phone_number"
-        placeholder="+91XXXXXXXXXX"
-        maxlength="13"
-        required
-        oninput="allowPhoneNumber(this)">
+          <!-- Contact Number -->
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+              <input type="text" class="form-control" name="contact_number" placeholder="+91XXXXXXXXXX" maxlength="13"
+                minlength="10" required oninput="allowPhoneNumber(this)">
+            </div>
           </div>
-        </div>
           <script>
-                   function allowPhoneNumber(input) {
-                          let value = input.value;
+            function allowPhoneNumber(input) {
+              let value = input.value;
 
-                          // Allow + only at the start
-                          if (value.startsWith('+')) {
-                            value = '+' + value.slice(1).replace(/[^0-9]/g, '');
-                          } else {
-                            value = value.replace(/[^0-9]/g, '');
-                          }
+              // Allow + only at the start
+              if (value.startsWith('+')) {
+                value = '+' + value.slice(1).replace(/[^0-9]/g, '');
+              } else {
+                value = value.replace(/[^0-9]/g, '');
+              }
 
-                          // Limit to +91 + 10 digits OR 12 digits without +
-                          if (value.startsWith('+')) {
-                            value = value.slice(0, 13); // + + 12 digits
-                          } else {
-                            value = value.slice(0, 12);
-                          }
+              // Limit to +91 + 10 digits OR 12 digits without +
+              if (value.startsWith('+')) {
+                value = value.slice(0, 13); // + + 12 digits
+              } else {
+                value = value.slice(0, 12);
+              }
 
-                          input.value = value;
-                        }
-              </script>
-
-
+              input.value = value;
+            }
+          </script>
 
 
-        <!-- Select Hospital -->
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-hospital"></i></span>
-            <select class="form-select" id="hospital" name="hospital" required>
-              <option value="" selected disabled>Select Hospital</option>
-              {% for hospital in hospitals %}
-              <option value="{{ hospital.id }}">{{ hospital.name }}</option>
-              {% endfor %}
-            </select>
+
+
+          <!-- Select Hospital -->
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-hospital"></i></span>
+              <select class="form-select" id="hospital" name="hospital" required>
+                <option value="" selected disabled>Select Hospital</option>
+                {% for hospital in hospitals %}
+                <option value="{{ hospital.id }}">{{ hospital.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
-        </div>
 
-        <!-- Specialization -->
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-stethoscope"></i></span>
-            <input type="text" class="form-control" id="specialization" name="specialization"
-              placeholder="Specialization" required>
+          <!-- Specialization -->
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-stethoscope"></i></span>
+              <input type="text" class="form-control" id="specialization" name="specialization"
+                placeholder="Specialization" required>
+            </div>
           </div>
-        </div>
 
-        <!-- Qualification -->
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-graduation-cap"></i></span>
-            <input type="text" class="form-control" id="qualification" name="qualification" placeholder="Qualification"
-              required>
+          <!-- Qualification -->
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-graduation-cap"></i></span>
+              <input type="text" class="form-control" id="qualification" name="qualification"
+                placeholder="Qualification" required>
+            </div>
           </div>
-        </div>
 
-        <!-- Years of Experience -->
-        <div class="col-md-3">
+          <!-- Years of Experience -->
+          <div class="col-md-3">
             <div class="input-group">
               <span class="input-group-text">
                 <i class="fa-solid fa-briefcase"></i>
               </span>
-              <input
-                type="text"
-                class="form-control"
-                id="year_of_experience"
-                name="year_of_experience"
-                placeholder="Years of Experience"
-                maxlength="2"
-                required
-                oninput="allowExperience(this)">
-        </div>
-      </div>
+              <input type="text" class="form-control" id="year_of_experience" name="year_of_experience"
+                placeholder="Years of Experience" maxlength="2" required oninput="allowExperience(this)">
+            </div>
+          </div>
 
 
-      <script>
-          function allowExperience(input) {
-            // Remove non-numeric characters
-            let value = input.value.replace(/[^0-9]/g, '');
+          <script>
+            function allowExperience(input) {
+              // Remove non-numeric characters
+              let value = input.value.replace(/[^0-9]/g, '');
 
-            // Convert to number
-            let num = parseInt(value, 10);
+              // Convert to number
+              let num = parseInt(value, 10);
 
-            // If empty, allow clearing
-            if (value === '') {
-              input.value = '';
-              return;
+              // If empty, allow clearing
+              if (value === '') {
+                input.value = '';
+                return;
+              }
+
+              // Enforce range 1–50
+              if (num < 1) num = 1;
+              if (num > 50) num = 50;
+
+              input.value = num;
             }
-
-            // Enforce range 1–50
-            if (num < 1) num = 1;
-            if (num > 50) num = 50;
-
-            input.value = num;
-          }
-      </script>
+          </script>
 
 
-        <!-- Aadhaar Number -->
-        <div class="col-md-3">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
-            <input type="text" class="form-control" id="aadhaar" name="aadhaar" placeholder="Aadhaar Number" required maxlength="12"
-              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,12);">
+          <!-- Aadhaar Number -->
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+              <input type="text" class="form-control" id="aadhaar" name="aadhaar" placeholder="Aadhaar Number" required
+                maxlength="12" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,12);">
+            </div>
           </div>
-        </div>
 
-        <!-- Gender -->
-        <div class="col-md-3">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-venus-mars"></i></span>
-            <select class="form-select" id="gender" name="gender" required>
-              <option value="" disabled selected>Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
+          <!-- Gender -->
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-venus-mars"></i></span>
+              <select class="form-select" id="gender" name="gender" required>
+                <option value="" disabled selected>Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <!-- Date of Birth -->
-        <div class="col-md-3">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
-            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" placeholder="Date of Birth"
+          <!-- Date of Birth -->
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
+              <input type="date" class="form-control" id="date_of_birth" name="date_of_birth"
+                placeholder="Date of Birth" required>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="col-12">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+
+              <textarea class="form-control" id="address" name="address" rows="1" placeholder="Address"
+                required></textarea>
+            </div>
+          </div>
+
+          <!-- Medical Certificate -->
+          <div class="col-md-4">
+            <label for="medical_certificate" class="form-label">Medical Certificate</label>
+            <input type="file" class="form-control" id="medical_certificate" name="medical_certificate" required>
+          </div>
+
+          <!-- Registration Certificate -->
+          <div class="col-md-4">
+            <label for="registration_certificate" class="form-label">Registration Certificate</label>
+            <input type="file" class="form-control" id="registration_certificate" name="registration_certificate"
               required>
           </div>
-        </div>
 
-        <!-- Address -->
-        <div class="col-12">
-          <div class="input-group">
-            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-
-            <textarea class="form-control" id="address" name="address" rows="1" placeholder="Address"
-              required></textarea>
+          <!-- Degree Certificates -->
+          <div class="col-md-4">
+            <label for="degree_certificates" class="form-label">Degree Certificates</label>
+            <input type="file" class="form-control" id="degree_certificates" name="degree_certificates" required>
           </div>
+
+          <!-- Passport Photo -->
+          <div class="col-md-4">
+            <label for="passport_photo" class="form-label">Passport Photo</label>
+            <input type="file" class="form-control" id="passport_photo" name="passport_photo" required>
+          </div>
+
+          <!-- Experience Certificate -->
+          <div class="col-4">
+            <label for="experience_certificate" class="form-label">Experience Certificate (Optional)</label>
+            <input type="file" class="form-control" id="experience_certificate" name="experience_certificate"
+              placeholder="Experience Certificate (Optional)">
+          </div>
+
         </div>
 
-        <!-- Medical Certificate -->
-        <div class="col-md-4">
-          <label for="medical_certificate" class="form-label">Medical Certificate</label>
-          <input type="file" class="form-control" id="medical_certificate" name="medical_certificate" required>
+        <br>
+
+        <button type="submit" class="btn btn-submit w-100">Register</button>
+
+        <div class="text-center mt-3">
+          <p>Already registered?
+            <a href="{% url 'doctor_login'%}" style="color:#864d26; font-weight:600; text-decoration:none;">
+              Login here
+            </a>
+          </p>
         </div>
-
-        <!-- Registration Certificate -->
-        <div class="col-md-4">
-          <label for="registration_certificate" class="form-label">Registration Certificate</label>
-          <input type="file" class="form-control" id="registration_certificate" name="registration_certificate"
-            required>
-        </div>
-
-        <!-- Degree Certificates -->
-        <div class="col-md-4">
-          <label for="degree_certificates" class="form-label">Degree Certificates</label>
-          <input type="file" class="form-control" id="degree_certificates" name="degree_certificates" required>
-        </div>
-
-        <!-- Passport Photo -->
-        <div class="col-md-4">
-          <label for="passport_photo" class="form-label">Passport Photo</label>
-          <input type="file" class="form-control" id="passport_photo" name="passport_photo" required>
-        </div>
-
-        <!-- Experience Certificate -->
-        <div class="col-4">
-          <label for="experience_certificate" class="form-label">Experience Certificate (Optional)</label>
-          <input type="file" class="form-control" id="experience_certificate" name="experience_certificate"
-            placeholder="Experience Certificate (Optional)">
-        </div>
-
-      </div>
-
-      <br>
-
-      <button type="submit" class="btn btn-submit w-100">Register</button>
-
-      <div class="text-center mt-3">
-        <p>Already registered?
-          <a href="{% url 'doctor_login'%}" style="color:#864d26; font-weight:600; text-decoration:none;">
-            Login here
-          </a>
-        </p>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
   </div>
 
   <script>
