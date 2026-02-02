@@ -41,12 +41,12 @@ class HospitalViewSet(ModelViewSet):
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.select_related('hospital').all()
     serializer_class = DepartmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return [permissions.IsAuthenticated(), IsSuperAdmin() | IsHospitalAdminOfSameHospital()]
-        return [ permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticatedOrReadOnly()]
     
     def get_queryset(self):
         qs = super().get_queryset()
@@ -59,12 +59,12 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 class TreatmentViewSet(viewsets.ModelViewSet):
     queryset = Treatment.objects.select_related('hospital', 'department').all()
     serializer_class = TreatmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return [permissions.IsAuthenticated(), IsSuperAdmin() | IsHospitalAdminOfSameHospital()]
-        return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticatedOrReadOnly()]
     
     def get_queryset(self):
         qs = super().get_queryset()

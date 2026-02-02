@@ -33,10 +33,10 @@ class HospitalPublicSerializer(serializers.ModelSerializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ['id', 'hospital', 'name', 'description']
+        fields = ['id', 'hospital', 'name']
 
 class TreatmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Treatment
-        fields = ['id', 'hospital', 'department', 'name', 'description']
+        fields = ['id', 'hospital', 'department', 'name']
 
