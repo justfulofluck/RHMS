@@ -189,7 +189,11 @@
                     <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
                 </div>
 
-                <img src="#" class="avatar">
+                {% if hospital.logo %}
+                <img src="{{ hospital.logo.url }}" class="avatar">
+                {% else %}
+                <img src="https://via.placeholder.com/150" class="avatar">
+                {% endif %}
             </div>
         </div>
 

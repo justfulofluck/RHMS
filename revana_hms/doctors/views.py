@@ -160,7 +160,7 @@ def add_doctor_submit(request):
                 user = User.objects.create_user(
                     email=email,
                     password=password,
-                    phone=data.get('contact_number'),
+                    phone=data.get('contact_number') or data.get('phone_number'),
                     role='doctor',
                     is_active=True
                 )
@@ -169,7 +169,7 @@ def add_doctor_submit(request):
                     user=user,
                     gender=data.get('gender'),
                     date_of_birth=data.get('date_of_birth'),
-                    contact_number=data.get('contact_number'),
+                    contact_number=data.get('contact_number') or data.get('phone_number'),
                     address=data.get('address'),
                     medical_certificate=request.FILES.get('medical_certificate'),
                     qualification=data.get('qualification'),
