@@ -220,7 +220,7 @@
 
         <!-- Appointments Section (Moved to Top) -->
         <div class="row g-4 mb-4">
-            <div class="col-6">
+            <div class="col-7">
                 <div class="list-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="section-title">Appointments</div>
@@ -250,7 +250,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6">
+
+            <div class="col-5">
                 <!-- Appointment List -->
                 <div id="appointmentList">
                     <!-- Populated by JS -->
@@ -262,265 +263,264 @@
                 </div>
             </div>
         </div>
-    </div>
 
 
-    <!-- Content Columns -->
-    <div class="row g-4">
+        <!-- Content Columns -->
+        <div class="row g-4">
 
-        <!-- Left Column -->
-        <div class="col-lg-4">
+            <!-- Left Column -->
+            <div class="col-lg-4">
 
 
 
-            <div class="list-card">
-                <div class="section-title">Treatments</div>
-                <ul class="list-unstyled">
-                    {% for treatment in treatments %}
-                    <li class="py-2 border-bottom">{{ treatment.name }}</li>
-                    {% empty %}
-                    <li>No treatments found.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <!-- Right Column -->
-        <div class="col-lg-8">
-
-            <div class="list-card">
-                <div class="section-title">Departments</div>
-                <ul class="list-unstyled">
-                    {% for dept in departments %}
-                    <li class="py-2 border-bottom">{{ dept.name }}</li>
-                    {% empty %}
-                    <li>No departments found.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <div class="list-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="section-title">Doctors ({{ doctors|length }})</div>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'add_doctor_page' %}" class="btn btn-sm"
-                            style="background:var(--brown); color:white;">
-                            <i class="fa-solid fa-plus"></i> Add Doctor
-                        </a>
-                        <a href="{% url 'pending_doctors' %}" class="btn btn-sm"
-                            style="background:var(--brown); color:white;">
-                            <i class="fa-solid fa-user-doctor"></i> Manage Doctors
-                        </a>
-                    </div>
+                <div class="list-card">
+                    <div class="section-title">Treatments</div>
+                    <ul class="list-unstyled">
+                        {% for treatment in treatments %}
+                        <li class="py-2 border-bottom">{{ treatment.name }}</li>
+                        {% empty %}
+                        <li>No treatments found.</li>
+                        {% endfor %}
+                    </ul>
                 </div>
-                <ul class="list-unstyled">
-                    {% for doctor in doctors %}
-                    <li class="py-2 border-bottom">{{ doctor.name }} - {{ doctor.specialization }}</li>
-                    {% empty %}
-                    <li>No doctors found.</li>
-                    {% endfor %}
-                </ul>
             </div>
 
+            <!-- Right Column -->
+            <div class="col-lg-8">
 
-            <style>
-                .calendar-grid {
-                    display: grid;
-                    grid-template-columns: repeat(7, 1fr);
-                    text-align: center;
-                    gap: 5px;
-                }
+                <div class="list-card">
+                    <div class="section-title">Departments</div>
+                    <ul class="list-unstyled">
+                        {% for dept in departments %}
+                        <li class="py-2 border-bottom">{{ dept.name }}</li>
+                        {% empty %}
+                        <li>No departments found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
 
-                .cal-day-header {
-                    font-weight: 700;
-                    color: var(--brown-dark);
-                    font-size: 0.9rem;
-                    padding-bottom: 8px;
-                }
-
-                .cal-day {
-                    width: 36px;
-                    height: 36px;
-                    line-height: 36px;
-                    margin: 0 auto;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-size: 0.9rem;
-                    transition: 0.2s;
-                    color: #555;
-                }
-
-                .cal-day:hover {
-                    background-color: #f0e2d3;
-                }
-
-                .cal-day.active {
-                    background-color: var(--brown-dark);
-                    /* #6b3f21 chosen color */
-                    color: white !important;
-                }
-
-                .cal-day.has-appt {
-                    font-weight: bold;
-                    color: var(--brown);
-                }
-
-                .cal-day.text-muted {
-                    color: #ccc !important;
-                }
-
-                /* Appointment Item */
-                .appt-item {
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    padding: 12px;
-                    margin-bottom: 10px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    border-left: 4px solid var(--brown);
-                    /* Accent */
-                }
-
-                .appt-item:nth-child(even) {
-                    background: #fff5eb;
-                    /* Light brown tint */
-                    border-left-color: #e9d7c3;
-                }
-
-                .appt-title {
-                    font-weight: 700;
-                    color: var(--brown-dark);
-                    font-size: 0.95rem;
-                }
-
-                .appt-time {
-                    color: #6c757d;
-                    font-size: 0.85rem;
-                }
-
-                .appt-avatar {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                }
+                <div class="list-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="section-title">Doctors ({{ doctors|length }})</div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'add_doctor_page' %}" class="btn btn-sm"
+                                style="background:var(--brown); color:white;">
+                                <i class="fa-solid fa-plus"></i> Add Doctor
+                            </a>
+                            <a href="{% url 'pending_doctors' %}" class="btn btn-sm"
+                                style="background:var(--brown); color:white;">
+                                <i class="fa-solid fa-user-doctor"></i> Manage Doctors
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled">
+                        {% for doctor in doctors %}
+                        <li class="py-2 border-bottom">{{ doctor.name }} - {{ doctor.specialization }}</li>
+                        {% empty %}
+                        <li>No doctors found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
 
 
-
-                /* Custom Scrollbar for list if needed */
-                #appointmentList {
-                    max-height: 400px;
-                    overflow-y: auto;
-                }
-            </style>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const appointments = JSON.parse('{{ appointments_json|escapejs }}');
-
-                    let currentDate = new Date();
-                    let selectedDate = new Date(); // Defaults to today
-
-                    const calendarGrid = document.getElementById('calendarGrid');
-                    const monthYearEl = document.getElementById('currentMonthYear');
-                    const apptListEl = document.getElementById('appointmentList');
-
-                    // Helper: Format Date YYYY-MM-DD
-                    function formatDate(date) {
-                        const y = date.getFullYear();
-                        const m = String(date.getMonth() + 1).padStart(2, '0');
-                        const d = String(date.getDate()).padStart(2, '0');
-                        return `${y}-${m}-${d}`;
+                <style>
+                    .calendar-grid {
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        text-align: center;
+                        gap: 5px;
                     }
 
-                    function renderCalendar(date) {
-                        const year = date.getFullYear();
-                        const month = date.getMonth();
+                    .cal-day-header {
+                        font-weight: 700;
+                        color: var(--brown-dark);
+                        font-size: 0.9rem;
+                        padding-bottom: 8px;
+                    }
 
-                        // Set Header
-                        const monthNames = ["January", "February", "March", "April", "May", "June",
-                            "July", "August", "September", "October", "November", "December"];
-                        monthYearEl.textContent = `${monthNames[month]} ${year}`;
+                    .cal-day {
+                        width: 36px;
+                        height: 36px;
+                        line-height: 36px;
+                        margin: 0 auto;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        transition: 0.2s;
+                        color: #555;
+                    }
 
-                        // Clear previous days (keep headers)
-                        const headers = calendarGrid.querySelectorAll('.cal-day-header');
-                        calendarGrid.innerHTML = '';
-                        headers.forEach(h => calendarGrid.appendChild(h));
+                    .cal-day:hover {
+                        background-color: #f0e2d3;
+                    }
 
-                        const firstDayIdx = new Date(year, month, 1).getDay();
-                        const lastDay = new Date(year, month + 1, 0).getDate();
-                        const prevLastDay = new Date(year, month, 0).getDate();
+                    .cal-day.active {
+                        background-color: var(--brown-dark);
+                        /* #6b3f21 chosen color */
+                        color: white !important;
+                    }
 
-                        // Previous Month Padding
-                        for (let i = firstDayIdx; i > 0; i--) {
-                            const dayEl = document.createElement('div');
-                            dayEl.className = 'cal-day text-muted';
-                            dayEl.textContent = prevLastDay - i + 1;
-                            calendarGrid.appendChild(dayEl);
+                    .cal-day.has-appt {
+                        font-weight: bold;
+                        color: var(--brown);
+                    }
+
+                    .cal-day.text-muted {
+                        color: #ccc !important;
+                    }
+
+                    /* Appointment Item */
+                    .appt-item {
+                        background: #f8f9fa;
+                        border-radius: 8px;
+                        padding: 12px;
+                        margin-bottom: 10px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-left: 4px solid var(--brown);
+                        /* Accent */
+                    }
+
+                    .appt-item:nth-child(even) {
+                        background: #fff5eb;
+                        /* Light brown tint */
+                        border-left-color: #e9d7c3;
+                    }
+
+                    .appt-title {
+                        font-weight: 700;
+                        color: var(--brown-dark);
+                        font-size: 0.95rem;
+                    }
+
+                    .appt-time {
+                        color: #6c757d;
+                        font-size: 0.85rem;
+                    }
+
+                    .appt-avatar {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        object-fit: cover;
+                    }
+
+
+
+                    /* Custom Scrollbar for list if needed */
+                    #appointmentList {
+                        max-height: 400px;
+                        overflow-y: auto;
+                    }
+                </style>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const appointments = JSON.parse('{{ appointments_json|escapejs }}');
+
+                        let currentDate = new Date();
+                        let selectedDate = new Date(); // Defaults to today
+
+                        const calendarGrid = document.getElementById('calendarGrid');
+                        const monthYearEl = document.getElementById('currentMonthYear');
+                        const apptListEl = document.getElementById('appointmentList');
+
+                        // Helper: Format Date YYYY-MM-DD
+                        function formatDate(date) {
+                            const y = date.getFullYear();
+                            const m = String(date.getMonth() + 1).padStart(2, '0');
+                            const d = String(date.getDate()).padStart(2, '0');
+                            return `${y}-${m}-${d}`;
                         }
 
-                        // Current Month Days
-                        for (let i = 1; i <= lastDay; i++) {
-                            const currentDayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                            const dayEl = document.createElement('div');
-                            dayEl.className = 'cal-day';
-                            dayEl.textContent = i;
+                        function renderCalendar(date) {
+                            const year = date.getFullYear();
+                            const month = date.getMonth();
 
-                            // Has Appointment?
-                            const hasAppt = appointments.some(a => a.date === currentDayStr);
-                            if (hasAppt) dayEl.classList.add('has-appt');
+                            // Set Header
+                            const monthNames = ["January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"];
+                            monthYearEl.textContent = `${monthNames[month]} ${year}`;
 
-                            // Is Selected?
-                            if (currentDayStr === formatDate(selectedDate)) {
-                                dayEl.classList.add('active');
-                            }
+                            // Clear previous days (keep headers)
+                            const headers = calendarGrid.querySelectorAll('.cal-day-header');
+                            calendarGrid.innerHTML = '';
+                            headers.forEach(h => calendarGrid.appendChild(h));
 
-                            dayEl.addEventListener('click', () => {
-                                selectedDate = new Date(year, month, i);
-                                renderCalendar(currentDate); // Re-render to update active state
-                                renderAppointments(selectedDate);
-                            });
+                            const firstDayIdx = new Date(year, month, 1).getDay();
+                            const lastDay = new Date(year, month + 1, 0).getDate();
+                            const prevLastDay = new Date(year, month, 0).getDate();
 
-                            calendarGrid.appendChild(dayEl);
-                        }
-
-                        // Next Month Padding (to complete grid)
-                        const totalCells = firstDayIdx + lastDay;
-                        const nextDays = 42 - totalCells; // 6 rows * 7 cols
-                        if (nextDays < 42) { // Only if we need padding
-                            for (let i = 1; i <= nextDays && (calendarGrid.children.length - 7) < 42; i++) {
-                                // (calendarGrid.children.length - 7) excludes headers
-                                // Actually just fill until 35 or 42 based on rows needed
-                                if ((calendarGrid.children.length - 7) % 7 === 0 && (calendarGrid.children.length - 7) >= 35) break;
-
+                            // Previous Month Padding
+                            for (let i = firstDayIdx; i > 0; i--) {
                                 const dayEl = document.createElement('div');
                                 dayEl.className = 'cal-day text-muted';
-                                dayEl.textContent = i;
+                                dayEl.textContent = prevLastDay - i + 1;
                                 calendarGrid.appendChild(dayEl);
                             }
+
+                            // Current Month Days
+                            for (let i = 1; i <= lastDay; i++) {
+                                const currentDayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                                const dayEl = document.createElement('div');
+                                dayEl.className = 'cal-day';
+                                dayEl.textContent = i;
+
+                                // Has Appointment?
+                                const hasAppt = appointments.some(a => a.date === currentDayStr);
+                                if (hasAppt) dayEl.classList.add('has-appt');
+
+                                // Is Selected?
+                                if (currentDayStr === formatDate(selectedDate)) {
+                                    dayEl.classList.add('active');
+                                }
+
+                                dayEl.addEventListener('click', () => {
+                                    selectedDate = new Date(year, month, i);
+                                    renderCalendar(currentDate); // Re-render to update active state
+                                    renderAppointments(selectedDate);
+                                });
+
+                                calendarGrid.appendChild(dayEl);
+                            }
+
+                            // Next Month Padding (to complete grid)
+                            const totalCells = firstDayIdx + lastDay;
+                            const nextDays = 42 - totalCells; // 6 rows * 7 cols
+                            if (nextDays < 42) { // Only if we need padding
+                                for (let i = 1; i <= nextDays && (calendarGrid.children.length - 7) < 42; i++) {
+                                    // (calendarGrid.children.length - 7) excludes headers
+                                    // Actually just fill until 35 or 42 based on rows needed
+                                    if ((calendarGrid.children.length - 7) % 7 === 0 && (calendarGrid.children.length - 7) >= 35) break;
+
+                                    const dayEl = document.createElement('div');
+                                    dayEl.className = 'cal-day text-muted';
+                                    dayEl.textContent = i;
+                                    calendarGrid.appendChild(dayEl);
+                                }
+                            }
                         }
-                    }
 
-                    function renderAppointments(date) {
-                        const dateStr = formatDate(date);
-                        const dailyAppts = appointments.filter(a => a.date === dateStr);
+                        function renderAppointments(date) {
+                            const dateStr = formatDate(date);
+                            const dailyAppts = appointments.filter(a => a.date === dateStr);
 
-                        apptListEl.innerHTML = '';
+                            apptListEl.innerHTML = '';
 
-                        if (dailyAppts.length === 0) {
-                            apptListEl.innerHTML = `
+                            if (dailyAppts.length === 0) {
+                                apptListEl.innerHTML = `
                                     <div class="text-center text-muted py-4">
                                         <i class="fa-regular fa-calendar-xmark mb-2 fs-4"></i>
                                         <p class="mb-0 small">No appointments for ${date.toDateString()}</p>
                                     </div>`;
-                            return;
-                        }
+                                return;
+                            }
 
-                        dailyAppts.forEach(appt => {
-                            const el = document.createElement('div');
-                            el.className = 'appt-item';
-                            el.innerHTML = `
+                            dailyAppts.forEach(appt => {
+                                const el = document.createElement('div');
+                                el.className = 'appt-item';
+                                el.innerHTML = `
                                     <div>
                                         <div class="appt-title">${appt.type || 'General Visit'}</div>
                                         <div class="appt-time">
@@ -531,58 +531,58 @@
                                         ${appt.doctor_image ? `<img src="${appt.doctor_image}" class="appt-avatar" title="${appt.doctor_name}">` : ''}
                                     </div>
                                 `;
-                            apptListEl.appendChild(el);
+                                apptListEl.appendChild(el);
+                            });
+                        }
+
+                        // Event Listeners
+                        document.getElementById('prevMonth').addEventListener('click', () => {
+                            currentDate.setMonth(currentDate.getMonth() - 1);
+                            renderCalendar(currentDate);
                         });
-                    }
 
-                    // Event Listeners
-                    document.getElementById('prevMonth').addEventListener('click', () => {
-                        currentDate.setMonth(currentDate.getMonth() - 1);
+                        document.getElementById('nextMonth').addEventListener('click', () => {
+                            currentDate.setMonth(currentDate.getMonth() + 1);
+                            renderCalendar(currentDate);
+                        });
+
+                        // Init
                         renderCalendar(currentDate);
+                        renderAppointments(selectedDate);
                     });
-
-                    document.getElementById('nextMonth').addEventListener('click', () => {
-                        currentDate.setMonth(currentDate.getMonth() + 1);
-                        renderCalendar(currentDate);
-                    });
-
-                    // Init
-                    renderCalendar(currentDate);
-                    renderAppointments(selectedDate);
-                });
-            </script>
+                </script>
+            </div>
         </div>
-    </div>
-    <script>
-        // --- Top Loading Bar Logic ---
-        const loaderBar = document.getElementById('top-loading-bar');
+        <script>
+            // --- Top Loading Bar Logic ---
+            const loaderBar = document.getElementById('top-loading-bar');
 
-        function startLoader() {
-            loaderBar.style.opacity = '1';
-            loaderBar.style.width = '30%';
-            setTimeout(() => {
-                if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
-            }, 500);
-        }
+            function startLoader() {
+                loaderBar.style.opacity = '1';
+                loaderBar.style.width = '30%';
+                setTimeout(() => {
+                    if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
+                }, 500);
+            }
 
-        function stopLoader() {
-            loaderBar.style.width = '100%';
-            setTimeout(() => {
-                loaderBar.style.opacity = '0';
-                setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
-            }, 500);
-        }
+            function stopLoader() {
+                loaderBar.style.width = '100%';
+                setTimeout(() => {
+                    loaderBar.style.opacity = '0';
+                    setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
+                }, 500);
+            }
 
-        // Show on Page Load
-        startLoader();
-        window.addEventListener('load', stopLoader);
-
-        // Show on Submit
-        document.querySelector('form').addEventListener('submit', function () {
+            // Show on Page Load
             startLoader();
-        });
-        // -----------------------------
-    </script>
+            window.addEventListener('load', stopLoader);
+
+            // Show on Submit
+            document.querySelector('form').addEventListener('submit', function () {
+                startLoader();
+            });
+            // -----------------------------
+        </script>
 
     </div>
 
