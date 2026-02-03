@@ -1,0 +1,277 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>All Appointments</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --brown-dark: #6b3f21;
+            --brown: #8c6239;
+            --panel: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+            background: #f5ede5;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: var(--panel);
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h4 {
+            font-weight: 800;
+            color: var(--brown-dark);
+            margin-bottom: 20px;
+        }
+
+        .side-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--brown-dark);
+            font-weight: 600;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .side-link.active,
+        .side-link:hover {
+            background: var(--brown);
+            color: white !important;
+        }
+
+        /* Main */
+        .main {
+            margin-left: 270px;
+            padding: 30px;
+        }
+
+        /* Top Bar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .topbar h2 {
+            margin: 0;
+            color: var(--brown-dark);
+            font-weight: 700;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--brown);
+        }
+
+        .list-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.07);
+            margin-bottom: 20px;
+        }
+
+        /* Custom Badges */
+        .badge-scheduled {
+            background-color: var(--brown) !important;
+            color: white;
+        }
+
+        .badge-token {
+            background-color: var(--brown) !important;
+            color: white;
+        }
+
+        /* Top Loading Bar */
+        #top-loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #8c6239;
+            /* App brown color */
+            z-index: 99999;
+            transition: width 0.4s ease, opacity 0.4s ease;
+            width: 0%;
+            opacity: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="top-loading-bar"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4>Admin Panel</h4>
+
+        <a class="side-link" href="{% url 'hospital_admin_dashboard' %}">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+
+        <a class="side-link" href="{% url 'pending_doctors' %}">
+            <i class="fa-solid fa-user-doctor"></i> Doctors
+        </a>
+
+        <a class="side-link" href="{% url 'hospitals:manage_departments' %}">
+            <i class="fa-solid fa-users"></i> Departments
+        </a>
+
+        <a class="side-link" href="{% url 'hospitals:manage_treatments' %}">
+            <i class="fa-solid fa-stethoscope"></i> Treatments
+        </a>
+
+        <a class="side-link active" href="{% url 'hospital_appointments' %}">
+            <i class="fa-regular fa-calendar-check"></i> Appointments
+        </a>
+
+        <a class="side-link" href="{% url 'logout' %}">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div>
+                <h2>All Appointments</h2>
+                <div class="text-muted">Logged in as {{ request.user.email }}</div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="small text-muted">Hospital</div>
+                    <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
+                </div>
+
+                {% if hospital.logo %}
+                <img src="{{ hospital.logo.url }}" class="avatar">
+                {% else %}
+                <img src="#" class="avatar">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="list-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead style="background:#f8f9fa;">
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Token</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appt in appointments %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ appt.patient_name }}</div>
+                                        <div class="small text-muted">{{ appt.patient_email|default:"No Email" }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{ appt.doctor.name }}</div>
+                                        <div class="small text-muted">{{ appt.doctor.specialization }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{ appt.appointment_date|date:"M d, Y" }}</div>
+                                        <div class="small text-muted">{{ appt.appointment_date|time:"h:i A" }}</div>
+                                    </td>
+                                    <td>
+                                        {% if appt.status == 'scheduled' %}
+                                        <span class="badge badge-scheduled">Scheduled</span>
+                                        {% elif appt.status == 'confirmed' %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                        {% elif appt.status == 'completed' %}
+                                        <span class="badge bg-secondary">Completed</span>
+                                        {% elif appt.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        {% else %}
+                                        <span class="badge bg-light text-dark">{{ appt.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="badge badge-token">#{{ appt.token_number }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No appointments found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Top Loading Bar Logic ---
+        const loaderBar = document.getElementById('top-loading-bar');
+
+        function startLoader() {
+            loaderBar.style.opacity = '1';
+            loaderBar.style.width = '30%';
+            setTimeout(() => {
+                if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
+            }, 500);
+        }
+
+        function stopLoader() {
+            loaderBar.style.width = '100%';
+            setTimeout(() => {
+                loaderBar.style.opacity = '0';
+                setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
+            }, 500);
+        }
+
+        // Show on Page Load
+        startLoader();
+        window.addEventListener('load', stopLoader);
+
+        // Show on Submit
+        document.querySelector('form')?.addEventListener('submit', function () {
+            startLoader();
+        });
+        // -----------------------------
+    </script>
+
+</body>
+
+</html>

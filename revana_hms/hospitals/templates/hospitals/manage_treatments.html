@@ -125,19 +125,20 @@
             margin-bottom: 10px;
             font-size: 1.1rem;
         }
+
         #top-loading-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 4px;
-      background: #8c6239;
-      /* App brown color */
-      z-index: 99999;
-      transition: width 0.4s ease, opacity 0.4s ease;
-      width: 0%;
-      opacity: 1;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #8c6239;
+            /* App brown color */
+            z-index: 99999;
+            transition: width 0.4s ease, opacity 0.4s ease;
+            width: 0%;
+            opacity: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
@@ -164,7 +165,7 @@
             <i class="fa-solid fa-stethoscope"></i> Treatments
         </a>
 
-        <a class="side-link" href="#">
+        <a class="side-link" href="{% url 'hospital_appointments' %}">
             <i class="fa-regular fa-calendar-check"></i> Appointments
         </a>
 
@@ -193,71 +194,76 @@
             </div>
         </div>
         <br>
-{% block content %}
-<div class="col-lg-12">
-    <h2 style="color:#6e432d;">Manage Treatments</h2>
-<br>
-    <div class="card mb-4">
-        <div class="card-header" style="background-color: #c9a788;color: #6b3f21;font-weight: 600;">Add New Treatment</div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <input type="text" name="name" class="form-control" placeholder="Treatment Name" required>
-                    </div>
-                    <div class="col-md-4">
-                        <select name="department_id" class="form-select" required>
-                            <option value="">Select Department</option>
-                            {% for department in departments %}
-                            <option value="{{ department.id }}">{{ department.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <!-- Add Cost and Duration fields if model supports them -->
-                    <div class="col-md-4">
-                        <button type="submit" name="create" style="background-color: #6b3f21;border: #6b3f21; " class="btn btn-primary w-100">Add Treatment</button>
-                    </div>
+        {% block content %}
+        <div class="col-lg-12">
+            <h2 style="color:#6e432d;">Manage Treatments</h2>
+            <br>
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #c9a788;color: #6b3f21;font-weight: 600;">Add New
+                    Treatment</div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" name="name" class="form-control" placeholder="Treatment Name"
+                                    required>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="department_id" class="form-select" required>
+                                    <option value="">Select Department</option>
+                                    {% for department in departments %}
+                                    <option value="{{ department.id }}">{{ department.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <!-- Add Cost and Duration fields if model supports them -->
+                            <div class="col-md-4">
+                                <button type="submit" name="create" style="background-color: #6b3f21;border: #6b3f21; "
+                                    class="btn btn-primary w-100">Add Treatment</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
+            <br>
+            <div class="card">
+                <div class="card-header" style="background-color: #c9a788 ;color: #6b3f21;font-weight: 600;">Existing
+                    Treatments</div>
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for treatment in treatments %}
+                        <tr>
+                            <td>{{ treatment.name }}</td>
+                            <td>{{ treatment.department.name }}</td>
+                            <td>
+                                <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="treatment_id" value="{{ treatment.id }}">
+                                    <button type="submit" name="delete"
+                                        style="background: #6b3f21; border: #6b3f21; color:#fff;">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No treatments found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-<br>
-    <div class="card">
-        <div class="card-header" style="background-color: #c9a788 ;color: #6b3f21;font-weight: 600;">Existing Treatments</div>
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for treatment in treatments %}
-                <tr>
-                    <td>{{ treatment.name }}</td>
-                    <td>{{ treatment.department.name }}</td>
-                    <td>
-                        <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure?');">
-                            {% csrf_token %}
-                            <input type="hidden" name="treatment_id" value="{{ treatment.id }}">
-                            <button type="submit" name="delete" style="background: #6b3f21; border: #6b3f21; color:#fff;">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3">No treatments found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endblock %}
-       
-       
+        {% endblock %}
+
+
 
     </div>
     <!--Topbar Logic-->

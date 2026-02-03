@@ -125,19 +125,20 @@
             margin-bottom: 10px;
             font-size: 1.1rem;
         }
+
         #top-loading-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 4px;
-      background: #8c6239;
-      /* App brown color */
-      z-index: 99999;
-      transition: width 0.4s ease, opacity 0.4s ease;
-      width: 0%;
-      opacity: 1;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #8c6239;
+            /* App brown color */
+            z-index: 99999;
+            transition: width 0.4s ease, opacity 0.4s ease;
+            width: 0%;
+            opacity: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
@@ -164,7 +165,7 @@
             <i class="fa-solid fa-stethoscope"></i> Treatments
         </a>
 
-        <a class="side-link" href="#">
+        <a class="side-link" href="{% url 'hospital_appointments' %}">
             <i class="fa-regular fa-calendar-check"></i> Appointments
         </a>
 
@@ -190,53 +191,58 @@
                 </div>
 
                 <img src="{{ hospital.logo.url }}" class="avatar">
-                
+
             </div>
         </div>
-        
 
 
-{% block content %}
-     <br>
-<div class="col-lg-12">
-    <h2 style="color:#6e432d;">Manage Departments</h2>
-<br>
-    <div class="card mb-4">
-        <div class="card-header" style="background-color: #c9a788;color: #6b3f21;font-weight: 600;">Add New Department</div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                <div class="input-group">
-                    <input type="text" name="name" class="form-control" placeholder="Department Name" required>
-                    <button type="submit" style="background-color: #6b3f21;border: #6b3f21; " name="create" class="btn btn-primary">Add Department</button>
+
+        {% block content %}
+        <br>
+        <div class="col-lg-12">
+            <h2 style="color:#6e432d;">Manage Departments</h2>
+            <br>
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #c9a788;color: #6b3f21;font-weight: 600;">Add New
+                    Department</div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" name="name" class="form-control" placeholder="Department Name" required>
+                            <button type="submit" style="background-color: #6b3f21;border: #6b3f21; " name="create"
+                                class="btn btn-primary">Add Department</button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="background-color: #c9a788;color: #6b3f21;font-weight: 600;">Existing
+                    Departments</div>
+                <ul class="list-group list-group-flush">
+                    {% for department in departments %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ department.name }}
+                        <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+                            {% csrf_token %}
+                            <input type="hidden" style="background-color: #6b3f21 " name="department_id"
+                                value="{{ department.id }}">
+                            <button type="submit" style="background-color: #6b3f21 " name="delete"
+                                class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No departments found.</li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header" style="background-color: #c9a788;color: #6b3f21;font-weight: 600;">Existing Departments</div>
-        <ul class="list-group list-group-flush">
-            {% for department in departments %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ department.name }}
-                <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure?');">
-                    {% csrf_token %}
-                    <input type="hidden" style="background-color: #6b3f21 "  name="department_id" value="{{ department.id }}">
-                    <button type="submit" style="background-color: #6b3f21 "  name="delete" class="btn btn-danger btn-sm">Delete</button>
-                </form>
-            </li>
-            {% empty %}
-            <li class="list-group-item">No departments found.</li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
-{% endblock %}
+        {% endblock %}
 
 
-       
-       
+
+
 
     </div>
     <!--Topbar Logic-->

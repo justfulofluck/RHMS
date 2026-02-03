@@ -20,7 +20,7 @@ from appointments.models import Appointment, DoctorAvailability, DailyQueue
 from patients.models import Patient
 from appointments.serializers import AppointmentSerializer, DoctorAvailabilitySerializer
 from doctors.models import Doctor
-from hospitals.models import Hospital
+from hospitals.models import Hospital, HospitalAdmin
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -546,6 +546,7 @@ def call_next_patient(request):
     except Exception as e:
         return Response({'success': False, 'message': str(e)}, status=500)
 
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def mobile_doctor_slots(request, doctor_id):
@@ -608,8 +609,34 @@ def mobile_doctor_slots(request, doctor_id):
             })
             
         return Response(response_data)
-
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+
+
+# 🏥 Hospital Admin Appointments View
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
+
+@login_required
+def hospital_appointments_view(request):
+    try:
+        if not hasattr(request.user, 'hospitaladmin'):
+            messages.error(request, "You are not authorized to view this page.")
+            return redirect('homepage')
+
+        hospital_admin = request.user.hospitaladmin
+        hospital = hospital_admin.hospital
+        appointments = Appointment.objects.filter(hospital=hospital).order_by('-appointment_date')
+        
+        context = {
+            'hospital': hospital,
+            'appointments': appointments,
+        }
+        return render(request, 'frontend/hospital_appointments.html', context)
+    except Exception as e:
+        messages.error(request, f"Error fetching appointments: {str(e)}")
+        # Fallback to dashboard if something goes wrong
+        return redirect('hospital_admin_dashboard')
 
 
