@@ -224,16 +224,6 @@
                 <div class="list-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="section-title">Appointments</div>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown">
-                                All Type
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">General Visit</a></li>
-                                <li><a class="dropdown-item" href="#">Surgery</a></li>
-                            </ul>
-                        </div>
                     </div>
 
                     <!-- Calendar Controls -->
@@ -265,7 +255,8 @@
                     </div>
 
                     <div class="text-center mt-3">
-                        <button class="btn w-100 btn-light text-muted fw-bold small">View All Appointments</button>
+                         <a href="{% url 'hospital_appointments' %}"
+                                class="btn w-100 btn-light text-muted fw-bold small">View All Appointments</a>
                     </div>
                 </div>
             </div>

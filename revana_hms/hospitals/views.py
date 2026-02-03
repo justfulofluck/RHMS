@@ -134,7 +134,7 @@ def manage_departments(request):
         return redirect('hospitals:manage_departments')
 
     departments = Department.objects.filter(hospital=hospital)
-    return render(request, 'hospitals/manage_departments.html', {'departments': departments})
+    return render(request, 'hospitals/manage_departments.html', {'departments': departments, 'hospital': hospital})
 
 @login_required
 def manage_treatments(request):
@@ -172,7 +172,7 @@ def manage_treatments(request):
         return redirect('hospitals:manage_treatments')
 
     treatments = Treatment.objects.filter(hospital=hospital).select_related('department')
-    return render(request, 'hospitals/manage_treatments.html', {'treatments': treatments, 'departments': departments})
+    return render(request, 'hospitals/manage_treatments.html', {'treatments': treatments, 'departments': departments, 'hospital': hospital})
 
 def department_list(request):
     # Only show departments from approved hospitals
