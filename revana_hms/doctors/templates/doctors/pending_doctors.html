@@ -348,32 +348,33 @@
         </div>
         <!--Topbar Script-->
         <script>
-    // --- Top Loading Bar Logic ---
-    const loaderBar = document.getElementById('top-loading-bar');
-    function startLoading() {
-      loaderBar.style.width = '0%';
-      loaderBar.style.opacity = '1';
-      setTimeout(() => {
-        loaderBar.style.width = '80%';
-      }, 100); // Slight delay to trigger the transition
-    }
-    function finishLoading() {
-      loaderBar.style.width = '100%';
-      setTimeout(() => {
-        loaderBar.style.opacity = '0';
-      }, 400); // Wait for the width transition to finish
-    }
-    // Start loading on page load
-    window.addEventListener('load', () => {
-        startLoading();
-        finishLoading();
-    });
-    // Start loading on link clicks
-    document.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            startLoading();
+        // Top Loading Bar Logic
+        function showLoadingBar() {
+            const loadingBar = document.getElementById('top-loading-bar');
+            loadingBar.style.width = '0%';
+            loadingBar.style.opacity = '1';
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 90) {
+                    clearInterval(interval);
+                } else {
+                    width += 10;
+                    loadingBar.style.width = width + '%';
+                }
+            }, 200);
+        }
+        function hideLoadingBar() {
+            const loadingBar = document.getElementById('top-loading-bar');
+            loadingBar.style.width = '100%';
+            setTimeout(() => {
+                loadingBar.style.opacity = '0';
+            }, 400);
+        }
+        // Simulate loading on page load
+        window.addEventListener('load', () => {
+            showLoadingBar();
+            setTimeout(hideLoadingBar, 1000); // Simulate load time
         });
-    });
     </script>
     </div>
 
