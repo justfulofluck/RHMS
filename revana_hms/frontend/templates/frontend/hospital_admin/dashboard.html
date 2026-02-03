@@ -252,9 +252,17 @@
             </div>
 
             <div class="col-5">
-                <!-- Appointment List -->
-                <div id="appointmentList">
-                    <!-- Populated by JS -->
+                <!-- Appointment List Container -->
+                <div class="appointment-container">
+                    <div class="appointment-header">
+                        <div class="section-title">Today's Appointments</div>
+                        <button class="scroll-down-btn" id="scrollDownBtn" title="Scroll to bottom">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="appointmentList">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
 
                 <div class="text-center mt-3">
@@ -408,10 +416,85 @@
 
 
 
-                    /* Custom Scrollbar for list if needed */
+                    /* Appointment Container */
+                    .appointment-container {
+                        background: #fff;
+                        border-radius: 12px;
+                        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.07);
+                        margin-bottom: 20px;
+                        max-height: 450px;
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                    .appointment-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 15px 20px 10px 20px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }
+
+                    /* Enhanced Scrollbar Styling */
                     #appointmentList {
-                        max-height: 400px;
+                        max-height: 280px;
                         overflow-y: auto;
+                        padding: 20px;
+                    }
+
+                    /* Custom Scrollbar for Webkit browsers */
+                    #appointmentList::-webkit-scrollbar {
+                        width: 8px;
+                    }
+
+                    #appointmentList::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                        border-radius: 10px;
+                    }
+
+                    #appointmentList::-webkit-scrollbar-thumb {
+                        background: var(--brown);
+                        border-radius: 10px;
+                        transition: background 0.3s ease;
+                    }
+
+                    #appointmentList::-webkit-scrollbar-thumb:hover {
+                        background: var(--brown-dark);
+                    }
+
+                    /* Scroll Down Button */
+                    .scroll-down-btn {
+                        background: var(--brown);
+                        color: white;
+                        border: none;
+                        border-radius: 50%;
+                        width: 32px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        opacity: 0;
+                        transform: translateY(10px);
+                        pointer-events: none;
+                        font-size: 12px;
+                    }
+
+                    .scroll-down-btn.visible {
+                        opacity: 1;
+                        transform: translateY(0);
+                        pointer-events: auto;
+                    }
+
+                    .scroll-down-btn:hover {
+                        background: var(--brown-dark);
+                        transform: translateY(-2px);
+                    }
+
+                    /* Smooth scrolling */
+                    #appointmentList {
+                        scroll-behavior: smooth;
                     }
                 </style>
 
@@ -514,12 +597,15 @@
                                         <i class="fa-regular fa-calendar-xmark mb-2 fs-4"></i>
                                         <p class="mb-0 small">No appointments for ${date.toDateString()}</p>
                                     </div>`;
+                                updateScrollButton();
                                 return;
                             }
 
-                            dailyAppts.forEach(appt => {
+                            dailyAppts.forEach((appt, index) => {
                                 const el = document.createElement('div');
                                 el.className = 'appt-item';
+                                el.style.opacity = '0';
+                                el.style.transform = 'translateY(20px)';
                                 el.innerHTML = `
                                     <div>
                                         <div class="appt-title">${appt.type || 'General Visit'}</div>
@@ -532,7 +618,30 @@
                                     </div>
                                 `;
                                 apptListEl.appendChild(el);
+
+                                // Animate appointment items
+                                setTimeout(() => {
+                                    el.style.transition = 'all 0.3s ease';
+                                    el.style.opacity = '1';
+                                    el.style.transform = 'translateY(0)';
+                                }, index * 100);
                             });
+
+                            updateScrollButton();
+                        }
+
+                        function updateScrollButton() {
+                            const scrollBtn = document.getElementById('scrollDownBtn');
+                            const apptList = document.getElementById('appointmentList');
+
+                            setTimeout(() => {
+                                // Show button if content is scrollable
+                                if (apptList.scrollHeight > apptList.clientHeight) {
+                                    scrollBtn.classList.add('visible');
+                                } else {
+                                    scrollBtn.classList.remove('visible');
+                                }
+                            }, 300);
                         }
 
                         // Event Listeners
@@ -544,6 +653,25 @@
                         document.getElementById('nextMonth').addEventListener('click', () => {
                             currentDate.setMonth(currentDate.getMonth() + 1);
                             renderCalendar(currentDate);
+                        });
+
+                        // Scroll down button functionality
+                        document.getElementById('scrollDownBtn').addEventListener('click', () => {
+                            const apptList = document.getElementById('appointmentList');
+                            apptList.scrollTo({
+                                top: apptList.scrollHeight,
+                                behavior: 'smooth'
+                            });
+                        });
+
+                        // Scroll detection for button visibility
+                        document.getElementById('appointmentList').addEventListener('scroll', function () {
+                            const scrollBtn = document.getElementById('scrollDownBtn');
+                            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
+                                scrollBtn.classList.remove('visible');
+                            } else if (this.scrollHeight > this.clientHeight) {
+                                scrollBtn.classList.add('visible');
+                            }
                         });
 
                         // Init
