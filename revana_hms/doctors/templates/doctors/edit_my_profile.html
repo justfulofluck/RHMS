@@ -149,10 +149,25 @@
             background-color: #8b5e3c;
             border-color: #8b5e3c;
         }
+        /* Top Loading Bar */
+    #top-loading-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: #1c4278;
+      /* App brown color */
+      z-index: 99999;
+      transition: width 0.4s ease, opacity 0.4s ease;
+      width: 0%;
+      opacity: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
     </style>
 </head>
 
 <body>
+    <div id="top-loading-bar"></div>
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -346,6 +361,34 @@
                 genderSelect.value = gender;
             }
         });
+    </script>
+    <!-- Loading Bar Logic -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const loadingBar = document.getElementById("top-loading-bar");
+        function startLoading() {
+            loadingBar.style.width = "0%";
+            loadingBar.style.opacity = "1";
+            setTimeout(() => {
+                loadingBar.style.width = "80%";
+            }, 100);
+        }
+        function finishLoading() {
+            loadingBar.style.width = "100%";
+            setTimeout(() => {
+                loadingBar.style.opacity = "0";
+            }, 500);
+        }
+        // Start loading on form submit
+        const form = document.getElementById("editProfileForm");
+        form.addEventListener("submit", function() {
+            startLoading();
+        });
+        // Finish loading when page fully loads
+        window.addEventListener("load", function() {
+            finishLoading();
+        });
+    });
     </script>
 </body>
 

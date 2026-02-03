@@ -125,10 +125,24 @@
             margin-bottom: 10px;
             font-size: 1.1rem;
         }
+        #top-loading-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: #8c6239;
+      /* App brown color */
+      z-index: 99999;
+      transition: width 0.4s ease, opacity 0.4s ease;
+      width: 0%;
+      opacity: 1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
     </style>
 </head>
 
 <body>
+    <div id="top-loading-bar"></div>
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -220,10 +234,39 @@
 </div>
 {% endblock %}
 
+
        
        
 
     </div>
+    <!--Topbar Logic-->
+    <script>
+        // --- Top Loading Bar Logic ---
+        const loaderBar = document.getElementById('top-loading-bar');
+
+        function startLoading() {
+            loaderBar.style.width = '0%';
+            loaderBar.style.opacity = '1';
+            setTimeout(() => {
+                loaderBar.style.width = '80%';
+            }, 100);
+        }
+
+        function finishLoading() {
+            loaderBar.style.width = '100%';
+            setTimeout(() => {
+                loaderBar.style.opacity = '0';
+            }, 400);
+        }
+
+        // Simulate loading for demonstration
+        window.addEventListener('load', () => {
+            finishLoading();
+        });
+
+        // Example usage: Call startLoading() when an action begins
+        // and finishLoading() when it ends.
+    </script>
 
 </body>
 
