@@ -12,6 +12,7 @@ from appointments.models import Appointment
 from django.utils import timezone
 from frontend.decorators import role_required
 from django.http import JsonResponse
+from patients.models import Patient
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.tokens import default_token_generator
@@ -468,6 +469,16 @@ def doctor_dashboard(request):
                 status='completed'
             ).exclude(id=appt.id).exists()
         
+        # Get Patient Phone
+        appt.patient_phone = ""
+        if appt.patient_email:
+            try:
+                patient_obj = Patient.objects.filter(user__email=appt.patient_email).first()
+                if patient_obj:
+                    appt.patient_phone = patient_obj.phone
+            except Exception:
+                pass
+
         appt.has_history = has_history
         appt.visit_status = "Returning" if has_history else "New" # Also populate for badge
         appointments_today.append(appt)

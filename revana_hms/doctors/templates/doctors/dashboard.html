@@ -91,26 +91,25 @@
         /* BS Override */
 
         /* Top Loading Bar */
-    #top-loading-bar {
-      position: fixed;
-      top: 0
-      left: 0;
-      height: 4px;
-      background: #1c4278;
-      /* App brown color */
-      z-index: 99999;
-      transition: width 0.4s ease, opacity 0.4s ease;
-      width: 0%;
-      opacity: 1;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+        #top-loading-bar {
+            position: fixed;
+            top: 0 left: 0;
+            height: 4px;
+            background: #1c4278;
+            /* App brown color */
+            z-index: 99999;
+            transition: width 0.4s ease, opacity 0.4s ease;
+            width: 0%;
+            opacity: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
 <body>
 
     <!-- Sidebar -->
-     <div id="top-loading-bar"></div>
+    <div id="top-loading-bar"></div>
     <div class="sidebar">
         <a href="{% url 'doctor_dashboard' %}" class="active"><i class="bi bi-grid-1x2 me-2"></i> Dashboard</a>
         <a href="{% url 'doctor_availability_list' %}"><i class="bi bi-calendar-month me-2"></i> Set Monthly
@@ -208,6 +207,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="ps-3">Patient Name</th>
+                                        <th>Contact</th>
                                         <th>Time</th>
                                         <th>Token</th>
                                         <th>Type</th>
@@ -221,6 +221,7 @@
                                         <td class="ps-3 fw-bold text-dark patient-name">
                                             {{ appt.patient_name }}
                                         </td>
+                                        <td>{{ appt.patient_phone|default:"-" }}</td>
                                         <td>{{ appt.appointment_date|date:"h:i A" }}</td>
                                         <td>
                                             <span class="badge bg-light text-dark border rounded-pill px-3">
@@ -567,35 +568,35 @@
         setInterval(fetchNotifications, 60000);
     </script>
     <script>
-    // --- Top Loading Bar Logic ---
-    const loaderBar = document.getElementById('top-loading-bar');
+        // --- Top Loading Bar Logic ---
+        const loaderBar = document.getElementById('top-loading-bar');
 
-    function startLoader() {
-      loaderBar.style.opacity = '1';
-      loaderBar.style.width = '30%';
-      setTimeout(() => {
-        if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
-      }, 500);
-    }
+        function startLoader() {
+            loaderBar.style.opacity = '1';
+            loaderBar.style.width = '30%';
+            setTimeout(() => {
+                if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
+            }, 500);
+        }
 
-    function stopLoader() {
-      loaderBar.style.width = '100%';
-      setTimeout(() => {
-        loaderBar.style.opacity = '0';
-        setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
-      }, 500);
-    }
+        function stopLoader() {
+            loaderBar.style.width = '100%';
+            setTimeout(() => {
+                loaderBar.style.opacity = '0';
+                setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
+            }, 500);
+        }
 
-    // Show on Page Load
-    startLoader();
-    window.addEventListener('load', stopLoader);
+        // Show on Page Load
+        startLoader();
+        window.addEventListener('load', stopLoader);
 
-    // Show on Submit
-    document.querySelector('form').addEventListener('submit', function () {
-      startLoader();
-    });
-    // -----------------------------
-  </script>
+        // Show on Submit
+        document.querySelector('form').addEventListener('submit', function () {
+            startLoader();
+        });
+        // -----------------------------
+    </script>
 </body>
 
 </html>
