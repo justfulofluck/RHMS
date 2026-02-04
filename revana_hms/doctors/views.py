@@ -160,7 +160,7 @@ def add_doctor_submit(request):
                 user = User.objects.create_user(
                     email=email,
                     password=password,
-                    phone=data.get('contact_number') or data.get('phone_number'),
+                    phone=data.get('contact_number'),
                     role='doctor',
                     is_active=True
                 )
@@ -169,7 +169,7 @@ def add_doctor_submit(request):
                     user=user,
                     gender=data.get('gender'),
                     date_of_birth=data.get('date_of_birth'),
-                    contact_number=data.get('contact_number') or data.get('phone_number'),
+                    contact_number=data.get('contact_number'),
                     address=data.get('address'),
                     medical_certificate=request.FILES.get('medical_certificate'),
                     qualification=data.get('qualification'),
@@ -360,9 +360,24 @@ def hospital_admin_dashboard(request):
     departments = Department.objects.filter(hospital=hospital)
     treatments = Treatment.objects.filter(hospital=hospital)
     doctors = Doctor.objects.filter(hospital=hospital)
+    today = timezone.localdate()
     appointments = Appointment.objects.filter(
         hospital=hospital,
-        appointment_date__gte=timezone.now()
+        appointment_date__date__gte=today
+    ).order_by('appointment_date')
+
+    # Dashboard Stats
+    total_departments = departments.count()
+    total_doctors = doctors.count()
+    total_treatments = treatments.count()
+    # Estimate total patients (distinct emails in appointments)
+    total_patients = Appointment.objects.filter(hospital=hospital).values('patient_email').distinct().count()
+
+    # Today's Appointments for Table
+    today = timezone.localdate()
+    todays_appointments = Appointment.objects.filter(
+        hospital=hospital,
+        appointment_date__date=today
     ).order_by('appointment_date')
 
     pending_doctors = doctors.filter(status=Doctor.STATUS_PENDING)
@@ -392,6 +407,11 @@ def hospital_admin_dashboard(request):
         'treatments': treatments,
         'doctors': doctors,
         'appointments': appointments,
+        'todays_appointments': todays_appointments,
+        'total_departments': total_departments,
+        'total_doctors': total_doctors,
+        'total_treatments': total_treatments,
+        'total_patients': total_patients,
         'appointments_json': appointments_json,
         'pending_doctors': pending_doctors,
     })

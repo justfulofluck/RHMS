@@ -107,6 +107,7 @@
         .badge-token {
             background-color: var(--brown) !important;
             color: white;
+            font-size:14px;
         }
 
         /* Top Loading Bar */
@@ -190,16 +191,18 @@
                         <table class="table table-hover align-middle">
                             <thead style="background:#f8f9fa;">
                                 <tr>
+                                    <th>Token</th>
                                     <th>Patient</th>
                                     <th>Doctor</th>
                                     <th>Date & Time</th>
-                                    <th>Status</th>
-                                    <th>Token</th>
+                                    <th>Action</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for appt in appointments %}
                                 <tr>
+                                    <td><span class="badge badge-token">#{{ appt.token_number }}</span></td>
                                     <td>
                                         <div class="fw-bold">{{ appt.patient_name }}</div>
                                         <div class="small text-muted">{{ appt.patient_email|default:"No Email" }}</div>
@@ -213,23 +216,13 @@
                                         <div class="small text-muted">{{ appt.appointment_date|time:"h:i A" }}</div>
                                     </td>
                                     <td>
-                                        {% if appt.status == 'scheduled' %}
-                                        <span class="badge badge-scheduled">Scheduled</span>
-                                        {% elif appt.status == 'confirmed' %}
-                                        <span class="badge bg-success">Confirmed</span>
-                                        {% elif appt.status == 'completed' %}
-                                        <span class="badge bg-secondary">Completed</span>
-                                        {% elif appt.status == 'cancelled' %}
-                                        <span class="badge bg-danger">Cancelled</span>
-                                        {% else %}
-                                        <span class="badge bg-light text-dark">{{ appt.status|title }}</span>
-                                        {% endif %}
+                                        <a href="#" class="btn btn-sm border badge badge-token">View Report</a>
                                     </td>
-                                    <td><span class="badge badge-token">#{{ appt.token_number }}</span></td>
+                                    
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">No appointments found.</td>
+                                    
                                 </tr>
                                 {% endfor %}
                             </tbody>

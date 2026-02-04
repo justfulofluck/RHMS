@@ -249,11 +249,12 @@
                             <td>{{ treatment.department.name }}</td>
                             <td>
                                 <form method="post" style="display:inline;" onsubmit="return confirm('Are you sure?');">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="treatment_id" value="{{ treatment.id }}">
-                                    <button type="submit" name="delete"
-                                        style="background: #6b3f21; border: #6b3f21; color:#fff;">Delete</button>
-                                </form>
+                            {% csrf_token %}
+                            <input type="hidden" style="background-color: #6b3f21 " name="department_id"
+                                value="{{ department.id }}">
+                            <button type="submit" style="background-color: #6b3f21; color : white " name="delete"
+                                class="btn btn-sm">Delete</button>
+                        </form>
                             </td>
                         </tr>
                         {% empty %}
