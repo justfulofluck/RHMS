@@ -107,7 +107,8 @@
         .badge-token {
             background-color: var(--brown) !important;
             color: white;
-            font-size: 12px;
+            font-size : 12px;
+            padding: 5px 8px;
         }
 
         .stat-title {
@@ -120,6 +121,47 @@
             font-weight: 800;
             margin-top: 5px;
             color: var(--brown);
+        }
+
+        /* New Brown Stat Card Style */
+        .stat-card-brown {
+            background: white;
+            color: var(--brown);
+            padding: 15px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon-box {
+            width: 50px;
+            height: 50px;
+            background: var(--brown);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            padding: 20px;
+        }
+
+        .stat-icon-box i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .stat-content .stat-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .stat-content .stat-num {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1.2;
         }
 
         .list-card {
@@ -291,53 +333,50 @@
         <!-- Stats -->
         <div class="row g-3 mb-4">
             <div class="col-md-3">
-                <div class="stat-card p-3 d-flex align-items-center gap-3">
-                    <div class="stat-icon text-center" style="width: 60px;">
-                        <i class="fa-solid fa-hospital text-muted" style="font-size: 2.5rem;"></i>
+                <div class="stat-card-brown">
+                    <div class="stat-icon-box">
+                        <i class="fa-solid fa-user-doctor"></i>
                     </div>
-                    <div>
-                        <div class="stat-title text-muted fw-bold mb-1">Total Departments</div>
-                        <div class="stat-value display-6 fw-bold mb-0"
-                            style="color:var(--brown-dark); font-size: 1.8rem;">{{ total_departments }}</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Doctors</div>
+                        <div class="stat-num">{{ total_doctors }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card-brown">
+                    <div class="stat-icon-box">
+                        <i class="fa-solid fa-hospital"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Departments</div>
+                        <div class="stat-num">{{ total_departments }}</div>
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="col-md-3">
+                <div class="stat-card-brown">
+                    <div class="stat-icon-box">
+                        <i class="fa-solid fa-stethoscope"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Treatments</div>
+                        <div class="stat-num">{{ total_treatments }}</div>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <div class="stat-card p-3 d-flex align-items-center gap-3">
-                    <div class="stat-icon text-center" style="width: 60px;">
-                        <i class="fa-solid fa-user-doctor text-muted" style="font-size: 2.5rem;"></i>
+                <div class="stat-card-brown">
+                    <div class="stat-icon-box">
+                        <i class="fa-solid fa-bed-pulse"></i>
                     </div>
-                    <div>
-                        <div class="stat-title text-muted fw-bold mb-1">Total Doctors</div>
-                        <div class="stat-value display-6 fw-bold mb-0"
-                            style="color:var(--brown-dark); font-size: 1.8rem;">{{ total_doctors }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="stat-card p-3 d-flex align-items-center gap-3">
-                    <div class="stat-icon text-center" style="width: 60px;">
-                        <i class="fa-solid fa-stethoscope text-muted" style="font-size: 2.5rem;"></i>
-                    </div>
-                    <div>
-                        <div class="stat-title text-muted fw-bold mb-1">Total Treatments</div>
-                        <div class="stat-value display-6 fw-bold mb-0"
-                            style="color:var(--brown-dark); font-size: 1.8rem;">{{ total_treatments }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="stat-card p-3 d-flex align-items-center gap-3">
-                    <div class="stat-icon text-center" style="width: 60px;">
-                        <i class="fa-solid fa-bed-pulse text-muted" style="font-size: 2.5rem;"></i>
-                    </div>
-                    <div>
-                        <div class="stat-title text-muted fw-bold mb-1">Total Patients</div>
-                        <div class="stat-value display-6 fw-bold mb-0"
-                            style="color:var(--brown-dark); font-size: 1.8rem;">{{ total_patients }}</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Patients</div>
+                        <div class="stat-num">{{ total_patients }}</div>
                     </div>
                 </div>
             </div>
@@ -399,7 +438,6 @@
                                 {% for appt in todays_appointments %}
                                 <tr>
                                     <td><span class="badge badge-token">#{{ appt.token_number|default:'--' }}</span>
-                                    </td>
                                     <td>
                                         <div class="fw-bold">{{ appt.patient_name }}</div>
                                         <div class="small text-muted">{{ appt.patient_email|default:"No Email" }}</div>
@@ -412,8 +450,9 @@
                                         <div class="fw-bold">{{ appt.appointment_date|date:"M d, Y" }}</div>
                                         <div class="small text-muted">{{ appt.appointment_date|time:"h:i A" }}</div>
                                     </td>
+                                    </td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-dark badge-token border">View Report</a>
+                                        <a href="#" class="badge badge-token btn">View Report</a>
                                     </td>
                                 </tr>
                                 {% empty %}
@@ -452,9 +491,9 @@
                         {% endfor %}
                     </ul>
                 </div>
-            </div>
+            </div> {% endcomment %}
 
-            <!-- Right Column -->
+            {% comment %} <!-- Right Column -->
             <div class="col-lg-8">
 
                 <div class="list-card">

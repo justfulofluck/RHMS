@@ -23,7 +23,9 @@
             font-family: "Poppins", sans-serif;
             background: #f5ede5;
         }
-
+.btn:hover{
+   color:white; 
+}
         /* Sidebar */
         .sidebar {
             position: fixed;
@@ -107,7 +109,7 @@
         .badge-token {
             background-color: var(--brown) !important;
             color: white;
-            font-size:14px;
+            font-size:18px;
         }
 
         /* Top Loading Bar */
@@ -212,11 +214,11 @@
                                         <div class="small text-muted">{{ appt.doctor.specialization }}</div>
                                     </td>
                                     <td>
-                                        <div class="fw-bold">{{ appt.appointment_date|date:"M d, Y" }}</div>
-                                        <div class="small text-muted">{{ appt.appointment_date|time:"h:i A" }}</div>
+                                        <div class="fw-bold">{{ appt.appointment_date|time:"h:i A" }}</div>
+                                        <div class="small text-muted">{{ appt.appointment_date|date:"M d, Y" }}</div>
                                     </td>
                                     <td>
-                                        <a href="#" class="btn btn-sm border badge badge-token">View Report</a>
+                                        <a class="btn btn-sm border badge badge-token" href="{% url 'hospital_admin_dashboard' %}">View Report</a>
                                     </td>
                                     
                                 </tr>
