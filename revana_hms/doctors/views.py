@@ -478,6 +478,21 @@ def doctor_dashboard(request):
                     appt.patient_phone = patient_obj.phone
             except Exception:
                 pass
+        
+        # Fallback: Try by Name if phone is still empty
+        if not appt.patient_phone and appt.patient_name:
+            try:
+                # Try finding by Patient Name
+                patient_obj = Patient.objects.filter(name__iexact=appt.patient_name).first()
+                if patient_obj:
+                     appt.patient_phone = patient_obj.phone
+                else:
+                     # Try finding by User Username (if name is actually a username)
+                     patient_obj = Patient.objects.filter(user__username__iexact=appt.patient_name).first()
+                     if patient_obj:
+                         appt.patient_phone = patient_obj.phone
+            except Exception:
+                pass
 
         appt.has_history = has_history
         appt.visit_status = "Returning" if has_history else "New" # Also populate for badge
