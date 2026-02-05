@@ -693,6 +693,24 @@ def edit_my_profile(request):
                 # Doctors can update their own: Name, Specialization
                 doctor.name = request.POST.get('name', doctor.name)
                 doctor.specialization = request.POST.get('specialization', doctor.specialization)
+                
+                # Update Department
+                department_id = request.POST.get('department')
+                if department_id:
+                     department = Department.objects.filter(id=department_id, hospital=doctor.hospital).first()
+                     if department:
+                         doctor.department = department
+
+                # Update Treatments
+                treatment_ids = request.POST.getlist('treatments')
+                if treatment_ids:
+                    # Validate treatments belong to the doctor's hospital
+                    treatments_to_add = Treatment.objects.filter(id__in=treatment_ids, hospital=doctor.hospital)
+                    doctor.treatments.set(treatments_to_add)
+                elif 'treatments' in request.POST: # Only clear if checkbox group was present
+                    doctor.treatments.clear()
+
+
                 doctor.save()
 
                 # Profile Details
@@ -752,8 +770,12 @@ def edit_my_profile(request):
             return redirect('doctor_profile_edit')
 
     # GET Request
+    # Fetch all departments for this hospital to populate dropdown
+    departments = Department.objects.filter(hospital=doctor.hospital)
+
     return render(request, 'doctors/edit_my_profile.html', {
         'doctor': doctor,
+        'departments': departments,
     })
 
 
