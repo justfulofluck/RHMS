@@ -93,7 +93,8 @@
         /* Top Loading Bar */
         #top-loading-bar {
             position: fixed;
-            top: 0 left: 0;
+            top: 0;
+            left: 0;
             height: 4px;
             background: #1c4278;
             /* App brown color */
@@ -236,7 +237,7 @@
                                         <td>{{ appt.appointment_date|date:"h:i A" }}</td>
                                         <td>
                                             <span class="badge bg-light text-dark border rounded-pill px-3">
-                                                #{{ appt.token_number|default:"-" }}
+                                                {{ appt.token_number|default:"-" }}
                                             </span>
                                         </td>
                                         <td>
