@@ -83,20 +83,21 @@
             border-radius: 10px;
             padding: 20px;
         }
+
         /* Top Loading Bar */
-    #top-loading-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 4px;
-      background: #1c4278;
-      /* App brown color */
-      z-index: 99999;
-      transition: width 0.4s ease, opacity 0.4s ease;
-      width: 0%;
-      opacity: 1;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+        #top-loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #1c4278;
+            /* App brown color */
+            z-index: 99999;
+            transition: width 0.4s ease, opacity 0.4s ease;
+            width: 0%;
+            opacity: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
@@ -136,9 +137,26 @@
         <div class=" mt-4">
             <div class="row">
                 <div class="col-md-12">
-                    <h2><i class="bi bi-calendar-event"></i> Advanced Scheduler</h2>
-                    <p class="text-muted">Select specific dates and configure multiple time slots (e.g., Morning &
-                        Evening).</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2><i class="bi bi-calendar-event"></i> Advanced Scheduler</h2>
+                            <p class="text-muted mb-0">Select specific dates and configure multiple time slots (e.g.,
+                                Morning &
+                                Evening).</p>
+                        </div>
+                        <a href="{% url 'doctor_profile_edit' %}"
+                            class="d-flex align-items-center text-decoration-none">
+                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
+                                style="width: 40px; height: 40px; font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                {% if request.user.doctorprofile.passport_photo %}
+                                <img src="{{ request.user.doctorprofile.passport_photo.url }}" alt="Profile"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                {{ request.user.doctor.name|slice:":2"|upper }}
+                                {% endif %}
+                            </div>
+                        </a>
+                    </div>
                     <hr>
                 </div>
             </div>
@@ -1039,6 +1057,7 @@
                     transform: translateX(100%);
                     opacity: 0;
                 }
+
                 to {
                     transform: translateX(0);
                     opacity: 1;
@@ -1050,6 +1069,7 @@
                     transform: translateX(0);
                     opacity: 1;
                 }
+
                 to {
                     transform: translateX(100%);
                     opacity: 0;
@@ -1128,6 +1148,7 @@
                 from {
                     opacity: 0;
                 }
+
                 to {
                     opacity: 1;
                 }
@@ -1138,6 +1159,7 @@
                     transform: scale(0.9);
                     opacity: 0;
                 }
+
                 to {
                     transform: scale(1);
                     opacity: 1;
@@ -1148,6 +1170,7 @@
                 from {
                     opacity: 1;
                 }
+
                 to {
                     opacity: 0;
                 }
@@ -1334,7 +1357,7 @@
                 e.preventDefault();
 
                 if (calendar.selectedDates.size === 0) {
-                    CustomToast.confirm('Please click on updates in the calendar to SELECT them (they will turn blue).\n\nYellow dates are just showing what is already scheduled.\nBlue dates are the ones you are about to change.', () => {});
+                    CustomToast.confirm('Please click on updates in the calendar to SELECT them (they will turn blue).\n\nYellow dates are just showing what is already scheduled.\nBlue dates are the ones you are about to change.', () => { });
                     return;
                 }
 
@@ -1368,13 +1391,13 @@
                     .then(result => {
                         console.log('DEBUG: Success handler reached');
                         console.log('DEBUG: Result:', result);
-                        
+
                         if (result.success) {
                             console.log('DEBUG: Success condition met');
                             CustomToast.success(result.message);
                             calendar.clearSelection();
                             calendar.fetchAvailability(); // Refresh highlights
-                            
+
                             // Immediate page reload after 3.5 seconds
                             setTimeout(() => {
                                 console.log('DEBUG: Executing page reload...');
@@ -1394,18 +1417,18 @@
             // Initialize
             document.addEventListener('DOMContentLoaded', () => {
                 calendar.init();
-                
+
                 // Display Django messages as custom toasts
                 {% if messages %}
-                    {% for message in messages %}
-                        {% if message.tags == 'success' %}
-                            CustomToast.success('{{ message|escapejs }}');
-                        {% elif message.tags == 'error' %}
-                            CustomToast.error('{{ message|escapejs }}');
-                        {% endif %}
-                    {% endfor %}
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                CustomToast.success('{{ message|escapejs }}');
+                {% elif message.tags == 'error' %}
+                CustomToast.error('{{ message|escapejs }}');
                 {% endif %}
-                
+                {% endfor %}
+                {% endif %}
+
                 // Listen for cross-tab availability updates
                 window.addEventListener('storage', (e) => {
                     if (e.key === 'availability_updated') {
@@ -1423,7 +1446,7 @@
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
                         const newTableBody = doc.querySelector('.table tbody');
-                        
+
                         // Update the current table body with fresh data
                         const currentTableBody = document.querySelector('.table tbody');
                         if (newTableBody && currentTableBody) {
@@ -1440,20 +1463,20 @@
                     toast.className = 'custom-toast-success';
                     toast.textContent = message;
                     document.body.appendChild(toast);
-                    
+
                     // Auto-close after 3 seconds
                     setTimeout(() => {
                         toast.style.animation = 'slideOutRight 0.3s ease-out';
                         setTimeout(() => toast.remove(), 300);
                     }, 3000);
                 }
-                
+
                 static error(message) {
                     const toast = document.createElement('div');
                     toast.className = 'custom-toast-error';
                     toast.textContent = message;
                     document.body.appendChild(toast);
-                    
+
                     // Auto-close after 5 seconds for errors
                     setTimeout(() => {
                         toast.style.animation = 'slideOutRight 0.3s ease-out';
@@ -1476,13 +1499,13 @@
                         </div>
                     `;
                     document.body.appendChild(modal);
-                    
+
                     // Add event listeners
                     modal.querySelector('#cancel-btn').addEventListener('click', () => {
                         modal.style.animation = 'modalFadeOut 0.3s ease-out';
                         setTimeout(() => modal.remove(), 300);
                     });
-                    
+
                     modal.querySelector('#delete-btn').addEventListener('click', () => {
                         modal.style.animation = 'modalFadeOut 0.3s ease-out';
                         setTimeout(() => {
@@ -1523,7 +1546,7 @@
         const loadingBar = document.getElementById("top-loading-bar");
         let loading = false;
         let pageLoadStarted = false;
-        
+
         // Start loading immediately for page load
         function startPageLoad() {
             if (!pageLoadStarted && loadingBar) {
@@ -1536,7 +1559,7 @@
                 }, 100);
             }
         }
-        
+
         function finishLoading() {
             if (loading) {
                 loadingBar.style.width = "100%";
@@ -1546,16 +1569,16 @@
                 }, 400);
             }
         }
-        
+
         // Start loading immediately
         startPageLoad();
-        
+
         // Hide loading when page fully loads
-        window.addEventListener("load", function() {
+        window.addEventListener("load", function () {
             finishLoading();
         });
-        
-        document.addEventListener("DOMContentLoaded", function() {
+
+        document.addEventListener("DOMContentLoaded", function () {
             function startLoading() {
                 if (!loading) {
                     loading = true;
@@ -1566,10 +1589,10 @@
                     }, 100);
                 }
             }
-            
+
             // Intercept fetch calls
             const originalFetch = window.fetch;
-            window.fetch = function(...args) {
+            window.fetch = function (...args) {
                 startLoading();
                 return originalFetch.apply(this, args).then(response => {
                     finishLoading();
@@ -1581,13 +1604,13 @@
             };
             // Intercept form submissions
             document.querySelectorAll("form").forEach(form => {
-                form.addEventListener("submit", function() {
+                form.addEventListener("submit", function () {
                     startLoading();
                 });
             });
         });
     </script>
-    
+
 
 </body>
 

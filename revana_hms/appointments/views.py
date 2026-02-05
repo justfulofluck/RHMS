@@ -629,6 +629,32 @@ def hospital_appointments_view(request):
         hospital = hospital_admin.hospital
         appointments = Appointment.objects.filter(hospital=hospital).order_by('-appointment_date')
         
+        # Apply Phone Logic
+        appointments_list = []
+        for appt in appointments:
+            appt.patient_phone = ""
+            if appt.patient_email:
+                try:
+                    patient_obj = Patient.objects.filter(user__email=appt.patient_email).first()
+                    if patient_obj:
+                        appt.patient_phone = patient_obj.phone
+                except Exception:
+                    pass
+            
+            if not appt.patient_phone and appt.patient_name:
+                try:
+                    patient_obj = Patient.objects.filter(name__iexact=appt.patient_name).first()
+                    if patient_obj:
+                            appt.patient_phone = patient_obj.phone
+                    else:
+                            patient_obj = Patient.objects.filter(user__username__iexact=appt.patient_name).first()
+                            if patient_obj:
+                                appt.patient_phone = patient_obj.phone
+                except Exception:
+                    pass
+            appointments_list.append(appt)
+        appointments = appointments_list
+        
         context = {
             'hospital': hospital,
             'appointments': appointments,

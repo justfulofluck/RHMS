@@ -19,12 +19,12 @@
             background-color: #f5ede5;
         }
 
-.rounded-circle {
-    border-radius: 50% !important;
-    background: #d0e8ff !important;
-    color: #24437a !important;
-    font-weight: 700;
-}
+        .rounded-circle {
+            border-radius: 50% !important;
+            background: #d0e8ff !important;
+            color: #24437a !important;
+            font-weight: 700;
+        }
 
         .sidebar {
             width: 260px;
@@ -78,53 +78,57 @@
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        .bg-success{
-           background-color: #f8d8ad !important;
-           color: #1c4278;
+
+        .bg-success {
+            background-color: #f8d8ad !important;
+            color: #1c4278;
         }
+
         .appointment-list {
             background: white;
             border-radius: 10px;
             padding: 20px;
         }
-        .bg-primary{
+
+        .bg-primary {
             background-color: #24437a !important;
         }
-        .text-primary{
-           color: #24437a!important; 
+
+        .text-primary {
+            color: #24437a !important;
         }
 
         .btn-outline-primary {
-    --bs-btn-color: #24437a;
-    --bs-btn-border-color: #24437a;
-    --bs-btn-hover-color: #fff;
-    --bs-btn-hover-bg: #24437a;
-    --bs-btn-hover-border-color: #24437a;
-    --bs-btn-focus-shadow-rgb: 13, 110, 253;
-    --bs-btn-active-color: #fff;
-    --bs-btn-active-bg: #24437a;
-    --bs-btn-active-border-color: #24437a;
-    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-    --bs-btn-disabled-color: #24437a;
-    --bs-btn-disabled-bg: transparent;
-    --bs-btn-disabled-border-color: #24437a;
-    --bs-gradient: none;
-}
-/* Top Loading Bar */
-    #top-loading-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 4px;
-      background: #1c4278;
-      /* App brown color */
-      z-index: 99999;
-      transition: width 0.4s ease, opacity 0.4s ease;
-      width: 0%;
-      opacity: 1;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+            --bs-btn-color: #24437a;
+            --bs-btn-border-color: #24437a;
+            --bs-btn-hover-color: #fff;
+            --bs-btn-hover-bg: #24437a;
+            --bs-btn-hover-border-color: #24437a;
+            --bs-btn-focus-shadow-rgb: 13, 110, 253;
+            --bs-btn-active-color: #fff;
+            --bs-btn-active-bg: #24437a;
+            --bs-btn-active-border-color: #24437a;
+            --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+            --bs-btn-disabled-color: #24437a;
+            --bs-btn-disabled-bg: transparent;
+            --bs-btn-disabled-border-color: #24437a;
+            --bs-gradient: none;
+        }
 
+        /* Top Loading Bar */
+        #top-loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #1c4278;
+            /* App brown color */
+            z-index: 99999;
+            transition: width 0.4s ease, opacity 0.4s ease;
+            width: 0%;
+            opacity: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
@@ -157,9 +161,22 @@
         {% block content %}
         <div class="container mt-4">
             <div class="row mb-4">
-                <div class="col-md-12">
-                    <h2><i class="bi bi-people"></i> My Patients</h2>
-                    <p class="text-muted">List of patients who have visited you.</p>
+                <div class="col-md-12 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="bi bi-people"></i> My Patients</h2>
+                        <p class="text-muted mb-0">List of patients who have visited you.</p>
+                    </div>
+                    <a href="{% url 'doctor_profile_edit' %}" class="d-flex align-items-center text-decoration-none">
+                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
+                            style="width: 40px; height: 40px; font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            {% if doctor.user.doctorprofile.passport_photo %}
+                            <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt="Profile"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                            {{ doctor.name|slice:":2"|upper }}
+                            {% endif %}
+                        </div>
+                    </a>
                 </div>
             </div>
 
@@ -224,7 +241,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                  <h5 class="modal-title">Patient History: <span id="modalPatientName" class="fw-bold"></span>
+                        <h5 class="modal-title">Patient History: <span id="modalPatientName" class="fw-bold"></span>
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -287,7 +304,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!--Loadingbar logic-->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const loadingBar = document.getElementById("top-loading-bar");
             function startLoading() {
                 loadingBar.style.width = "0%";
@@ -308,7 +325,7 @@
             window.addEventListener("load", finishLoading);
         });
     </script>
-    
+
 
 </body>
 

@@ -13,11 +13,10 @@
 
     <style>
         body {
-
-            background-color: #f4ede5;
+            background-color: #f4f7fe;
+            font-family: 'Poppins', sans-serif;
         }
 
-        /* Sidebar Styling */
         .sidebar {
             width: 260px;
             height: 100vh;
@@ -25,9 +24,7 @@
             left: 0;
             top: 0;
             background: #1c4278;
-            /* Consistent with other pages */
             padding-top: 20px;
-            z-index: 1000;
         }
 
         .sidebar a {
@@ -36,8 +33,7 @@
             display: block;
             text-decoration: none;
             font-size: 16px;
-            display: flex;
-            align-items: center;
+            transition: 0.2s;
         }
 
         .sidebar .active {
@@ -53,132 +49,218 @@
         /* Content Styling */
         .content {
             margin-left: 260px;
-            padding: 20px 40px;
+            padding: 15px 25px;
+            /* Further reduced padding */
         }
 
-        .profile-container {
-            padding-top: 100px;
+        /* Card Styling */
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
             background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        h4.page-title {
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 25px;
-            /* Removed heavy brown background */
-        }
-
-        .section-header {
-            font-size: 14px;
-            color: #555;
-            font-weight: 600;
-            margin-top: 10px;
             margin-bottom: 15px;
+            /* Further reduced margin */
+        }
+
+        .profile-card {
+            text-align: center;
+            padding: 20px 15px;
+            /* Further reduced padding */
+        }
+
+        .profile-img-container {
+            position: relative;
+            width: 120px;
+            /* Slightly smaller image */
+            height: 120px;
+            margin: 0 auto 10px;
+            /* Reduced margin */
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .camera-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #1c4278;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: 0.2s;
+        }
+
+        .camera-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 10px;
+            /* Reduced padding */
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
             text-transform: uppercase;
+            color: #888;
             letter-spacing: 0.5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .section-title {
+            color: #1c4278;
+            font-weight: 700;
+            margin-bottom: 12px;
+            /* Reduced margin */
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            /* Slightly smaller */
+        }
+
+        .section-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 24px;
+            background: #1c4278;
+            margin-right: 12px;
+            border-radius: 2px;
         }
 
         label {
-            font-size: 13px;
-            color: #666;
+            font-size: 12px;
+            /* Smaller label */
+            font-weight: 500;
+            color: #555;
             margin-bottom: 5px;
             display: block;
         }
 
-        /* Input Styling */
-        .input-group-text {
-            background-color: transparent;
-            border-right: none;
-            color: #24437a;
-            background-color: #bfddfd;
-            border-radius: 8px 0 0 8px;
-        }
-
         .form-control,
         .form-select {
-            border-left: none;
-            border-color: #ced4da;
-            border-radius: 0 8px 8px 0;
-            font-size: 14px;
-            padding: 10px;
+            border: 1px solid #eee;
+            background-color: #fcfcfc;
+            border-radius: 10px;
+            padding: 8px 12px;
+            /* Reduced padding */
+            font-size: 13px;
+            /* Smaller text */
+            color: #333;
         }
 
         .form-control:focus,
         .form-select:focus {
-            box-shadow: none;
-            border-color: #8b5e3c;
+            border-color: #bfddfd;
+            box-shadow: 0 0 0 3px rgba(28, 66, 120, 0.1);
+            background-color: #fff;
         }
 
-        .input-group:focus-within .input-group-text {
-            border-color: #8b5e3c;
-            color: #8b5e3c;
-
+        /* Read-only inputs */
+        .form-control:disabled,
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            color: #6c757d;
         }
 
-        .btn-primary {
-            background-color: #c98d57;
-            /* Light brown/tan */
-            border: none;
-            padding: 10px 30px;
-            border-radius: 8px;
-            font-weight: 500;
+        /* Input Group Icons */
+        .input-group-text {
+            background: #fcfcfc;
+            border: 1px solid #eee;
+            border-right: none;
+            color: #1c4278;
+            border-radius: 10px 0 0 10px;
         }
 
-        .btn-primary:hover {
-            background-color: #b07846;
+        .input-with-icon .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
         }
 
-        .btn-secondary {
-            background-color: #f1f3f5;
-            color: #555;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 8px;
-            font-weight: 500;
-        }
-
-        .btn-secondary:hover {
-            background-color: #e2e6ea;
-        }
-
-        /* Radio buttons custom style (if needed for gender) */
-        .form-check-input:checked {
-            background-color: #8b5e3c;
-            border-color: #8b5e3c;
-        }
-
-        /* Top Loading Bar */
-        #top-loading-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
+        .btn-submit {
             background: #1c4278;
-            /* App brown color */
-            z-index: 99999;
-            transition: width 0.4s ease, opacity 0.4s ease;
-            width: 0%;
-            opacity: 1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Sidebar Blue */
+            color: white;
+            padding: 10px 30px;
+            /* Compact button */
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: #15325e;
+            /* Darker Blue */
+        }
+
+        .badge-treatment {
+            background: #eef2ff;
+            color: #1c4278;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+            margin: 4px;
+            border: 1px solid #bfddfd;
+        }
+
+        .summary-box {
+            background: #eef5ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .summary-item i {
+            color: #1c4278;
+            width: 24px;
+            margin-right: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div id="top-loading-bar"></div>
 
     <!-- Sidebar -->
+    <div id="top-loading-bar"></div>
     <div class="sidebar">
         <a href="{% url 'doctor_dashboard' %}"><i class="bi bi-grid-1x2 me-2"></i> Dashboard</a>
-
-        <!-- Availability Management -->
         <a href="{% url 'doctor_availability_list' %}"><i class="bi bi-calendar-month me-2"></i> Set Monthly
             Availability</a>
-
-
         <a href="{% url 'my_patients' %}"><i class="bi bi-people me-2"></i> My Patients</a>
         <a href="#"><i class="bi bi-file-medical me-2"></i> Patient Reports</a>
         <a href="{% url 'doctor_profile_edit' %}" class="active"><i class="bi bi-person-lines-fill me-2"></i>
@@ -187,159 +269,202 @@
     </div>
 
     <div class="content">
-        <!-- New Header Style -->
-        <div class="mb-4">
-            <h3 class="fw-bold text-dark" style="color: #1c4278 !important;">
-                <i class="bi bi-person-gear me-2"></i> Edit Profile
-            </h3>
-            <p class="text-muted">Manage your personal information, specialization, and contact details.</p>
-        </div>
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-2"> <!-- Further reduced margin -->
+            <div>
+                <h4 class="fw-bold mb-0" style="color: #333; font-size: 1.2rem;"><i class="bi bi-person-gear me-2"
+                        style="color:#1c4278;"></i>Edit Profile</h4>
+                <p class="text-muted small mb-0" style="font-size: 0.8rem;">Manage your personal information,
+                    specialization, and contact details.</p>
+            </div>
 
-        <div class="profile-container">
-            <form id="editProfileForm" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                <!-- ROW 1: Name, Email, Phone -->
-                <div class="row g-4 mb-3">
-                    <div class="col-md-4">
-                        <label>First Name</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person"></i></span>
-                            <input type="text" class="form-control" name="name" value="{{ doctor.name }}"
-                                placeholder="Dr. Name" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label>Email (Cannot Changed)</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                            <input type="email" class="form-control" value="{{ doctor.user.email }}" disabled>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label>Mobile Number</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                            <input type="text" class="form-control" name="contact_number"
-                                value="{{ doctor.user.doctorprofile.contact_number|default:'' }}"
-                                placeholder="+1 234 567 890">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ROW 2: Specialization, Department, Gender -->
-                <div class="row g-4 mb-3">
-                    <div class="col-md-4">
-                        <label>Specialization</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-mortarboard"></i></span>
-                            <input type="text" class="form-control" name="specialization"
-                                value="{{ doctor.specialization }}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label>Department (Admin)</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-hospital"></i></span>
-                            <select class="form-select" name="department" id="departmentSelect">
-                                <option value="">-- Select Department --</option>
-                                {% for dept in departments %}
-                                <option value="{{ dept.id }}" {% if doctor.department.id == dept.id %}selected{% endif %}>
-                                    {{ dept.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label>Gender</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
-                            <select class="form-select" name="gender" id="genderSelect">
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ROW 3: DOB, Qual, Experience -->
-                <div class="row g-4 mb-3">
-                    <div class="col-md-4">
-                        <label>Date Of Birth</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                            <input type="date" class="form-control" name="date_of_birth"
-                                value="{{ doctor.user.doctorprofile.date_of_birth|date:'Y-m-d' }}">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label>Qualification</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-bookmark-star"></i></span>
-                            <input type="text" class="form-control" name="qualification"
-                                value="{{ doctor.user.doctorprofile.qualification|default:'' }}">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label>Years of Experience</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                            <input type="number" class="form-control" name="year_of_experience"
-                                value="{{ doctor.user.doctorprofile.year_of_experience|default:'' }}">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ROW 4: Address -->
-                <div class="row g-4 mb-3">
-                    <div class="col-12">
-                        <label>Address</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                            <input type="text" class="form-control" name="address"
-                                value="{{ doctor.user.doctorprofile.address|default:'' }}" placeholder="Full Address">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ROW 5: Photo & Treatments -->
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <label>Profile Photo</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-camera"></i></span>
-                            <input type="file" class="form-control" name="passport_photo">
-                        </div>
+            <div class="d-flex align-items-center">
+                <a href="{% url 'doctor_profile_edit' %}" class="d-flex align-items-center text-decoration-none">
+                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
+                        style="width: 40px; height: 40px; font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
                         {% if doctor.user.doctorprofile.passport_photo %}
-                        <small class="text-muted ms-2">Current: <a
-                                href="{{ doctor.user.doctorprofile.passport_photo.url }}" target="_blank">View
-                                Photo</a></small>
+                        <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt="Profile"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                        {{ doctor.name|slice:":2"|upper }}
                         {% endif %}
                     </div>
-                    <div class="col-md-6">
-                        <label>Assigned Treatments</label>
-                        <div class="p-3 border rounded bg-white" style="max-height: 200px; overflow-y: auto;"
-                            id="treatmentsContainer">
-                            <p class="text-muted small mb-0">Select a department first.</p>
-                        </div>
-                        <!-- Hidden input to store initial treatments for JS comparison -->
-                        <div id="initialTreatments"
-                            data-ids="[{% for t in doctor.treatments.all %}{{ t.id }}{% if not forloop.last %},{% endif %}{% endfor %}]">
+                </a>
+            </div>
+        </div>
+
+        <form id="editProfileForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+                <!-- LEFT COLUMN: Profile Card -->
+                <div class="col-lg-4 mb-3">
+                    <div class="card profile-card h-55">
+                        <div class="card-body p-2">
+                            <!-- Image Upload -->
+                            <div class="profile-img-container">
+                                {% if doctor.user.doctorprofile.passport_photo %}
+                                <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt="Profile"
+                                    class="profile-img" id="profilePreview">
+                                {% else %}
+                                <img src="https://via.placeholder.com/150" alt="Profile" class="profile-img"
+                                    id="profilePreview">
+                                {% endif %}
+                                <label for="passport_photo" class="camera-btn">
+                                    <i class="bi bi-camera-fill" style="font-size: 12px;"></i>
+                                </label>
+                                <input type="file" name="passport_photo" id="passport_photo" style="display: none;"
+                                    accept="image/*" onchange="previewImage(this)">
+                            </div>
+
+                            <h5 class="fw-bold mb-1" style="font-size: 1rem;">{{ doctor.name }}</h5>
+                            <p class="text-primary fw-medium mb-3 small">
+                                <i class="bi bi-stethoscope me-1"></i>{{ doctor.specialization }}
+                            </p>
+
+                            <div class="summary-box text-start p-3" style="margin-top: 10px;"> <!-- Compact Summary -->
+                                <h6 class="fw-bold mb-2 small" style="color: #1c4278;"><i
+                                        class="bi bi-globe me-2"></i>Professional Summary</h6>
+                                <div class="summary-item mb-1 small">
+                                    <i class="bi bi-check-circle-fill" style="width: 20px;"></i>
+                                    <span>Specialization: {{ doctor.specialization }}</span>
+                                </div>
+                                <div class="summary-item mb-1 small">
+                                    <i class="bi bi-mortarboard-fill" style="width: 20px;"></i>
+                                    <span>{{ doctor.user.doctorprofile.qualification|default:'MBBS' }}</span>
+                                </div>
+                                <div class="summary-item mb-0 small">
+                                    <i class="bi bi-building-fill" style="width: 20px;"></i>
+                                    <span>Dept: {{ doctor.department.name|default:'General' }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Buttons -->
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <button type="submit"
-                        style="background:#24437a;color: #fff;padding: 10px;    font-size: 15px; border-radius: 8px;width: 10%;border-bottom: #6b3f21;"
-                        class="btn btn-primary">Submit</button>
-                </div>
+                <!-- RIGHT COLUMN: Form Fields -->
+                <div class="col-lg-8">
+                    <div class="card" style="padding: 15px;"> <!-- Further Reduced Padding -->
+                        <!-- Section 1: Personal Information -->
+                        <div class="section-title">Personal Information</div>
 
-            </form>
-        </div>
+                        <div class="row g-2 mb-3"> <!-- Compact Gap & Margin -->
+                            <div class="col-md-6">
+                                <label>First Name</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control" name="name" value="{{ doctor.name }}"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Email (Read-only)</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control" value="{{ doctor.user.email }}" readonly
+                                        disabled>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Mobile Number</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input type="text" class="form-control" name="contact_number"
+                                        value="{{ doctor.user.doctorprofile.contact_number|default:'' }}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Gender</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+                                    <select class="form-select" name="gender" id="genderSelect">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6"> <!-- NOW HALF WIDTH -->
+                                <label>Date Of Birth</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                    <input type="date" class="form-control" name="date_of_birth"
+                                        value="{{ doctor.user.doctorprofile.date_of_birth|date:'Y-m-d' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Professional Details -->
+                        <div class="section-title">Professional Details</div>
+
+                        <div class="row g-2 mb-3"> <!-- Compact Gap & Margin -->
+                            <div class="col-md-6">
+                                <label>Specialization</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-briefcase-medical"></i></span>
+                                    <input type="text" class="form-control" name="specialization"
+                                        value="{{ doctor.specialization }}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Department (Admin Only)</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-hospital"></i></span>
+                                    <input type="text" class="form-control"
+                                        value="{{ doctor.department.name|default:'Not Assigned' }}" readonly disabled>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Qualification</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-award"></i></span>
+                                    <input type="text" class="form-control" name="qualification"
+                                        value="{{ doctor.user.doctorprofile.qualification|default:'' }}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Years of Experience</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                                    <input type="number" class="form-control" name="year_of_experience"
+                                        value="{{ doctor.user.doctorprofile.year_of_experience|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Professional Details -->
+                        <div class="section-title">Contact & Address</div>
+
+                        <div class="row g-2 mb-2"> <!-- Compact Gap & Margin -->
+                            <div class="col-12">
+                                <label>Detailed Address</label>
+                                <div class="input-group input-with-icon">
+                                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                    <input type="text" class="form-control" name="address"
+                                        value="{{ doctor.user.doctorprofile.address|default:'' }}"
+                                        placeholder="Street Name, Area, City, Zip Code">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-flex justify-content-end mt-2">
+                            <button type="submit" class="btn btn-submit">Save Changes</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+
     </div>
 
 
@@ -359,104 +484,29 @@
 
         {% if messages %}
         {% for message in messages %}
-        toastr.{{ message.tags }} ("{{ message }}");
+        toastr.{ { message.tags } } ("{{ message }}");
         {% endfor %}
         {% endif %}
 
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Gender Selection
             const gender = "{{ doctor.user.doctorprofile.gender|default:''|escapejs }}";
             const genderSelect = document.getElementById('genderSelect');
             if (genderSelect && gender) {
                 genderSelect.value = gender;
             }
+        });
 
-            // Dynamic Treatment Loading
-            const departmentSelect = document.getElementById('departmentSelect');
-            const treatmentsContainer = document.getElementById('treatmentsContainer');
-            const initialTreatmentsData = document.getElementById('initialTreatments').getAttribute('data-ids');
-            const initialTreatmentIds = initialTreatmentsData ? JSON.parse(initialTreatmentsData) : [];
-
-            function loadTreatments(departmentId) {
-                if (!departmentId) {
-                    treatmentsContainer.innerHTML = '<p class="text-muted small mb-0">Select a department first.</p>';
-                    return;
+        // Image Preview Logic
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profilePreview').src = e.target.result;
                 }
-
-                treatmentsContainer.innerHTML = '<p class="text-muted small mb-0">Loading treatments...</p>';
-
-                fetch(`/api/treatments/?department=${departmentId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.length === 0) {
-                            treatmentsContainer.innerHTML = '<p class="text-muted small mb-0">No treatments found for this department.</p>';
-                            return;
-                        }
-
-                        let html = '<div class="row">';
-                        data.forEach(treatment => {
-                            const isChecked = initialTreatmentIds.includes(treatment.id) ? 'checked' : '';
-                            html += `
-                                <div class="col-md-6 mb-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="treatments" value="${treatment.id}" id="treatment_${treatment.id}" ${isChecked}>
-                                        <label class="form-check-label" for="treatment_${treatment.id}">
-                                            ${treatment.name}
-                                        </label>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        html += '</div>';
-                        treatmentsContainer.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.error('Error fetching treatments:', error);
-                        treatmentsContainer.innerHTML = '<p class="text-danger small mb-0">Error loading treatments.</p>';
-                    });
+                reader.readAsDataURL(input.files[0]);
             }
-
-            // Initial load if department is selected
-            if (departmentSelect.value) {
-                loadTreatments(departmentSelect.value);
-            }
-
-            // On change
-            departmentSelect.addEventListener('change', function () {
-                loadTreatments(this.value);
-            });
-        });
-    </script>
-
-    <!-- Loading Bar Logic -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const loadingBar = document.getElementById("top-loading-bar");
-            function startLoading() {
-                loadingBar.style.width = "0%";
-                loadingBar.style.opacity = "1";
-                setTimeout(() => {
-                    loadingBar.style.width = "80%";
-                }, 100);
-            }
-            function finishLoading() {
-                loadingBar.style.width = "100%";
-                setTimeout(() => {
-                    loadingBar.style.opacity = "0";
-                    setTimeout(() => {
-                        loadingBar.style.width = "0%";
-                    }, 100);
-                }, 500);
-            }
-            // Start loading on form submit
-            const form = document.getElementById("editProfileForm");
-            form.addEventListener("submit", function () {
-                startLoading();
-            });
-            // Finish loading when page fully loads
-            window.addEventListener("load", function () {
-                finishLoading();
-            });
-        });
+        }
     </script>
 </body>
 

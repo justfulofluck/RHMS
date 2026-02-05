@@ -23,9 +23,7 @@
             font-family: "Poppins", sans-serif;
             background: #f5ede5;
         }
-.btn:hover{
-   color:white; 
-}
+
         /* Sidebar */
         .sidebar {
             position: fixed;
@@ -94,7 +92,7 @@
 
         .list-card {
             background: #fff;
-            padding: 20px;
+            padding: 10px;
             border-radius: 12px;
             box-shadow: 0 12px 20px rgba(0, 0, 0, 0.07);
             margin-bottom: 20px;
@@ -109,7 +107,8 @@
         .badge-token {
             background-color: var(--brown) !important;
             color: white;
-            font-size:18px;
+            font-size: 16px;
+            padding: 5px 8px;
         }
 
         /* Top Loading Bar */
@@ -189,6 +188,21 @@
         <div class="row g-4">
             <div class="col-12">
                 <div class="list-card">
+                    <!-- Filter Section -->
+                    <div class="d-flex flex-wrap gap-3 mb-4 justify-content-between align-items-center">
+                        <div class="d-flex gap-2">
+                            <div class="input-group" style="width: 250px;">
+                                <span class="input-group-text bg-white border-end-0"><i
+                                        class="fa-solid fa-search text-muted"></i></span>
+                                <input type="text" id="searchInput" class="form-control border-start-0 ps-0"
+                                    placeholder="Search Patient Name...">
+                            </div>
+                            <input type="date" id="dateFilter" class="form-control" style="width: 180px;">
+                        </div>
+                        <button class="btn text-white" style="background-color: var(--brown);"
+                            onclick="applyFilters()">Apply Filter</button>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead style="background:#f8f9fa;">
@@ -196,43 +210,61 @@
                                     <th>Token</th>
                                     <th>Patient</th>
                                     <th>Doctor</th>
+                                    <th>Treatment</th>
                                     <th>Date & Time</th>
                                     <th>Action</th>
-                                    
+
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="appointmentsTableBody">
                                 {% for appt in appointments %}
-                                <tr>
+                                <tr class="appointment-row" data-date="{{ appt.appointment_date|date:'Y-m-d' }}"
+                                    data-name="{{ appt.patient_name|lower }}">
                                     <td><span class="badge badge-token">#{{ appt.token_number }}</span></td>
-                                    <td>
+                                   <td>
                                         <div class="fw-bold">{{ appt.patient_name }}</div>
-                                        <div class="small text-muted">{{ appt.patient_email|default:"No Email" }}</div>
-                                    </td>
+                                        <div class="small text-muted">{{ appt.patient_phone|default:"-- --" }}</div>
+                                    </td> 
                                     <td>
                                         <div class="fw-bold">{{ appt.doctor.name }}</div>
                                         <div class="small text-muted">{{ appt.doctor.specialization }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold">{{ appt.treatment.name|default:"General" }}</div>
                                     </td>
                                     <td>
                                         <div class="fw-bold">{{ appt.appointment_date|time:"h:i A" }}</div>
                                         <div class="small text-muted">{{ appt.appointment_date|date:"M d, Y" }}</div>
                                     </td>
                                     <td>
-                                        <a class="btn btn-sm border badge badge-token" href="{% url 'hospital_admin_dashboard' %}">View Report</a>
+                                        <a href="#" class="badge badge-token btn">View Report</a>
                                     </td>
-                                    
                                 </tr>
                                 {% empty %}
-                                <tr>
-                                    
+                                <tr id="noDataRow" style="display: none;">
+                                    <td colspan="6" class="text-center py-4 text-muted">No appointments found matching
+                                        your criteria.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
+
+                <!-- Pagination Controls -->
+                <div class="d-flex justify-content-between align-items-center mt-3" id="paginationControls">
+                    <div class="text-muted small" id="pageInfo">Showing 0-0 of 0</div>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-secondary btn-sm text-white" style="background-color: var(--brown);" id="prevBtn" onclick="changePage(-1)"><i
+                                class="fa-solid fa-chevron-left"></i> Prev</button>
+                        <button class="btn btn-outline-secondary btn-sm text-black" style="background-color: white;" disabled id="currPageBtn">1</button>
+                        <button class="btn btn-outline-secondary btn-sm text-white" style="background-color: var(--brown);" id="nextBtn" onclick="changePage(1)">Next <i
+                                class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
     </div>
 
@@ -264,7 +296,101 @@
         document.querySelector('form')?.addEventListener('submit', function () {
             startLoader();
         });
-        // -----------------------------
+
+        // --- Frontend Pagination & Filtering Logic ---
+        let allRows = [];
+        let filteredRows = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Collect all rows initially rendered by Django
+            const rows = document.querySelectorAll('.appointment-row');
+            rows.forEach(row => allRows.push(row));
+
+            // Initial Render
+            applyFilters();
+        });
+
+        function applyFilters() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const dateValue = document.getElementById('dateFilter').value;
+
+            filteredRows = allRows.filter(row => {
+                const name = row.getAttribute('data-name');
+                const date = row.getAttribute('data-date'); // YYYY-MM-DD format
+
+                const matchesName = name.includes(searchText);
+                const matchesDate = dateValue ? date === dateValue : true;
+
+                return matchesName && matchesDate;
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        // Trigger filter on Enter key in search box
+        document.getElementById('searchInput').addEventListener('keyup', function (e) {
+            if (e.key === 'Enter') applyFilters();
+        });
+        document.getElementById('searchInput').addEventListener('input', applyFilters); // Live search
+        document.getElementById('dateFilter').addEventListener('change', applyFilters);
+
+
+        function renderTable() {
+            const tableBody = document.getElementById('appointmentsTableBody');
+            const noDataRow = document.getElementById('noDataRow');
+
+            // Calculate slice range
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageRows = filteredRows.slice(start, end);
+
+            // Hide all original rows first (remove from DOM or hide)
+            // It's cleaner to remove all children and append only the ones we need, 
+            // but for performance with DOM nodes, let's just use display property or re-append.
+            // Re-appending existing DOM nodes moves them.
+
+            // Clear current display
+            allRows.forEach(row => row.style.display = 'none');
+
+            // Show appropriate rows
+            pageRows.forEach(row => row.style.display = 'table-row');
+
+            // Handle "No Data"
+            if (filteredRows.length === 0) {
+                if (noDataRow) noDataRow.style.display = 'table-row';
+            } else {
+                if (noDataRow) noDataRow.style.display = 'none';
+            }
+
+            updatePaginationControls();
+        }
+
+        function changePage(delta) {
+            const maxPage = Math.max(1, Math.ceil(filteredRows.length / itemsPerPage));
+            const newPage = currentPage + delta;
+
+            if (newPage >= 1 && newPage <= maxPage) {
+                currentPage = newPage;
+                renderTable();
+            }
+        }
+
+        function updatePaginationControls() {
+            const totalItems = filteredRows.length;
+            const maxPage = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+            const start = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, totalItems);
+
+            document.getElementById('pageInfo').innerText = `Showing ${start}-${end} of ${totalItems}`;
+            document.getElementById('currPageBtn').innerText = currentPage;
+
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === maxPage || totalItems === 0;
+        }
     </script>
 
 </body>
