@@ -7,144 +7,295 @@
 <style>
     /* PAGE BACKGROUND */
     body {
-        background: linear-gradient(to bottom, #ecdccf, #ffffff);
+        background: #f5f5f5;
         font-family: "Poppins", sans-serif;
         margin: 0;
     }
 
-    /* ---------------- SIDEBAR ---------------- */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: 250px;
-        background: linear-gradient(180deg, #8a5b3e 0%, #6e432d 100%);
-        color: #fff;
-        padding: 25px 20px;
-        box-shadow: 3px 0 10px rgba(0, 0, 0, 0.25);
-        overflow-y: auto;
-    }
-
-    .sidebar h3 {
-        font-weight: 700;
-        text-align: center;
-        margin-bottom: 35px;
-        letter-spacing: 1px;
-    }
-
-    .sidebar a {
-        color: #f5e7df;
-        text-decoration: none;
-        display: block;
-        padding: 12px 15px;
-        margin-bottom: 10px;
-        border-radius: 10px;
-        font-weight: 500;
-        transition: 0.3s ease;
-    }
-
-    .sidebar a:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateX(5px);
-    }
-
-    .sidebar .active {
-        background: #ffffff;
-        color: #8a5b3e !important;
-        font-weight: 600;
-    }
-
     /* ---------------- MAIN CONTENT ---------------- */
     .main-content {
-        margin-left: 260px;
+        margin-left: 280px;
         padding: 30px;
     }
 
-    /* PAGE TITLES */
-    h2 {
-        color: #fff;
-        font-weight: 700;
-        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
     /* ---------------- DASHBOARD METRIC CARDS ---------------- */
-    .card-metric {
-        border-radius: 16px;
-        color: #fff;
-        border: none;
-        padding: 10px;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
         transition: transform 0.2s ease;
+        border: 1px solid #f3f4f6;
     }
 
-    .card-metric:hover {
-        transform: translateY(-5px);
+    .metric-card:hover {
+        transform: translateY(-2px);
     }
 
-    .card-metric i {
-        opacity: 0.8;
+    .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
     }
 
-    /* ---------------- GENERAL CARDS ---------------- */
-    .card {
-        border-radius: 14px !important;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-        border: none !important;
+    .metric-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .icon-orange {
+        background-color: #ffedd5;
+        color: #f97316;
+    }
+
+    .icon-blue {
+        background-color: #dbeafe;
+        color: #3b82f6;
+    }
+
+    .icon-yellow {
+        background-color: #fef9c3;
+        color: #eab308;
+    }
+
+    .icon-red {
+        background-color: #fee2e2;
+        color: #ef4444;
+    }
+
+    .metric-change-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .badge-positive {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-negative {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-neutral {
+        background-color: #f3f4f6;
+        color: #4b5563;
+    }
+
+    .metric-title {
+        color: #6b7280;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .metric-value {
+        font-size: 36px;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1;
+    }
+
+    /* ---------------- CHARTS ---------------- */
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        margin-bottom: 24px;
+        border: 1px solid #f3f4f6;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .chart-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .chart-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        margin-top: 4px;
     }
 
     /* ---------------- TABLES ---------------- */
-    .table-hover tbody tr:hover {
-        background: #fff4e6;
-        transition: 0.3s;
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        border: 1px solid #f3f4f6;
     }
 
-    /* Fix table header background */
-    .table thead {
-        background: #8a5b3e;
-        color: #fff;
-        border-radius: 10px;
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
     }
 
-    /* ---------------- BUTTONS ---------------- */
-    .btn-success {
-        background: #6e432d !important;
-        border: none !important;
+    .table-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
     }
 
-    .btn-success:hover {
-        background: #573523 !important;
+    .view-all-link {
+        color: #ea580c;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 14px;
     }
 
-    /* Delete button */
-    .btn-danger {
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .custom-table th {
+        text-align: left;
+        color: #9ca3af;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 12px 16px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .custom-table td {
+        padding: 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f3f4f6;
+        color: #1f2937;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .custom-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .user-info div:first-child {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .user-info div:last-child {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 4px 10px;
         border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
     }
 
-    /* ---------------- SCROLLBAR STYLING ---------------- */
-    .sidebar::-webkit-scrollbar {
-        width: 6px;
+    .role-doctor {
+        background-color: #dbeafe;
+        color: #1e40af;
     }
 
-    #dashboard h2 {
-        color: #6e432d;
+    .role-hospital-admin {
+        background-color: #fef3c7;
+        color: #92400e;
     }
 
-    #approvals h2 {
-        color: #6e432d;
+    .role-patient {
+        background-color: #f3e8ff;
+        color: #6b21a8;
     }
 
-    #users h2 {
-        color: #6e432d;
+    .role-superadmin {
+        background-color: #fee2e2;
+        color: #991b1b;
     }
 
-    #appointments h2 {
-        color: #6e432d;
+    .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #059669;
     }
 
-    .sidebar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 10px;
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #10b981;
+        border-radius: 50%;
+    }
+
+    .status-inactive {
+        color: #ca8a04;
+    }
+
+    .status-dot-inactive {
+        background-color: #f59e0b;
+    }
+
+    .action-btn {
+        color: #9ca3af;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 4px;
+        transition: color 0.2s;
+    }
+
+    .action-btn:hover {
+        color: #4b5563;
+        background-color: #f3f4f6;
     }
 
     /* SEARCH BAR STYLES */
@@ -152,63 +303,27 @@
         display: flex;
         align-items: center;
         gap: 15px;
-        margin-bottom: 25px;
-        max-width: 700px;
-    }
-
-    .search-icon-btn {
-        width: 50px;
-        height: 50px;
-        background-color: #1e6d7e;
-        /* Teal Blue from screenshot */
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 20px;
-        box-shadow: 0 4px 10px rgba(30, 109, 126, 0.3);
-        border: none;
-        cursor: default;
-    }
-
-    .search-container {
-        position: relative;
-        flex-grow: 1;
+        margin-bottom: 30px;
+        background-color: white;
+        padding: 8px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f3f4f6;
+        max-width: 600px;
     }
 
     .search-input {
         width: 100%;
-        padding: 15px 45px 15px 25px;
-        /* Right padding for X button */
-        border-radius: 30px;
-        border: 1px solid #e0e0e0;
-        font-size: 16px;
+        border: none;
         outline: none;
-        transition: 0.3s;
-        background: #ffffff;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        font-size: 14px;
+        color: #374151;
+        padding: 8px;
     }
 
-    .search-input:focus {
-        border-color: #1e6d7e;
-        box-shadow: 0 4px 12px rgba(30, 109, 126, 0.15);
-    }
-
-    .clear-btn {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #666;
-        cursor: pointer;
-        font-size: 18px;
-        display: none;
-        /* Hidden by default */
-    }
-
-    .clear-btn:hover {
-        color: #333;
+    .search-icon {
+        color: #9ca3af;
+        margin-left: 12px;
     }
 
     .search-results {
@@ -218,360 +333,364 @@
         right: 0;
         z-index: 1000;
         background: #fff;
-        border-radius: 20px;
-        /* More rounded */
-        margin-top: 15px;
-        padding: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        margin-top: 10px;
+        padding: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         display: none;
-        max-height: 400px;
+        max-height: 300px;
         overflow-y: auto;
+        border: 1px solid #f0f0f0;
+    }
+
+    .search-container {
+        position: relative;
+        flex-grow: 1;
     }
 
     .search-item {
-        padding: 12px 20px;
-        border-bottom: 1px solid #f0f0f0;
+        padding: 10px 12px;
         cursor: pointer;
-        border-radius: 10px;
-        transition: 0.2s;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
     }
 
     .search-item:hover {
-        background: #f8f9fa;
-    }
-
-    /* "No Results" Pill Style from Screenshot */
-    .no-results {
-        background-color: #fceceb;
-        /* Light reddish pink */
-        color: #c05850;
-        /* Darker red text */
-        text-align: center;
-        padding: 15px;
-        border-radius: 10px;
-        font-weight: 500;
-        margin: 5px;
+        background-color: #f9fafb;
     }
 
     .search-category {
-        font-size: 11px;
+        font-size: 10px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #1e6d7e;
-        margin-bottom: 2px;
-        display: block;
+        color: #6b7280;
         font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .no-results {
+        padding: 12px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
     }
 </style>
 
-<div class="sidebar">
-    <h3 class="text-center mb-4">RHMS</h3>
-    <a href="#dashboard" class="active">Dashboard</a>
-    <a href="#approvals">Pending Approvals</a>
-    <a href="#users">Users</a>
-    <a href="#appointments">Appointments</a>
-    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
-        {% csrf_token %}
-    </form>
-    <a href="#" onclick="document.getElementById('logout-form').submit(); return false;">Logout</a>
-</div>
+{% include 'accounts/includes/sidebar.html' %}
 
 <div class="main-content">
 
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-gray-800 mb-1" style="font-size: 24px; color: #111827;">System Overview</h1>
+            <p class="text-muted mb-0" style="font-size: 14px; color: #6b7280;">Monitoring real-time health system
+                activity and registrations.</p>
+        </div>
+
+    </div>
+
     <!-- SEARCH BAR -->
     <div class="search-wrapper">
-        <button class="search-icon-btn">
-            <i class="fas fa-search"></i>
-        </button>
+        <i class="fas fa-search search-icon"></i>
         <div class="search-container">
             <input type="text" id="universalSearch" class="search-input"
                 placeholder="Search for users, hospitals, or doctors..." autocomplete="off">
-            <i id="clearSearchBtn" class="fas fa-times clear-btn"></i>
             <div id="searchResults" class="search-results"></div>
         </div>
     </div>
 
-    <div id="dashboard">
-        <h2 class="mb-4">Dashboard</h2>
+    <!-- METRICS GRID -->
+    <div class="row g-4 mb-4">
+        <!-- Total Users -->
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-icon-wrapper icon-orange">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="metric-change-badge badge-positive">
+                        <i class="fas fa-arrow-up"></i> 12%
+                    </div>
+                </div>
+                <div>
+                    <div class="metric-title">Total Users</div>
+                    <div class="metric-value">{{ total_users }}</div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Metrics -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card card-metric " style="background-color: #8a5b3e;">
-                    <div class="card-body">
-                        <div>
-                            <h5>Total Users</h5>
-                            <h3>{{ total_users }}</h3>
-                        </div>
-                        <i class="fas fa-users"></i>
+        <!-- Doctors -->
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-icon-wrapper icon-blue">
+                        <i class="fas fa-briefcase-medical"></i>
+                    </div>
+                    <div class="metric-change-badge badge-positive">
+                        <i class="fas fa-arrow-up"></i> 4%
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card card-metric " style="background-color: #cca78a ; color: #573523;">
-                    <div class="card-body">
-                        <div>
-                            <h5>Doctors</h5>
-                            <h3>{{ total_doctors }}</h3>
-                        </div>
-                        <i class="fas fa-user-md"></i>
-                    </div>
+                <div>
+                    <div class="metric-title">Doctors</div>
+                    <div class="metric-value">{{ total_doctors }}</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card card-metric " style="background-color: #8a5b3e;">
-                    <div class="card-body">
-                        <div>
-                            <h5>Hospitals</h5>
-                            <h3>{{ total_hospitals }}</h3>
-                        </div>
+        </div>
+
+        <!-- Hospitals -->
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-icon-wrapper icon-yellow">
                         <i class="fas fa-hospital"></i>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card card-metric" style="background-color: #cca78a ;  color: #573523;">
-                    <div class="card-body">
-                        <div>
-                            <h5>Appointments</h5>
-                            <h3>{{ total_appointments }}</h3>
-                        </div>
-                        <i class="far fa-calendar-check"></i>
+                    <div class="metric-change-badge badge-neutral">
+                        Stable
                     </div>
+                </div>
+                <div>
+                    <div class="metric-title">Hospitals</div>
+                    <div class="metric-value">{{ total_hospitals }}</div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Appointment Trends (Last 7 Days)</h5>
-                        <canvas id="appointmentsChart"></canvas>
+        <!-- Appointments -->
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-icon-wrapper icon-red">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                    <div class="metric-change-badge badge-negative">
+                        <i class="fas fa-arrow-down"></i> 2%
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Doctor Registrations (Last 12 Months)</h5>
-                        <canvas id="doctorChart"></canvas>
-                    </div>
+                <div>
+                    <div class="metric-title">Appointments</div>
+                    <div class="metric-value">{{ total_appointments }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="approvals" class="mt-5">
-        <h2 class="mb-4">Pending Approvals</h2>
-        <div class="card">
-            <div class="card-body">
-                <h4>Pending Hospitals</h4>
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for hospital in pending_hospitals %}
-                        <tr>
-                            <td>{{ hospital.name }}</td>
-                            <td>{{ hospital.email }}</td>
-                            <td>
-                                <a href="{% url 'approve_hospital' hospital.id %}"
-                                    class="btn btn-sm btn-success">Approve</a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3">No pending hospitals.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- CHARTS ROW -->
+    <div class="row pt-4">
+        <!-- Appointment Trends -->
+        <div class="col-lg-6 mb-4">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">Appointment Trends</h3>
+                        <p class="chart-subtitle">Last 7 Days activity volume</p>
+                    </div>
+                    <button class="btn btn-sm btn-light border">Weekly View <i
+                            class="fas fa-chevron-down ms-1"></i></button>
+                </div>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="appointmentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor Registrations -->
+        <div class="col-lg-6 mb-4">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">Doctor Registrations</h3>
+                        <p class="chart-subtitle">Monthly growth comparison</p>
+                    </div>
+                    <i class="fas fa-ellipsis-h text-muted" style="cursor: pointer;"></i>
+                </div>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="doctorChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="users" class="mt-5">
-        <h2 class="mb-4">User Management</h2>
-        <div class="card">
-            <div class="card-body">
-                <h4>Hospital Admins</h4>
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Email</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="hospital-admins-table">
-                        {% for admin in hospital_admins %}
-                        <tr>
-                            <td>{{ admin.email }}</td>
-                            <td>
-                                <form action="{% url 'delete_user' admin.id %}" method="post" style="display:inline;"
-                                    onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm "
-                                        style="background-color: #6e432d; color: #fff;">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="2">No hospital admins found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <!-- RECENT REGISTRATIONS -->
+    <div class="table-card mt-2">
+        <div class="table-header">
+            <div class="table-title">Recent Registrations</div>
+            <a href="{% url 'user_management' %}" class="view-all-link">View All Users</a>
         </div>
-        <div class="card mt-4">
-            <div class="card-body">
-                <h4>Doctors</h4>
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Email</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="doctors-table">
-                        {% for doctor in doctors %}
-                        <tr>
-                            <td>{{ doctor.email }}</td>
-                            <td>
-                                <form action="{% url 'delete_user' doctor.id %}" method="post" style="display:inline;"
-                                    onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm"
-                                        style="background-color: #6e432d; color: #fff;">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="2">No doctors found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
-    <div id="appointments" class="mt-5">
-        <h2 class="mb-4">Recent Appointments</h2>
-        <div class="card">
-            <div class="card-body">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Patient</th>
-                            <th>Doctor</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for appt in recent_appointments %}
-                        <tr>
-                            <td>{{ appt.patient_name }}</td>
-                            <td>{{ appt.doctor.user.email }}</td>
-                            <td>{{ appt.appointment_date|date:"Y-m-d H:i" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">User Details</th>
+                        <th style="width: 20%;">Role</th>
+                        <th style="width: 20%;">Registration Date</th>
+                        <th style="width: 15%;">Status</th>
+                        <th style="width: 10%; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                {% if user.profile_pic %}
+                                <img src="{{ user.profile_pic.url }}" class="user-avatar" alt="Avatar">
+                                {% else %}
+                                <div class="user-avatar">{{ user.email|make_list|first|upper }}</div>
+                                {% endif %}
+                                <div class="user-info">
+                                    <div>Dr. {{ user.first_name|default:user.email|truncatechars:15 }}</div>
+                                    <div>{{ user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge role-{{ user.role|slugify }}">
+                                {% if user.role == 'hospital_admin' %}
+                                Hospital Admin
+                                {% else %}
+                                {{ user.role|title }}
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            {% if user.is_active %}
+                            <div class="status-badge">
+                                <div class="status-dot"></div> Active
+                            </div>
+                            {% else %}
+                            <div class="status-badge status-inactive">
+                                <div class="status-dot status-dot-inactive"></div> Pending
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            <i class="fas fa-pen action-btn me-2"></i>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No recent registrations found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
 </div>
 
-<!-- Chart.js and Font Awesome -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 <script>
-    // Appointment Trends Chart
-    const ctx = document.getElementById('appointmentsChart').getContext('2d');
-    const appointmentsChart = new Chart(ctx, {
+    // --- APPOINTMENT TRENDS CHART ---
+    const ctxApp = document.getElementById('appointmentsChart').getContext('2d');
+
+    // Create gradient
+    let gradient = ctxApp.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(249, 115, 22, 0.2)'); // Orange with opacity
+    gradient.addColorStop(1, 'rgba(249, 115, 22, 0)');
+
+    const appointmentsChart = new Chart(ctxApp, {
         type: 'line',
         data: {
             labels: {{ chart_labels| safe }},
     datasets: [{
         label: 'Appointments',
         data: {{ chart_data| safe }},
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.3,
+        borderColor: '#ea580c', // Orange-600
+        backgroundColor: gradient,
+        borderWidth: 3,
+        tension: 0.4, // Curved lines
+        pointRadius: 0,
+        pointHoverRadius: 6,
         fill: true
             }]
         },
     options: {
         responsive: true,
-            scales: {
+            maintainAspectRatio: false,
+                plugins: {
+            legend: { display: false },
+            tooltip: {
+                mode: 'index',
+                    intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1f2937',
+                                bodyColor: '#4b5563',
+                                    borderColor: '#e5e7eb',
+                                        borderWidth: 1,
+                                            padding: 10,
+                                                callbacks: {
+                    label: function(context) {
+                        return context.parsed.y + ' Appointments';
+                    }
+                }
+            }
+        },
+        scales: {
             y: {
-                beginAtZero: true,
-                    ticks: {
-                    precision: 0
+                display: false, // Hide Y axis labels/grid as per design
+                    beginAtZero: true
+            },
+            x: {
+                grid: { display: false },
+                ticks: {
+                    color: '#9ca3af',
+                        font: { size: 11 }
                 }
             }
         }
     }
     });
 
-    // Doctor Registrations Chart
-    const doctorCtx = document.getElementById('doctorChart').getContext('2d');
-    const doctorChart = new Chart(doctorCtx, {
+    // --- DOCTOR REGISTRATIONS CHART ---
+    const ctxDoc = document.getElementById('doctorChart').getContext('2d');
+    const doctorChart = new Chart(ctxDoc, {
         type: 'bar',
         data: {
             labels: {{ doctor_chart_labels| safe }},
     datasets: [{
-        label: 'Doctors Registered',
+        label: 'Doctors',
         data: {{ doctor_chart_data| safe }},
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
+        backgroundColor: function (context) {
+            // Alternate colors somewhat randomly or by value to mimic design
+            const index = context.dataIndex;
+            return index % 2 === 0 ? '#fdba74' : '#e5e7eb'; // Orange-300 vs Gray-200
+        },
+        borderRadius: 20, // Fully rounded bars
+        borderSkipped: false,
+        barThickness: 12
             }]
         },
     options: {
         responsive: true,
-            scales: {
-            y: {
-                beginAtZero: true,
-                    ticks: {
-                    precision: 0
+            maintainAspectRatio: false,
+                plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: { display: false, beginAtZero: true },
+            x: {
+                grid: { display: false },
+                ticks: {
+                    color: '#9ca3af',
+                        font: { size: 10 }
                 }
             }
         }
     }
     });
 
-    // Universal Search Logic
+    // --- UNIVERSAL SEARCH LOGIC ---
     const searchInput = document.getElementById('universalSearch');
     const searchResults = document.getElementById('searchResults');
-    const clearBtn = document.getElementById('clearSearchBtn');
     let debounceTimer;
 
     if (searchInput) {
-        // Toggle Clear Button
-        searchInput.addEventListener('input', function () {
-            clearBtn.style.display = this.value.length > 0 ? 'block' : 'none';
-        });
-
-        clearBtn.addEventListener('click', function () {
-            searchInput.value = '';
-            searchResults.style.display = 'none';
-            this.style.display = 'none';
-            searchInput.focus();
-        });
-
         searchInput.addEventListener('input', function () {
             clearTimeout(debounceTimer);
             const query = this.value.trim();
@@ -583,118 +702,38 @@
 
             debounceTimer = setTimeout(() => {
                 fetch(`/accounts/superadmin/search/?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
+                    .then(r => r.json())
                     .then(data => {
-                        if (data.error) {
-                            alert(`Backend Error: ${data.error}`);
-                            console.error('Backend Error:', data.error);
-                            return;
-                        }
-
-                        const results = data.results;
                         searchResults.innerHTML = '';
-
-                        if (results.length === 0) {
-                            // Updated to match screenshot pill style
-                            searchResults.innerHTML = '<div class="no-results">No Results Found!</div>';
-                        } else {
-                            results.forEach(item => {
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach(item => {
                                 const div = document.createElement('div');
                                 div.className = 'search-item';
                                 div.innerHTML = `
-                                <div>
                                     <span class="search-category">${item.category}</span>
                                     <div>${item.label}</div>
-                                </div>
-                            `;
-                                div.addEventListener('click', () => {
+                                `;
+                                div.onclick = () => {
+                                    alert(`Selected: ${item.label}`);
                                     searchInput.value = item.label;
                                     searchResults.style.display = 'none';
-                                    alert(`Selected ${item.category}: ${item.label}`);
-                                });
+                                };
                                 searchResults.appendChild(div);
                             });
+                        } else {
+                            searchResults.innerHTML = '<div class="no-results">No Results Found</div>';
                         }
                         searchResults.style.display = 'block';
                     })
-                    .catch(err => {
-                        console.error('Search Network Error:', err);
-                        alert('Network Error: Failed to fetch search results.');
-                    });
+                    .catch(e => console.error(e));
             }, 300);
         });
 
-        // Close search results when clicking outside
         document.addEventListener('click', function (e) {
             if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                 searchResults.style.display = 'none';
             }
         });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        fetchHospitalAdmins();
-        fetchDoctors();
-    });
-
-    function fetchHospitalAdmins() {
-        fetch('/api/admin/hospital_admins/')
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.getElementById('hospital-admins-table');
-                tableBody.innerHTML = '';
-                data.forEach(user => {
-                    const row = `
-                        <tr>
-                            <td>${user.email}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id}, 'hospital-admin')">Remove</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-            });
-    }
-
-    function fetchDoctors() {
-        fetch('/api/admin/doctors/')
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.getElementById('doctors-table');
-                tableBody.innerHTML = '';
-                data.forEach(user => {
-                    const row = `
-                        <tr>
-                            <td>${user.email}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id}, 'doctor')">Remove</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-            });
-    }
-
-    function deleteUser(userId, userType) {
-        if (confirm('Are you sure you want to remove this user?')) {
-            fetch(`/api/admin/users/${userId}/`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-                .then(response => {
-                    if (response.status === 204) {
-                        if (userType === 'hospital-admin') {
-                            fetchHospitalAdmins();
-                        } else if (userType === 'doctor') {
-                            fetchDoctors();
-                        }
-                    }
-                });
-        }
     }
 </script>
 {% endblock %}

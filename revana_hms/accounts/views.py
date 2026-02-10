@@ -270,6 +270,7 @@ def delete_user(request, user_id):
         if hasattr(user, 'hospitaladmin'):
             hospital = user.hospitaladmin.hospital
             hospital.delete() # This will cascade delete the HospitalAdmin as well
+            user.delete() # Explicitly delete the user
             messages.success(request, f'Hospital {hospital.name} and Admin User deleted successfully.')
         else:
             user.delete()
@@ -407,3 +408,100 @@ def superadmin_search(request):
         traceback.print_exc() # Print stack trace to console
         print(f"ERROR in superadmin_search: {str(e)}")
         return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@user_passes_test(is_superadmin)
+def user_management(request):
+    from django.core.paginator import Paginator
+    
+    tab = request.GET.get('tab', 'admins') # 'admins' or 'doctors'
+    page_number = request.GET.get('page')
+    
+    if tab == 'doctors':
+        queryset = Doctor.objects.select_related('user', 'hospital').all().order_by('-id')
+    else:
+        queryset = HospitalAdmin.objects.select_related('user', 'hospital').all().order_by('-id')
+
+    paginator = Paginator(queryset, 10) # 10 items per page
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'tab': tab,
+    }
+    return render(request, 'accounts/user_management.html', context)
+
+@login_required
+@user_passes_test(is_superadmin)
+def appointment_management(request):
+    from django.core.paginator import Paginator
+    
+    page_number = request.GET.get('page')
+    queryset = Appointment.objects.select_related('doctor', 'doctor__user').all().order_by('-appointment_date')
+
+    paginator = Paginator(queryset, 10) # 10 items per page
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'accounts/appointment_management.html', context)
+
+@login_required
+@user_passes_test(is_superadmin)
+def pending_approvals(request):
+    # Fetch pending hospitals
+    pending_hospitals = Hospital.objects.filter(status=Hospital.STATUS_PENDING).order_by('-created_at')
+    
+    # Handle Approve/Reject actions
+    if request.method == 'POST':
+        hospital_id = request.POST.get('hospital_id')
+        action = request.POST.get('action')
+        
+        try:
+            hospital = Hospital.objects.get(id=hospital_id)
+            if action == 'approve':
+                hospital.status = Hospital.STATUS_APPROVED
+                hospital.is_approved = True
+                hospital.save()
+                
+                # Activate the admin user
+                try:
+                    hospital_admin = HospitalAdmin.objects.get(hospital=hospital)
+                    hospital_admin.user.is_active = True
+                    hospital_admin.user.save()
+                except HospitalAdmin.DoesNotExist:
+                    pass
+                    
+                messages.success(request, f'{hospital.name} has been approved.')
+                
+            elif action == 'reject':
+                hospital.status = Hospital.STATUS_REJECTED
+                hospital.is_approved = False
+                hospital.save()
+                messages.warning(request, f'{hospital.name} has been rejected.')
+                
+        except Hospital.DoesNotExist:
+            messages.error(request, 'Hospital not found.')
+            
+        return redirect('pending_approvals')
+
+    context = {
+        'pending_hospitals': pending_hospitals,
+    }
+    return render(request, 'accounts/pending_approvals.html', context)
+
+@login_required
+@user_passes_test(is_superadmin)
+def delete_appointment(request, appointment_id):
+    if request.method == 'POST':
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            appointment.delete()
+            messages.success(request, 'Appointment deleted successfully.')
+        except Appointment.DoesNotExist:
+            messages.error(request, 'Appointment not found.')
+        except Exception as e:
+            messages.error(request, f'Error deleting appointment: {str(e)}')
+    
+    return redirect('appointment_management')
