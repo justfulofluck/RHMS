@@ -9,7 +9,8 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import send_mail
 from django.utils import timezone
-from datetime import timedelta
+from django.urls import reverse
+from datetime import timedelta, datetime, date
 from django.db.models import Count, Q
 from rest_framework import status, generics
 from rest_framework.response import Response
@@ -207,21 +208,56 @@ def superadmin_dashboard(request):
 
 
 
-    # Appointment trends (last 7 days)
-    last_7_days = timezone.now() - timedelta(days=6)
-    appointment_by_day = (
-        Appointment.objects.filter(created_at__gte=last_7_days)
-        .annotate(day=TruncDate('created_at'))
-        .values('day')
-        .annotate(count=Count('id'))
-        .order_by('day')
-    )
-    chart_labels = [entry['day'].strftime('%b %d') for entry in appointment_by_day]
-    chart_data = [entry['count'] for entry in appointment_by_day]
+    # Appointment trends
+    filter_type = request.GET.get('filter', 'weekly')
+    
+    if filter_type == 'monthly':
+        # Last 30 Days
+        start_date = timezone.now() - timedelta(days=30)
+        appointment_data = (
+            Appointment.objects.filter(created_at__gte=start_date)
+            .annotate(day=TruncDate('created_at'))
+            .values('day')
+            .annotate(count=Count('id'))
+            .order_by('day')
+        )
+        chart_labels = [entry['day'].strftime('%b %d') for entry in appointment_data]
+        chart_data = [entry['count'] for entry in appointment_data]
+        chart_title = "Last 30 Days activity volume"
+        
+    elif filter_type == 'yearly':
+        # Last 12 Months
+        start_date = timezone.now() - timedelta(days=365)
+        appointment_data = (
+            Appointment.objects.filter(created_at__gte=start_date)
+            .annotate(month=TruncMonth('created_at'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+        chart_labels = [entry['month'].strftime('%b %Y') for entry in appointment_data]
+        chart_data = [entry['count'] for entry in appointment_data]
+        chart_title = "Last 12 Months activity volume"
+        
+    else: # Default to weekly
+        # Last 7 Days
+        start_date = timezone.now() - timedelta(days=6)
+        appointment_data = (
+            Appointment.objects.filter(created_at__gte=start_date)
+            .annotate(day=TruncDate('created_at'))
+            .values('day')
+            .annotate(count=Count('id'))
+            .order_by('day')
+        )
+        chart_labels = [entry['day'].strftime('%b %d') for entry in appointment_data]
+        chart_data = [entry['count'] for entry in appointment_data]
+        chart_title = "Last 7 Days activity volume"
 
     # Doctor registrations (last 12 months)
-    twelve_months_ago = timezone.now() - timedelta(days=365)
-    doctor_monthly = (
+    today = timezone.now()
+    twelve_months_ago = today - timedelta(days=365)
+    
+    doctor_monthly_qs = (
         User.objects
         .filter(role='doctor', date_joined__gte=twelve_months_ago)
         .annotate(month=TruncMonth('date_joined'))
@@ -229,8 +265,30 @@ def superadmin_dashboard(request):
         .annotate(count=Count('id'))
         .order_by('month')
     )
-    doctor_chart_labels = [entry['month'].strftime('%b %Y') for entry in doctor_monthly]
-    doctor_chart_data = [entry['count'] for entry in doctor_monthly]
+
+    # Create dict for easy lookup
+    data_dict = {}
+    for entry in doctor_monthly_qs:
+        if entry['month']:
+            month_key = entry['month'].strftime('%b %Y')
+            data_dict[month_key] = entry['count']
+    
+    doctor_chart_labels = []
+    doctor_chart_data = []
+    
+    # Generate last 12 months continuously
+    for i in range(11, -1, -1):
+        # Calculate month safely
+        calc_month = today.month - i
+        calc_year = today.year
+        if calc_month <= 0:
+            calc_month += 12
+            calc_year -= 1
+            
+        d = date(calc_year, calc_month, 1)
+        month_label = d.strftime('%b %Y')
+        doctor_chart_labels.append(month_label)
+        doctor_chart_data.append(data_dict.get(month_label, 0))
 
     # User role distribution
     role_distribution = (
@@ -245,6 +303,8 @@ def superadmin_dashboard(request):
     context.update({
         'chart_labels': chart_labels,
         'chart_data': chart_data,
+        'chart_title': chart_title,
+        'current_filter': filter_type,
         'doctor_chart_labels': doctor_chart_labels,
         'doctor_chart_data': doctor_chart_data,
         'role_labels': role_labels,
@@ -259,7 +319,6 @@ def superadmin_dashboard(request):
 
     return render(request, 'accounts/superadmin_dashboard.html', context)
 
-@login_required
 @login_required
 @user_passes_test(is_superadmin)
 def delete_user(request, user_id):
@@ -360,45 +419,62 @@ def superadmin_search(request):
         results = []
 
         # 1. Search Users (Email)
-        # Ensure User is defined (using global variable from top of file)
-        # Check if role field exists on User model to be safe
         users = User.objects.filter(email__icontains=query).values('id', 'email', 'role')[:5]
-        print(f"DEBUG: Found {len(users)} users") # DEBUG LOG
         
         for u in users:
+            # Determine URL based on role
+            if u.get('role') == 'doctor':
+                url = reverse('user_management') + f"?tab=doctors&q={u['email']}"
+            else:
+                url = reverse('user_management') + f"?tab=admins&q={u['email']}"
+
             results.append({
                 'category': 'User',
                 'label': f"{u['email']} ({u.get('role', 'N/A')})",
                 'id': u['id'],
-                'type': 'user'
+                'type': 'user',
+                'url': url,
+                'icon': 'fas fa-user'
             })
 
         # 2. Search Hospitals
         hospitals = Hospital.objects.filter(
             Q(name__icontains=query) | Q(city__icontains=query)
-        ).values('id', 'name', 'city')[:5]
-        print(f"DEBUG: Found {len(hospitals)} hospitals") # DEBUG LOG
+        ).values('id', 'name', 'city', 'is_approved')[:5]
 
         for h in hospitals:
+            if h['is_approved']:
+                # Active -> Link to Admins of this hospital
+                url = reverse('user_management') + f"?tab=admins&q={h['name']}"
+            else:
+                # Pending -> Link to Pending Approvals
+                url = reverse('pending_approvals')
+
             results.append({
                 'category': 'Hospital',
                 'label': f"{h['name']} - {h['city']}",
                 'id': h['id'],
-                'type': 'hospital'
+                'type': 'hospital',
+                'url': url,
+                'icon': 'fas fa-hospital'
             })
 
         # 3. Search Doctors
         doctors = Doctor.objects.filter(
             Q(name__icontains=query) | Q(specialization__icontains=query)
         ).values('id', 'name', 'specialization')[:5]
-        print(f"DEBUG: Found {len(doctors)} doctors") # DEBUG LOG
 
         for d in doctors:
+            # Link directly to edit page (Superuser has access)
+            url = reverse('edit_doctor', args=[d['id']])
+            
             results.append({
                 'category': 'Doctor',
                 'label': f"Dr. {d['name']} ({d['specialization']})",
                 'id': d['id'],
-                'type': 'doctor'
+                'type': 'doctor',
+                'url': url,
+                'icon': 'fas fa-user-md'
             })
 
         return JsonResponse({'results': results})
@@ -421,6 +497,21 @@ def user_management(request):
         queryset = Doctor.objects.select_related('user', 'hospital').all().order_by('-id')
     else:
         queryset = HospitalAdmin.objects.select_related('user', 'hospital').all().order_by('-id')
+
+    # Filter by search query if provided
+    query = request.GET.get('q')
+    if query:
+        if tab == 'doctors':
+            queryset = queryset.filter(
+                Q(name__icontains=query) | 
+                Q(user__email__icontains=query) | 
+                Q(hospital__name__icontains=query)
+            )
+        else:
+            queryset = queryset.filter(
+                Q(user__email__icontains=query) | 
+                Q(hospital__name__icontains=query)
+            )
 
     paginator = Paginator(queryset, 10) # 10 items per page
     page_obj = paginator.get_page(page_number)

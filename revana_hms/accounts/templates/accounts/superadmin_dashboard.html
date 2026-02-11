@@ -483,10 +483,24 @@
                 <div class="chart-header">
                     <div>
                         <h3 class="chart-title">Appointment Trends</h3>
-                        <p class="chart-subtitle">Last 7 Days activity volume</p>
+                        <p class="chart-subtitle">{{ chart_title }}</p>
                     </div>
-                    <button class="btn btn-sm btn-light border">Weekly View <i
-                            class="fas fa-chevron-down ms-1"></i></button>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light border dropdown-toggle" type="button"
+                            id="trendFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if current_filter == 'monthly' %}Monthly View
+                            {% elif current_filter == 'yearly' %}Yearly View
+                            {% else %}Weekly View{% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="trendFilterDropdown">
+                            <li><a class="dropdown-item {% if current_filter == 'weekly' %}active{% endif %}"
+                                    href="?filter=weekly">Weekly View</a></li>
+                            <li><a class="dropdown-item {% if current_filter == 'monthly' %}active{% endif %}"
+                                    href="?filter=monthly">Monthly View</a></li>
+                            <li><a class="dropdown-item {% if current_filter == 'yearly' %}active{% endif %}"
+                                    href="?filter=yearly">Yearly View</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div style="height: 300px; position: relative;">
                     <canvas id="appointmentsChart"></canvas>
@@ -502,7 +516,7 @@
                         <h3 class="chart-title">Doctor Registrations</h3>
                         <p class="chart-subtitle">Monthly growth comparison</p>
                     </div>
-                    <i class="fas fa-ellipsis-h text-muted" style="cursor: pointer;"></i>
+
                 </div>
                 <div style="height: 300px; position: relative;">
                     <canvas id="doctorChart"></canvas>
@@ -567,7 +581,10 @@
                             {% endif %}
                         </td>
                         <td style="text-align: right;">
-                            <i class="fas fa-pen action-btn me-2"></i>
+                            <button type="button" class="btn btn-link p-0 text-danger" title="Remove"
+                                onclick="openDeleteModal('{% url 'delete_user' user.id %}')">
+                                <i class="fas fa-trash-alt action-btn"></i>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
@@ -710,13 +727,18 @@
                                 const div = document.createElement('div');
                                 div.className = 'search-item';
                                 div.innerHTML = `
-                                    <span class="search-category">${item.category}</span>
-                                    <div>${item.label}</div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3 text-secondary">
+                                            <i class="${item.icon}"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">${item.label}</div>
+                                            <small class="text-muted">${item.category}</small>
+                                        </div>
+                                    </div>
                                 `;
                                 div.onclick = () => {
-                                    alert(`Selected: ${item.label}`);
-                                    searchInput.value = item.label;
-                                    searchResults.style.display = 'none';
+                                    window.location.href = item.url;
                                 };
                                 searchResults.appendChild(div);
                             });
@@ -734,6 +756,36 @@
                 searchResults.style.display = 'none';
             }
         });
+    }
+</script>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to remove this user?<br>This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteUserForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDeleteModal(url) {
+        const deleteForm = document.getElementById('deleteUserForm');
+        deleteForm.action = url;
+        const modal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+        modal.show();
     }
 </script>
 {% endblock %}

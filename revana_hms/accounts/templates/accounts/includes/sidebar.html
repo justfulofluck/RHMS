@@ -151,9 +151,9 @@
     <div class="sidebar-brand">
         <a href="{% url 'superadmin_dashboard' %}"
             style="text-decoration: none; display: flex; align-items: center; gap: 12px; color: inherit;">
-            <div class="brand-icon">
-                <i class="fas fa-shield-alt"></i>
-            </div>
+            {% load static %}
+            <img src="{% static 'frontend/images/logo.png' %}" alt="RHMS Logo"
+                style="width: 40px; height: 40px; border-radius: 8px;">
             <div class="brand-text">
                 <div class="brand-title">RHMS</div>
                 <div class="brand-subtitle">Hospital Management</div>
