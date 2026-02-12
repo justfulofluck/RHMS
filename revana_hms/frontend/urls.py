@@ -11,7 +11,7 @@ from .views import (
     homepage,
     appointment_widget,
 )
-from doctors.views import hospital_admin_dashboard
+from doctors.views import hospital_admin_dashboard, get_hospital_queue_status
 from . import views
 
 urlpatterns = [
@@ -25,5 +25,6 @@ urlpatterns = [
     path('hospital/edit/', views.edit_hospital_admin, name='edit_hospital_info'),
     path('superadmin/hospital/approve/<int:hospital_id>/', views.approve_hospital, name='approve_hospital'),
     path('book-appointment/', appointment_widget, name='appointment_widget'),
+    path('api/hospital/queue-status/', get_hospital_queue_status, name='get_hospital_queue_status'),
     
 ]

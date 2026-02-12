@@ -5,381 +5,513 @@
 <head>
     <meta charset="UTF-8">
     <title>Manage Doctors</title>
-
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
-    <!-- Toastr CSS -->
+    <!-- Toastr and jQuery -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-    <!-- jQuery (Required for Toastr) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <style>
         :root {
-            --brown-dark: #6b3f21;
-            --brown: #8c6239;
+            --primary: #7B61FF;
+            --primary-light: #F4F1FF;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --bg-body: #F9FAFB;
             --panel: #ffffff;
+            --text-main: #333;
+            --text-muted: #888;
         }
 
         body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--panel);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
-            font-family: "Poppins", sans-serif;
-            background: #f5ede5;
+        }
+
+        /* Layout */
+        .wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
         }
 
         /* Sidebar */
         .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 250px;
+            min-width: 250px;
+            max-width: 250px;
             background: var(--panel);
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            color: var(--text-main);
+            transition: all 0.3s;
+            position: fixed;
+            height: 100vh;
+            border-right: 1px solid #f0f0f0;
+            z-index: 1000;
         }
 
-        .sidebar h4 {
-            font-weight: 800;
-            color: var(--brown-dark);
-            margin-bottom: 20px;
-        }
-
-        .side-link {
+        .sidebar-header {
+            padding: 24px 24px;
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 12px;
-            color: var(--brown-dark);
-            font-weight: 600;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .side-link.active,
-        .side-link:hover {
-            background: var(--brown);
-            color: white !important;
-        }
-
-        /* Main */
-        .main {
-            margin-left: 270px;
-            padding: 30px;
-        }
-
-        /* Top Bar */
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 25px;
-        }
-
-        .topbar h2 {
-            margin: 0;
-            color: var(--brown-dark);
-            font-weight: 700;
-        }
-
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--brown);
-        }
-
-        .list-card {
-            background: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.07);
             margin-bottom: 20px;
         }
 
-        .nav-tabs .nav-link {
-            color: var(--brown-dark);
-            font-weight: 600;
+        .logo-box {
+            width: 32px;
+            height: 32px;
+            /* background: var(--primary); Removed */
+            /* color: white; Removed */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
         }
 
-        .nav-tabs .nav-link.active {
-            background: var(--brown);
-            color: white;
-            border-color: var(--brown);
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
 
-        .badge {
+        .sidebar-menu {
+            padding: 0 12px;
+            list-style: none;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu li a {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            border-radius: 8px;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .sidebar-menu li a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .logout-link {
+            position: absolute;
+            bottom: 20px;
+            width: calc(100% - 24px);
+            left: 12px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 10px;
+        }
+
+        .logout-link a {
+            color: #dc3545 !important;
+        }
+
+        .logout-link a:hover {
+            background: #fff5f5 !important;
+        }
+
+        /* Main Content */
+        .content {
+            width: 100%;
+            margin-left: 250px;
+            padding: 20px 40px;
+            background-color: #FAFBFC;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .top-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 35px;
+            padding: 15px 0;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: right;
+            border-left: 1px solid #eee;
+            padding-left: 25px;
+        }
+
+        .user-info .role {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .user-info .email {
             font-size: 0.75rem;
+            color: var(--text-muted);
         }
 
-        /* Top Loading Bar */
-        #top-loading-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background: #8c6239;
-            /* App brown color */
-            z-index: 99999;
-            transition: width 0.4s ease, opacity 0.4s ease;
-            width: 0%;
-            opacity: 1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Page Content */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .card-custom {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            margin-bottom: 24px;
+        }
+
+        .table-custom th {
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid #eee;
+            padding: 15px;
+            font-size: 0.9rem;
+        }
+
+        .table-custom td {
+            padding: 15px;
+            vertical-align: middle;
+            color: var(--text-main);
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-pending {
+            background: #FFF3E0;
+            color: #FF9800;
+        }
+
+        .badge-approved {
+            background: #E8F5E9;
+            color: #4CAF50;
+        }
+
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: none;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-approve {
+            background: #E8F5E9;
+            color: #28a745;
+        }
+
+        .btn-approve:hover {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-reject {
+            background: #FFEBEE;
+            color: #dc3545;
+        }
+
+        .btn-reject:hover {
+            background: #dc3545;
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <div id="top-loading-bar"></div>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h4>Admin Panel</h4>
-
-        <a class="side-link" href="{% url 'hospital_admin_dashboard' %}">
-            <i class="fa-solid fa-chart-line"></i> Dashboard
-        </a>
-
-        <a class="side-link active" href="{% url 'pending_doctors' %}">
-            <i class="fa-solid fa-user-doctor"></i> Doctors
-        </a>
-
-        <a class="side-link" href="{% url 'hospitals:manage_departments' %}">
-            <i class="fa-solid fa-users"></i> Departments
-        </a>
-
-        <a class="side-link" href="{% url 'hospitals:manage_treatments' %}">
-            <i class="fa-solid fa-stethoscope"></i> Treatments
-        </a>
-
-        <a class="side-link" href="{% url 'hospital_appointments' %}">
-            <i class="fa-regular fa-calendar-check"></i> Appointments
-        </a>
-
-        <a class="side-link" href="{% url 'logout' %}">
-            <i class="fa-solid fa-right-from-bracket"></i> Logout
-        </a>
-    </div>
-
-    <!-- Main -->
-    <div class="main">
-
-        <!-- Top Bar -->
-        <div class="topbar">
-            <div>
-                <h2>Manage Doctors</h2>
-                <div class="text-muted">{{ hospital.name }}</div>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end">
-                    <div class="small text-muted">Hospital</div>
-                    <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
-                </div>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
                 {% if hospital.logo %}
-                <img src="{{ hospital.logo.url }}" class="avatar">
+                <img src="{{ hospital.logo.url }}" alt="Logo" class="logo-box" style="object-fit: cover;">
                 {% else %}
-                <img src="https://via.placeholder.com/150" class="avatar">
+                <div class="logo-box" style="color: #FF7F50;"><i class="fa-solid fa-bullseye"></i></div>
                 {% endif %}
+                <div class="logo-text">
+                    {% if hospital %}
+                    {{ hospital.name }}
+                    {% else %}
+                    RHMS
+                    {% endif %}
+                </div>
             </div>
-        </div>
 
-        <!-- Toastr Notifications -->
-        <script>
-            toastr.options = {
-                "closeButton": true,
-                "progressBar": true,
-                "positionClass": "toast-top-right",
-                "timeOut": "5000"
-            };
-
-            {% if messages %}
-            {% for message in messages %}
-            var type = "{{ message.tags }}";
-            if (type === 'error') type = 'error'; // ensure error maps correctly
-            if (type === 'debug') type = 'info';
-            toastr[type]("{{ message }}");
-            {% endfor %}
-            {% endif %}
-        </script>
-
-        <!-- Tabs -->
-        <div class="list-card">
-            <ul class="nav nav-tabs mb-4" id="doctorTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all"
-                        type="button">
-                        All Doctors <span class="badge bg-secondary">{{ all_doctors|length }}</span>
-                    </button>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="{% url 'hospital_admin_dashboard' %}">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </a>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending"
-                        type="button">
-                        Pending Approval <span class="badge bg-warning text-dark">{{ pending_doctors|length }}</span>
-                    </button>
+                <li>
+                    <a href="{% url 'hospitals:manage_departments' %}">
+                        <i class="fa-solid fa-building-user"></i> Departments
+                    </a>
                 </li>
+                <li>
+                    <a href="{% url 'pending_doctors' %}" class="active">
+                        <i class="fa-solid fa-user-doctor"></i> Doctors
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'hospital_appointments' %}">
+                        <i class="fa-solid fa-calendar-check"></i> Appointments
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'hospitals:manage_treatments' %}">
+                        <i class="fa-solid fa-stethoscope"></i> Treatments
+                    </a>
+                </li>
+
             </ul>
 
-            <div class="tab-content" id="doctorTabsContent">
-                <!-- All Doctors Tab -->
-                <div class="tab-pane fade show active" id="all" role="tabpanel">
-                    {% if all_doctors %}
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead style="background:#f8f9fa;">
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Specialization</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Degree</th>
-                                    <th>Joined</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for doctor in all_doctors %}
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold">{{ doctor.name }}</div>
-                                        <small class="text-muted">{{ doctor.department.name|default:"No Dept" }}</small>
-                                    </td>
-                                    <td>{{ doctor.specialization }}</td>
-                                    <td>{{ doctor.user.email }}</td>
-                                    <td>
-                                        {% if doctor.user.doctorprofile %}
-                                        {{ doctor.user.doctorprofile.contact_number }}
-                                        {% else %}
-                                        <span class="text-muted">N/A</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if doctor.user.doctorprofile %}
-                                        {{ doctor.user.doctorprofile.qualification }}
-                                        {% else %}
-                                        <span class="text-muted">N/A</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if doctor.user.date_joined %}
-                                        {{ doctor.user.date_joined|date:"M d, Y" }}
-                                        {% else %}
-                                        <span class="text-muted">N/A</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if doctor.status == 'approved' %}
-                                        <span class="badge bg-success">Approved</span>
-                                        {% elif doctor.status == 'pending' %}
-                                        <span class="badge bg-warning text-dark">Pending</span>
-                                        {% else %}
-                                        <span class="badge bg-danger">Rejected</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'edit_doctor' doctor.id %}"
-                                            class="btn btn-sm btn-outline-primary">
-                                            <i class="fa-solid fa-pen-to-square"></i> Edit
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <p class="text-muted">No doctors found.</p>
-                    {% endif %}
-                </div>
+            <div class="logout-link">
+                <a href="{% url 'logout' %}"
+                    style="display: flex; align-items: center; gap: 15px; padding: 12px 15px; text-decoration: none; border-radius: 8px;">
+                    <i class="fa-solid fa-right-from-bracket" style="width: 20px; text-align: center;"></i> Logout
+                </a>
+            </div>
+        </nav>
 
-                <!-- Pending Doctors Tab -->
-                <div class="tab-pane fade" id="pending" role="tabpanel">
-                    {% if pending_doctors %}
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead style="background:#fff3cd;">
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Specialization</th>
-                                    <th>Phone</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for doctor in pending_doctors %}
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold">{{ doctor.name }}</div>
-                                        <small class="text-muted">{{ doctor.department.name|default:"No Dept" }}</small>
-                                    </td>
-                                    <td>{{ doctor.user.email }}</td>
-                                    <td>{{ doctor.specialization }}</td>
-                                    <td>
-                                        {% if doctor.user.doctorprofile %}
-                                        {{ doctor.user.doctorprofile.contact_number }}
-                                        {% else %}
-                                        <span class="text-muted">N/A</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'approve_doctor' doctor.id %}" class="btn btn-sm"
-                                            style="background-color: #6b3f21; color: white;">
-                                            <i class="fa-solid fa-check"></i> Approve
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Header -->
+            <div class="top-header">
+                <div class="user-profile">
+                    <div class="user-info">
+                        <div class="role">{{ user.get_full_name|default:user.email }}</div>
+                        <div class="email">Hospital Admin</div>
                     </div>
-                    {% else %}
-                    <p class="text-muted">No pending doctors found.</p>
-                    {% endif %}
+                    <div class="user-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
                 </div>
             </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2 class="page-title">Manage Doctors</h2>
+                <a href="{% url 'add_doctor_page' %}" class="btn btn-primary"
+                    style="background: var(--primary); border: none;">
+                    <i class="fa-solid fa-plus me-2"></i> Add Doctor
+                </a>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert"
+                style="border-radius: 12px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Pending Doctors -->
+            <div class="card-custom">
+                <h5 class="mb-4 fw-bold">Pending Approvals</h5>
+                {% if pending_doctors %}
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Doctor</th>
+                                <th>Specialization</th>
+                                <th>Experience</th>
+                                <th>Documents</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doctor in pending_doctors %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if doctor.user.doctorprofile.passport_photo %}
+                                        <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt=""
+                                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                        {% else %}
+                                        <div
+                                            style="width: 40px; height: 40px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fa-solid fa-user-doctor text-muted"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-bold">{{ doctor.name }}</div>
+                                            <div class="small text-muted">{{ doctor.user.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ doctor.specialization }}</td>
+                                <td>{{ doctor.user.doctorprofile.year_of_experience }} Years</td>
+                                <td>
+                                    {% if doctor.user.doctorprofile.medical_certificate %}
+                                    <a href="{{ doctor.user.doctorprofile.medical_certificate.url }}" target="_blank"
+                                        class="text-decoration-none small text-primary me-2">
+                                        <i class="fa-solid fa-file-medical"></i> Medical Cert
+                                    </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'approve_doctor' doctor.id %}" class="btn-action btn-approve"
+                                            title="Approve">
+                                            <i class="fa-solid fa-check"></i>
+                                        </a>
+                                        <a href="#" class="btn-action btn-reject" title="Reject">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-clipboard-check text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="text-muted mb-0">No pending doctor approvals.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- All Doctors List -->
+            <div class="card-custom">
+                <h5 class="mb-4 fw-bold">All Doctors</h5>
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Doctor</th>
+                                <th>Status</th>
+                                <th>Specialization</th>
+                                <th>Contact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doctor in all_doctors %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if doctor.user.doctorprofile.passport_photo %}
+                                        <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt=""
+                                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                        {% else %}
+                                        <div
+                                            style="width: 40px; height: 40px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fa-solid fa-user-doctor text-muted"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-bold">{{ doctor.name }}</div>
+                                            <div class="small text-muted">{{ doctor.user.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if doctor.status == 'approved' %}
+                                    <span class="badge badge-status badge-approved">Active</span>
+                                    {% else %}
+                                    <span class="badge badge-status badge-pending">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ doctor.specialization }}</td>
+                                <td>{{ doctor.user.phone }}</td>
+                                <td>
+                                    <a href="{% url 'edit_doctor' doctor.id %}" class="btn btn-sm btn-outline-primary"
+                                        style="border-radius: 6px;">
+                                        Edit
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
-        <!--Topbar Script-->
-        <script>
-            // Top Loading Bar Logic
-            function showLoadingBar() {
-                const loadingBar = document.getElementById('top-loading-bar');
-                loadingBar.style.width = '0%';
-                loadingBar.style.opacity = '1';
-                let width = 0;
-                const interval = setInterval(() => {
-                    if (width >= 90) {
-                        clearInterval(interval);
-                    } else {
-                        width += 10;
-                        loadingBar.style.width = width + '%';
-                    }
-                }, 200);
-            }
-            function hideLoadingBar() {
-                const loadingBar = document.getElementById('top-loading-bar');
-                loadingBar.style.width = '100%';
-                setTimeout(() => {
-                    loadingBar.style.opacity = '0';
-                }, 400);
-            }
-            // Simulate loading on page load
-            window.addEventListener('load', () => {
-                showLoadingBar();
-                setTimeout(hideLoadingBar, 1000); // Simulate load time
-            });
-        </script>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></scrip >
-</body >
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        {% if messages %}
+        {% for message in messages %}
+        toastr.{{ message.tags }}("{{ message }}");
+        {% endfor %}
+        {% endif %}
+    </script>
+</body>
 
-</html >
+</html>

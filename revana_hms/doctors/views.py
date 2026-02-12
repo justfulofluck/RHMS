@@ -1,4 +1,7 @@
 from rest_framework import viewsets, permissions, decorators, response, status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .models import Doctor, DoctorAvailability
 from .serializers import DoctorSerializer, DoctorAvailabilitySerializer
 from django.shortcuts import render, redirect, get_object_or_404
@@ -796,3 +799,64 @@ def patient_history_partial(request, patient_name):
         'patient_name': patient_name,
         'appointments': appointments
     })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_hospital_queue_status(request):
+    """
+    Returns queue status for all doctors in the admin's hospital.
+    Only includes doctors who have at least one appointment scheduled for TODAY.
+    """
+    try:
+        # 1. Get Hospital
+        if hasattr(request.user, 'hospitaladmin'):
+             hospital = request.user.hospitaladmin.hospital
+        else:
+             return Response({'error': 'Unauthorized'}, status=403)
+
+        today = timezone.localtime().date()
+        
+        # 2. Get doctors with appointments today
+        # We query Appointment to find unique doctors who have appointments today
+        # This implicitly filters out doctors with no appointments
+        doctor_ids = Appointment.objects.filter(
+            hospital=hospital,
+            appointment_date__date=today
+        ).values_list('doctor', flat=True).distinct()
+        
+        doctors_with_appointments = Doctor.objects.filter(id__in=doctor_ids)
+
+        queue_data = []
+        
+        for doctor in doctors_with_appointments:
+            # Get Queue
+            queue, _ = DailyQueue.objects.get_or_create(doctor=doctor, date=today)
+            current_token = queue.current_token
+            
+            # Get Next Token (First scheduled appointment > current_token)
+            next_appt = Appointment.objects.filter(
+                doctor=doctor,
+                appointment_date__date=today,
+                token_number__gt=current_token,
+                status__in=['scheduled', 'confirmed']
+            ).order_by('token_number').first()
+            
+            next_token_display = f"#{next_appt.token_number}" if next_appt else "--"
+            
+            # Use doctor profile image if available
+            doctor_image = None
+            if hasattr(doctor.user, 'doctorprofile') and doctor.user.doctorprofile.passport_photo:
+                doctor_image = doctor.user.doctorprofile.passport_photo.url
+            
+            queue_data.append({
+                'doctor_name': doctor.name,
+                'specialization': doctor.specialization,
+                'current_token': current_token,
+                'next_token': next_token_display,
+                'doctor_image': doctor_image
+            })
+            
+        return Response({'success': True, 'queue': queue_data})
+
+    except Exception as e:
+        return Response({'success': False, 'error': str(e)}, status=500)

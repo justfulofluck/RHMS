@@ -5,299 +5,461 @@
 <head>
     <meta charset="UTF-8">
     <title>All Appointments</title>
-
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Toastr and jQuery -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <style>
         :root {
-            --brown-dark: #6b3f21;
-            --brown: #8c6239;
+            --primary: #7B61FF;
+            --primary-light: #F4F1FF;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --bg-body: #F9FAFB;
             --panel: #ffffff;
+            --text-main: #333;
+            --text-muted: #888;
         }
 
         body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--panel);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
-            font-family: "Poppins", sans-serif;
-            background: #f5ede5;
+        }
+
+        /* Layout */
+        .wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
         }
 
         /* Sidebar */
         .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 250px;
+            min-width: 250px;
+            max-width: 250px;
             background: var(--panel);
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            color: var(--text-main);
+            transition: all 0.3s;
+            position: fixed;
+            height: 100vh;
+            border-right: 1px solid #f0f0f0;
+            z-index: 1000;
         }
 
-        .sidebar h4 {
-            font-weight: 800;
-            color: var(--brown-dark);
-            margin-bottom: 20px;
-        }
-
-        .side-link {
+        .sidebar-header {
+            padding: 24px 24px;
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 12px;
-            color: var(--brown-dark);
-            font-weight: 600;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .side-link.active,
-        .side-link:hover {
-            background: var(--brown);
-            color: white !important;
-        }
-
-        /* Main */
-        .main {
-            margin-left: 270px;
-            padding: 30px;
-        }
-
-        /* Top Bar */
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .topbar h2 {
-            margin: 0;
-            color: var(--brown-dark);
-            font-weight: 700;
-        }
-
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--brown);
-        }
-
-        .list-card {
-            background: #fff;
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.07);
             margin-bottom: 20px;
         }
 
-        /* Custom Badges */
-        .badge-scheduled {
-            background-color: var(--brown) !important;
+        .logo-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-menu {
+            padding: 0 12px;
+            list-style: none;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu li a {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            border-radius: 8px;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .sidebar-menu li a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .logout-link {
+            position: absolute;
+            bottom: 20px;
+            width: calc(100% - 24px);
+            left: 12px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 10px;
+        }
+
+        .logout-link a {
+            color: #dc3545 !important;
+        }
+
+        .logout-link a:hover {
+            background: #fff5f5 !important;
+        }
+
+        /* Main Content */
+        .content {
+            width: 100%;
+            margin-left: 250px;
+            padding: 20px 40px;
+            background-color: #FAFBFC;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .top-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 35px;
+            padding: 15px 0;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: right;
+            border-left: 1px solid #eee;
+            padding-left: 25px;
+        }
+
+        .user-info .role {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .user-info .email {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Page Content */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .card-custom {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            margin-bottom: 24px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #eee;
+            padding: 12px 15px;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(123, 97, 255, 0.25);
+        }
+
+        .btn-check-custom {
+            background-color: var(--primary);
             color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .btn-check-custom:hover {
+            background-color: #6a50e0;
+            color: white;
+        }
+
+        .table-custom th {
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid #eee;
+            padding: 15px;
+            font-size: 0.9rem;
+            background-color: #f8f9fa;
+        }
+
+        .table-custom td {
+            padding: 15px;
+            vertical-align: middle;
+            color: var(--text-main);
+            border-bottom: 1px solid #f9f9f9;
         }
 
         .badge-token {
-            background-color: var(--brown) !important;
+            background-color: var(--primary);
             color: white;
-            font-size: 16px;
-            padding: 5px 8px;
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 8px;
         }
 
-        /* Top Loading Bar */
-        #top-loading-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background: #8c6239;
-            /* App brown color */
-            z-index: 99999;
-            transition: width 0.4s ease, opacity 0.4s ease;
-            width: 0%;
-            opacity: 1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .btn-view-report {
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            background: white;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-view-report:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .pagination-btn {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: white !important;
+        }
+
+        .pagination-btn:disabled {
+            background-color: #e9ecef !important;
+            border-color: #e9ecef !important;
+            color: #6c757d !important;
         }
     </style>
 </head>
 
 <body>
-    <div id="top-loading-bar"></div>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h4>Admin Panel</h4>
-
-        <a class="side-link" href="{% url 'hospital_admin_dashboard' %}">
-            <i class="fa-solid fa-chart-line"></i> Dashboard
-        </a>
-
-        <a class="side-link" href="{% url 'pending_doctors' %}">
-            <i class="fa-solid fa-user-doctor"></i> Doctors
-        </a>
-
-        <a class="side-link" href="{% url 'hospitals:manage_departments' %}">
-            <i class="fa-solid fa-users"></i> Departments
-        </a>
-
-        <a class="side-link" href="{% url 'hospitals:manage_treatments' %}">
-            <i class="fa-solid fa-stethoscope"></i> Treatments
-        </a>
-
-        <a class="side-link active" href="{% url 'hospital_appointments' %}">
-            <i class="fa-regular fa-calendar-check"></i> Appointments
-        </a>
-
-        <a class="side-link" href="{% url 'logout' %}">
-            <i class="fa-solid fa-right-from-bracket"></i> Logout
-        </a>
-    </div>
-
-    <!-- Main -->
-    <div class="main">
-
-        <!-- Top Bar -->
-        <div class="topbar">
-            <div>
-                <h2>All Appointments</h2>
-                <div class="text-muted">Logged in as {{ request.user.email }}</div>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                {% if hospital.logo %}
+                <img src="{{ hospital.logo.url }}" alt="Logo" class="logo-box" style="object-fit: cover;">
+                {% else %}
+                <div class="logo-box" style="color: #FF7F50;"><i class="fa-solid fa-bullseye"></i></div>
+                {% endif %}
+                <div class="logo-text">
+                    {% if hospital %}
+                    {{ hospital.name }}
+                    {% else %}
+                    RHMS
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end">
-                    <div class="small text-muted">Hospital</div>
-                    <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="{% url 'hospital_admin_dashboard' %}">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'hospitals:manage_departments' %}">
+                        <i class="fa-solid fa-building-user"></i> Departments
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'pending_doctors' %}">
+                        <i class="fa-solid fa-user-doctor"></i> Doctors
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'hospital_appointments' %}" class="active">
+                        <i class="fa-solid fa-calendar-check"></i> Appointments
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'hospitals:manage_treatments' %}">
+                        <i class="fa-solid fa-stethoscope"></i> Treatments
+                    </a>
+                </li>
+
+            </ul>
+
+            <div class="logout-link">
+                <a href="{% url 'logout' %}"
+                    style="display: flex; align-items: center; gap: 15px; padding: 12px 15px; text-decoration: none; border-radius: 8px;">
+                    <i class="fa-solid fa-right-from-bracket" style="width: 20px; text-align: center;"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Header -->
+            <div class="top-header">
+                <div class="user-profile">
+                    <div class="user-info">
+                        <div class="role">{{ user.get_full_name|default:user.email }}</div>
+                        <div class="email">Hospital Admin</div>
+                    </div>
+                    <div class="user-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2 class="page-title">All Appointments</h2>
+            </div>
+
+            <!-- Content -->
+            <div class="card-custom">
+                <!-- Filter Section -->
+                <div class="d-flex flex-wrap gap-3 mb-4 justify-content-between align-items-center">
+                    <div class="d-flex gap-2 w-100 flex-md-nowrap flex-wrap">
+                        <div class="input-group" style="max-width: 350px;">
+                            <span class="input-group-text bg-white border-end-0"><i
+                                    class="fa-solid fa-search text-muted"></i></span>
+                            <input type="text" id="searchInput" class="form-control border-start-0 ps-0"
+                                placeholder="Search Patient Name...">
+                        </div>
+                        <input type="date" id="dateFilter" class="form-control" style="max-width: 180px;">
+                        <button class="btn btn-check-custom" onclick="applyFilters()">
+                            Apply Filter
+                        </button>
+                    </div>
                 </div>
 
-                {% if hospital.logo %}
-                <img src="{{ hospital.logo.url }}" class="avatar">
-                {% else %}
-                <img src="#" class="avatar">
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Content -->
-        <div class="row g-4">
-            <div class="col-12">
-                <div class="list-card">
-                    <!-- Filter Section -->
-                    <div class="d-flex flex-wrap gap-3 mb-4 justify-content-between align-items-center">
-                        <div class="d-flex gap-2">
-                            <div class="input-group" style="width: 250px;">
-                                <span class="input-group-text bg-white border-end-0"><i
-                                        class="fa-solid fa-search text-muted"></i></span>
-                                <input type="text" id="searchInput" class="form-control border-start-0 ps-0"
-                                    placeholder="Search Patient Name...">
-                            </div>
-                            <input type="date" id="dateFilter" class="form-control" style="width: 180px;">
-                        </div>
-                        <button class="btn text-white" style="background-color: var(--brown);"
-                            onclick="applyFilters()">Apply Filter</button>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead style="background:#f8f9fa;">
-                                <tr>
-                                    <th>Token</th>
-                                    <th>Patient</th>
-                                    <th>Doctor</th>
-                                    <th>Treatment</th>
-                                    <th>Date & Time</th>
-                                    <th>Action</th>
-
-                                </tr>
-                            </thead>
-                            <tbody id="appointmentsTableBody">
-                                {% for appt in appointments %}
-                                <tr class="appointment-row" data-date="{{ appt.appointment_date|date:'Y-m-d' }}"
-                                    data-name="{{ appt.patient_name|lower }}">
-                                    <td><span class="badge badge-token">#{{ appt.token_number }}</span></td>
-                                   <td>
-                                        <div class="fw-bold">{{ appt.patient_name }}</div>
-                                        <div class="small text-muted">{{ appt.patient_phone|default:"-- --" }}</div>
-                                    </td> 
-                                    <td>
-                                        <div class="fw-bold">{{ appt.doctor.name }}</div>
-                                        <div class="small text-muted">{{ appt.doctor.specialization }}</div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold">{{ appt.treatment.name|default:"General" }}</div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold">{{ appt.appointment_date|time:"h:i A" }}</div>
-                                        <div class="small text-muted">{{ appt.appointment_date|date:"M d, Y" }}</div>
-                                    </td>
-                                    <td>
-                                        <a href="#" class="badge badge-token btn">View Report</a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr id="noDataRow" style="display: none;">
-                                    <td colspan="6" class="text-center py-4 text-muted">No appointments found matching
-                                        your criteria.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Token</th>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Treatment</th>
+                                <th>Date & Time</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody">
+                            {% for appt in appointments %}
+                            <tr class="appointment-row" data-date="{{ appt.appointment_date|date:'Y-m-d' }}"
+                                data-name="{{ appt.patient_name|lower }}">
+                                <td><span class="badge-token">#{{ appt.token_number }}</span></td>
+                                <td>
+                                    <div class="fw-bold">{{ appt.patient_name }}</div>
+                                    <div class="small text-muted">{{ appt.patient_phone|default:"-- --" }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ appt.doctor.name }}</div>
+                                    <div class="small text-muted">{{ appt.doctor.specialization }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ appt.treatment.name|default:"General" }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ appt.appointment_date|time:"h:i A" }}</div>
+                                    <div class="small text-muted">{{ appt.appointment_date|date:"M d, Y" }}</div>
+                                </td>
+                                <td>
+                                    <a href="#" class="btn-view-report">View Report</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr id="noDataRow" style="display: none;">
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fa-regular fa-calendar-xmark mb-3"
+                                        style="font-size: 2rem; opacity: 0.3;"></i>
+                                    <p class="mb-0">No appointments found.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
 
                 <!-- Pagination Controls -->
-                <div class="d-flex justify-content-between align-items-center mt-3" id="paginationControls">
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top"
+                    id="paginationControls">
                     <div class="text-muted small" id="pageInfo">Showing 0-0 of 0</div>
                     <div class="btn-group">
-                        <button class="btn btn-outline-secondary btn-sm text-white" style="background-color: var(--brown);" id="prevBtn" onclick="changePage(-1)"><i
-                                class="fa-solid fa-chevron-left"></i> Prev</button>
-                        <button class="btn btn-outline-secondary btn-sm text-black" style="background-color: white;" disabled id="currPageBtn">1</button>
-                        <button class="btn btn-outline-secondary btn-sm text-white" style="background-color: var(--brown);" id="nextBtn" onclick="changePage(1)">Next <i
-                                class="fa-solid fa-chevron-right"></i></button>
+                        <button class="btn btn-sm pagination-btn" id="prevBtn" onclick="changePage(-1)">
+                            <i class="fa-solid fa-chevron-left"></i> Prev
+                        </button>
+                        <button class="btn btn-sm bg-white text-dark border disabled" id="currPageBtn">1</button>
+                        <button class="btn btn-sm pagination-btn" id="nextBtn" onclick="changePage(1)">
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    </div>
-
+    <!-- Frontend Pagination & Filtering Logic -->
     <script>
-        // --- Top Loading Bar Logic ---
-        const loaderBar = document.getElementById('top-loading-bar');
-
-        function startLoader() {
-            loaderBar.style.opacity = '1';
-            loaderBar.style.width = '30%';
-            setTimeout(() => {
-                if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
-            }, 500);
-        }
-
-        function stopLoader() {
-            loaderBar.style.width = '100%';
-            setTimeout(() => {
-                loaderBar.style.opacity = '0';
-                setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
-            }, 500);
-        }
-
-        // Show on Page Load
-        startLoader();
-        window.addEventListener('load', stopLoader);
-
-        // Show on Submit
-        document.querySelector('form')?.addEventListener('submit', function () {
-            startLoader();
-        });
-
-        // --- Frontend Pagination & Filtering Logic ---
         let allRows = [];
         let filteredRows = [];
         let currentPage = 1;
@@ -347,11 +509,6 @@
             const end = start + itemsPerPage;
             const pageRows = filteredRows.slice(start, end);
 
-            // Hide all original rows first (remove from DOM or hide)
-            // It's cleaner to remove all children and append only the ones we need, 
-            // but for performance with DOM nodes, let's just use display property or re-append.
-            // Re-appending existing DOM nodes moves them.
-
             // Clear current display
             allRows.forEach(row => row.style.display = 'none');
 
@@ -359,8 +516,14 @@
             pageRows.forEach(row => row.style.display = 'table-row');
 
             // Handle "No Data"
+            // Note: If strictly using allRows from DOM, we need to manually show/hide noDataRow
+            // independent of the loop above.
             if (filteredRows.length === 0) {
-                if (noDataRow) noDataRow.style.display = 'table-row';
+                if (noDataRow) {
+                    noDataRow.style.display = 'table-row';
+                    // Ensure it is appended if lost
+                    if (!tableBody.contains(noDataRow)) tableBody.appendChild(noDataRow);
+                }
             } else {
                 if (noDataRow) noDataRow.style.display = 'none';
             }
@@ -392,7 +555,7 @@
             document.getElementById('nextBtn').disabled = currentPage === maxPage || totalItems === 0;
         }
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

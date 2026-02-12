@@ -5,740 +5,856 @@
 <head>
     <meta charset="UTF-8">
     <title>Hospital Admin Dashboard</title>
-
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --brown-dark: #6b3f21;
-            --brown: #8c6239;
+            --primary: #7B61FF;
+            /* Purple */
+            --primary-light: #F4F1FF;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --info: #17a2b8;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --bg-body: #F9FAFB;
             --panel: #ffffff;
+            --text-main: #333;
+            --text-muted: #888;
+
+            /* Metric Colors */
+            --blue-soft: #E3F2FD;
+            --blue-text: #2196F3;
+            --purple-soft: #EDE7F6;
+            --purple-text: #673AB7;
+            --green-soft: #E8F5E9;
+            --green-text: #4CAF50;
+            --orange-soft: #FFF3E0;
+            --orange-text: #FF9800;
         }
 
         body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--panel);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
-            font-family: "Poppins", sans-serif;
-            background: #f5ede5;
+        }
+
+        /* Layout */
+        .wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
         }
 
         /* Sidebar */
         .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 250px;
+            min-width: 250px;
+            max-width: 250px;
             background: var(--panel);
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            color: var(--text-main);
+            transition: all 0.3s;
+            position: fixed;
+            height: 100vh;
+            border-right: 1px solid #f0f0f0;
+            z-index: 1000;
         }
 
-        .sidebar h4 {
-            font-weight: 800;
-            color: var(--brown-dark);
-            margin-bottom: 20px;
-        }
-
-        .side-link {
+        .sidebar-header {
+            padding: 24px 24px;
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 12px;
-            color: var(--brown-dark);
-            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .logo-box {
+            width: 32px;
+            height: 32px;
+            /* background: var(--primary); Removed */
+            /* color: white; Removed */
             border-radius: 8px;
-            margin-bottom: 8px;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .side-link.active,
-        .side-link:hover {
-            background: var(--brown);
-            color: white !important;
-        }
-
-        /* Main */
-        .main {
-            margin-left: 270px;
-            padding: 30px;
-        }
-
-        /* Top Bar */
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .topbar h2 {
-            margin: 0;
-            color: var(--brown-dark);
-            font-weight: 700;
-        }
-
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--brown);
-        }
-
-        /* Cards */
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 18px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-        }
-
-        /* Custom Badges */
-        .badge-scheduled {
-            background-color: var(--brown) !important;
-            color: white;
-        }
-
-        .badge-token {
-            background-color: var(--brown) !important;
-            color: white;
-            font-size : 16px;
-            padding: 5px 8px;
-        }
-
-        .stat-title {
-            color: var(--brown-dark);
-            font-weight: 700;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-top: 5px;
-            color: var(--brown);
-        }
-
-        /* New Brown Stat Card Style */
-        .stat-card-brown {
-            background: white;
-            color: var(--brown);
-            padding: 15px 20px;
-            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-icon-box {
-            width: 50px;
-            height: 50px;
-            background: var(--brown);
-            border-radius: 10px;
-            display: flex;
             justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
-            padding: 20px;
-        }
-
-        .stat-icon-box i {
-            font-size: 2rem;
-            color: white;
-        }
-
-        .stat-content .stat-label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            opacity: 0.9;
-        }
-
-        .stat-content .stat-num {
-            font-size: 2rem;
-            font-weight: 800;
-            line-height: 1.2;
-        }
-
-        .list-card {
-            background: #fff;
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.07);
-        }
-
-        .section-title {
-            font-weight: 700;
-            color: var(--brown-dark);
-            margin-bottom: 15px;
             font-size: 1.1rem;
         }
 
-        /* Table */
-        .table thead th {
-            font-weight: 600;
-            color: #555;
-            border-bottom: 2px solid #eee;
-            font-size: 0.9rem;
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
 
-        .table tbody td {
+        .sidebar-menu {
+            padding: 0 12px;
+            list-style: none;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu li a {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
             font-size: 0.95rem;
-            color: #333;
+            transition: all 0.2s;
+            border-radius: 8px;
         }
 
-        /* Calendar Styles */
-        .calendar-grid {
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .sidebar-menu li a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .logout-link {
+            position: absolute;
+            bottom: 20px;
+            width: calc(100% - 24px);
+            left: 12px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 10px;
+        }
+
+        .logout-link a {
+            color: #dc3545 !important;
+        }
+
+        .logout-link a:hover {
+            background: #fff5f5 !important;
+        }
+
+        /* Main Content */
+        .content {
+            width: 100%;
+            margin-left: 250px;
+            padding: 20px 40px;
+            background-color: #FAFBFC;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .top-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 35px;
+            padding: 15px 0;
+        }
+
+        .search-bar {
+            position: relative;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .search-bar input {
+            background: #F0F2F5;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 15px 12px 40px;
+            width: 350px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .notification-btn {
+            position: relative;
+            color: #666;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: right;
+            border-left: 1px solid #eee;
+            padding-left: 25px;
+        }
+
+        .user-info .role {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .user-info .email {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Dashboard Title Area */
+        .dash-title-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .dash-title h2 {
+            font-weight: 700;
+            margin: 0 0 5px 0;
+            font-size: 1.6rem;
+            color: var(--text-main);
+        }
+
+        .dash-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary-custom:hover {
+            background: #6a50e0;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(123, 97, 255, 0.3);
+        }
+
+        /* Metric Cards */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            height: 100%;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-content-wrap {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .icon-blue {
+            background: var(--blue-soft);
+            color: var(--blue-text);
+        }
+
+        .icon-purple {
+            background: var(--purple-soft);
+            color: var(--purple-text);
+        }
+
+        .icon-green {
+            background: var(--green-soft);
+            color: var(--green-text);
+        }
+
+        .icon-orange {
+            background: var(--orange-soft);
+            color: var(--orange-text);
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .stat-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #aaa;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            text-align: center;
+        }
+
+        /* Content Sections */
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            padding: 0;
+            /* Changed for flush layout */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .section-padding {
+            padding: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .view-all {
+            font-size: 0.85rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Calendar */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .current-month {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .calendar-nav i {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+
+        .calendar-days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             text-align: center;
-            gap: 5px;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
 
-        .cal-day-header {
-            font-weight: 700;
-            color: var(--brown-dark);
-            font-size: 0.9rem;
-            padding-bottom: 8px;
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            row-gap: 15px;
         }
 
-        .cal-day {
-            width: 36px;
-            height: 36px;
-            line-height: 36px;
+        .cal-date {
             margin: 0 auto;
-            border-radius: 6px;
-            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 0.9rem;
-            transition: 0.2s;
-            color: #555;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            color: var(--text-main);
         }
 
-        .cal-day:hover {
-            background-color: #f0e2d3;
+        .cal-date:hover {
+            background: #f0f0f0;
         }
 
-        .cal-day.active {
-            background-color: var(--brown-dark);
-            /* #6b3f21 chosen color */
-            color: white !important;
+        .cal-date.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 8px rgba(123, 97, 255, 0.4);
         }
 
-        .cal-day.has-appt {
-            font-weight: bold;
-            color: var(--brown);
+        /* Reminders */
+        .reminder-container {
+            background: #F8F9FE;
+            /* Light styling background for reminders area */
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
         }
 
-        .cal-day.text-muted {
-            color: #ccc !important;
+        .reminder-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #aaa;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
         }
 
-        /* Top Loading Bar */
-        #top-loading-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background: #8c6239;
-            z-index: 99999;
-            transition: width 0.4s ease, opacity 0.4s ease;
-            width: 0%;
-            opacity: 1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .reminder-item {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
         }
 
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .reminder-item.blue {
+            border-left-color: var(--primary);
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
+        .reminder-item.green {
+            border-left-color: var(--success);
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--brown);
-            border-radius: 4px;
+        .reminder-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 3px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--brown-dark);
+        .reminder-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            width: 60px;
+            height: 60px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            color: #ddd;
+            font-size: 1.5rem;
         }
     </style>
 </head>
 
 <body>
-    <div id="top-loading-bar"></div>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h4>Admin Panel</h4>
-
-        <a class="side-link active" href="#">
-            <i class="fa-solid fa-chart-line"></i> Dashboard
-        </a>
-
-        <a class="side-link" href="{% url 'pending_doctors' %}">
-            <i class="fa-solid fa-user-doctor"></i> Doctors
-        </a>
-
-        <a class="side-link" href="{% url 'hospitals:manage_departments' %}">
-            <i class="fa-solid fa-users"></i> Departments
-        </a>
-
-        <a class="side-link" href="{% url 'hospitals:manage_treatments' %}">
-            <i class="fa-solid fa-stethoscope"></i> Treatments
-        </a>
-
-        <a class="side-link" href="{% url 'hospital_appointments' %}">
-            <i class="fa-regular fa-calendar-check"></i> Appointments
-        </a>
-
-        <a class="side-link" href="{% url 'logout' %}">
-            <i class="fa-solid fa-right-from-bracket"></i> Logout
-        </a>
-    </div>
-
-    <!-- Main -->
-    <div class="main">
-
-        <!-- Top Bar -->
-        <div class="topbar">
-            <div>
-                <h2>Hospital Admin Dashboard</h2>
-                <div class="text-muted">Logged in as {{ request.user.email }}</div>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end">
-                    <div class="small text-muted">Hospital</div>
-                    <div class="fw-bold" style="color:var(--brown-dark)">{{ hospital.name }}</div>
-                </div>
-
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
                 {% if hospital.logo %}
-                <img src="{{ hospital.logo.url }}" class="avatar">
+                <img src="{{ hospital.logo.url }}" alt="{{ hospital.name }}"
+                    style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;">
                 {% else %}
-                <img src="https://via.placeholder.com/150" class="avatar">
+                <div class="logo-box" style="color: #FF7F50;"><i class="fa-solid fa-bullseye"></i></div>
                 {% endif %}
-            </div>
-        </div>
-
-        <!-- Stats -->
-        <!-- Stats -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="stat-card-brown">
-                    <div class="stat-icon-box">
-                        <i class="fa-solid fa-user-doctor"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-label">Total Doctors</div>
-                        <div class="stat-num">{{ total_doctors }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card-brown">
-                    <div class="stat-icon-box">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-label">Total Departments</div>
-                        <div class="stat-num">{{ total_departments }}</div>
-                    </div>
-                </div>
+                <div class="logo-text">{{ hospital.name }}</div>
             </div>
 
-            
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a></li>
+                <li><a href="{% url 'hospitals:manage_departments' %}"><i class="fa-solid fa-building-user"></i>
+                        Departments</a></li>
+                <li><a href="{% url 'pending_doctors' %}"><i class="fa-solid fa-user-doctor"></i> Doctors</a></li>
+                <li><a href="{% url 'hospital_appointments' %}"><i class="fa-solid fa-calendar-check"></i>
+                        Appointments</a></li>
+                <li><a href="{% url 'hospitals:manage_treatments' %}"><i class="fa-solid fa-stethoscope"></i>
+                        Treatments</a></li>
+                <li class="logout-link"><a href="{% url 'logout' %}"><i
+                            class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </nav>
 
-            <div class="col-md-3">
-                <div class="stat-card-brown">
-                    <div class="stat-icon-box">
-                        <i class="fa-solid fa-stethoscope"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-label">Total Treatments</div>
-                        <div class="stat-num">{{ total_treatments }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="stat-card-brown">
-                    <div class="stat-icon-box">
-                        <i class="fa-solid fa-bed-pulse"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-label">Total Patients</div>
-                        <div class="stat-num">{{ total_patients }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Content -->
+        <main class="content">
+            <!-- Top Header -->
+            <div class="top-header">
 
 
-        <!-- Appointments Section (Moved to Top) -->
-        <div class="row g-4 mb-4">
-            <div class="col-lg-4">
-                <div class="list-card h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="section-title">Calendar</div>
-                    </div>
+                <div class="user-nav">
 
-                    <!-- Calendar Controls -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <button class="btn btn-sm btn-light border" id="prevMonth"><i
-                                class="fa-solid fa-chevron-left"></i></button>
-                        <div class="fw-bold fs-5" style="color:var(--brown-dark)" id="currentMonthYear"></div>
-                        <button class="btn btn-sm btn-light border" id="nextMonth"><i
-                                class="fa-solid fa-chevron-right"></i></button>
-                    </div>
-
-                    <!-- Calendar Grid -->
-                    <div class="calendar-grid mb-4" id="calendarGrid">
-                        <!-- Days Header -->
-                        <div class="cal-day-header">Su</div>
-                        <div class="cal-day-header">Mo</div>
-                        <div class="cal-day-header">Tu</div>
-                        <div class="cal-day-header">We</div>
-                        <div class="cal-day-header">Th</div>
-                        <div class="cal-day-header">Fr</div>
-                        <div class="cal-day-header">Sa</div>
-                        <!-- Days will be generated by JS -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-8">
-                <!-- Appointment List Container -->
-                <div class="list-card h-100">
-                    <div class="appointment-header mb-3">
-                        <div class="section-title">Today's Appointments</div>
-                    </div>
-
-                    <div class="table-responsive"
-                        style="max-height: 300px; min-height: 250px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--brown) #f1f1f1;">
-                        <table class="table table-hover align-middle">
-                            <thead style="background:#f8f9fa; position: sticky; top: 0; z-index: 1;">
-                                <tr>
-                                    <th>Token</th>
-                                    <th>Patient</th>
-                                    <th>Doctor</th>
-                                    <th>Date & Time</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="appointmentList">
-                                {% for appt in todays_appointments %}
-                                <tr>
-                                    <td><span class="badge badge-token">#{{ appt.token_number|default:'--' }}</span>
-                                    <td>
-                                        <div class="fw-bold">{{ appt.patient_name }}</div>
-                                        <div class="small text-muted">{{ appt.patient_phone|default:"-- --" }}</div>
-                                    </td> 
-                                    <td>
-                                        <div class="fw-bold">{{ appt.doctor.name }}</div>
-                                        <div class="small text-muted">{{ appt.doctor.specialization }}</div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold">{{ appt.appointment_date|date:"M d, Y" }}</div>
-                                        <div class="small text-muted">{{ appt.appointment_date|time:"h:i A" }}</div>
-                                    </td>
-                                    </td>
-                                    <td>
-                                        <a href="#" class="badge badge-token btn">View Report</a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">No appointments for today.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="text-center mt-3">
-                        <a href="{% url 'hospital_appointments' %}" class="btn btn-sm"
-                            style="background:var(--brown); color:white;">
-                            View All Appointments History
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        {% comment %} <!-- Content Columns -->
-        <div class="row g-4">
-
-            <!-- Left Column -->
-            <div class="col-lg-4">
-
-                <div class="list-card">
-                    <div class="section-title">Treatments</div>
-                    <ul class="list-unstyled">
-                        {% for treatment in treatments %}
-                        <li class="py-2 border-bottom">{{ treatment.name }}</li>
-                        {% empty %}
-                        <li>No treatments found.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div> {% endcomment %}
-
-            {% comment %} <!-- Right Column -->
-            <div class="col-lg-8">
-
-                <div class="list-card">
-                    <div class="section-title">Departments</div>
-                    <ul class="list-unstyled">
-                        {% for dept in departments %}
-                        <li class="py-2 border-bottom">{{ dept.name }}</li>
-                        {% empty %}
-                        <li>No departments found.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-                <div class="list-card">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="section-title">Doctors ({{ doctors|length }})</div>
-                        <div class="d-flex gap-2">
-                            <a href="{% url 'add_doctor_page' %}" class="btn btn-sm"
-                                style="background:var(--brown); color:white;">
-                                <i class="fa-solid fa-plus"></i> Add Doctor
-                            </a>
-                            <a href="{% url 'pending_doctors' %}" class="btn btn-sm"
-                                style="background:var(--brown); color:white;">
-                                <i class="fa-solid fa-user-doctor"></i> Manage Doctors
-                            </a>
+                    <div class="user-profile">
+                        <div class="user-info">
+                            <div class="role">Hospital Admin</div>
+                            <div class="email">{{ request.user.email }}</div>
+                        </div>
+                        <div class="user-avatar">
+                            <i class="fa-regular fa-user"></i>
                         </div>
                     </div>
-                    <ul class="list-unstyled">
-                        {% for doctor in doctors %}
-                        <li class="py-2 border-bottom">{{ doctor.name }} - {{ doctor.specialization }}</li>
-                        {% empty %}
-                        <li>No doctors found.</li>
-                        {% endfor %}
-                    </ul>
-                </div> {% endcomment %}
-
-                <!-- Safely embed JSON data -->
-                {{ appointments_json|json_script:"appointments-data" }}
-
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Retrieve JSON data safely
-                        let appointments = [];
-                        try {
-                            const dataScript = document.getElementById('appointments-data');
-                            if (dataScript && dataScript.textContent) {
-                                appointments = JSON.parse(dataScript.textContent);
-                            }
-                        } catch (e) {
-                            console.error("Error parsing appointments JSON:", e);
-                        }
-
-                        // Ensure appointments is an array
-                        if (!Array.isArray(appointments)) {
-                            appointments = [];
-                        }
-
-                        let currentDate = new Date();
-                        let selectedDate = new Date(); // Defaults to today
-
-                        const calendarGrid = document.getElementById('calendarGrid');
-                        const monthYearEl = document.getElementById('currentMonthYear');
-                        const apptListEl = document.getElementById('appointmentList');
-
-                        // Helper: Format Date YYYY-MM-DD
-                        function formatDate(date) {
-                            const y = date.getFullYear();
-                            const m = String(date.getMonth() + 1).padStart(2, '0');
-                            const d = String(date.getDate()).padStart(2, '0');
-                            return `${y}-${m}-${d}`;
-                        }
-
-                        function renderCalendar(date) {
-                            if (!calendarGrid) return;
-
-                            const year = date.getFullYear();
-                            const month = date.getMonth();
-
-                            // Set Header
-                            const monthNames = ["January", "February", "March", "April", "May", "June",
-                                "July", "August", "September", "October", "November", "December"];
-                            if (monthYearEl) monthYearEl.textContent = `${monthNames[month]} ${year}`;
-
-                            // Clear previous days (keep headers)
-                            // We need to match headers by class to preserve them
-                            const headers = Array.from(calendarGrid.querySelectorAll('.cal-day-header'));
-                            calendarGrid.innerHTML = '';
-                            headers.forEach(h => calendarGrid.appendChild(h));
-
-                            const firstDayIdx = new Date(year, month, 1).getDay();
-                            const lastDay = new Date(year, month + 1, 0).getDate();
-                            const prevLastDay = new Date(year, month, 0).getDate();
-
-                            // Previous Month Padding
-                            for (let i = firstDayIdx; i > 0; i--) {
-                                const dayEl = document.createElement('div');
-                                dayEl.className = 'cal-day text-muted';
-                                dayEl.textContent = prevLastDay - i + 1;
-                                calendarGrid.appendChild(dayEl);
-                            }
-
-                            // Current Month Days
-                            for (let i = 1; i <= lastDay; i++) {
-                                const currentDayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                                const dayEl = document.createElement('div');
-                                dayEl.className = 'cal-day';
-                                dayEl.textContent = i;
-
-                                // Has Appointment?
-                                // Safe check using Optional Chaining equivalent
-                                const hasAppt = appointments.some(a => a && a.date === currentDayStr);
-                                if (hasAppt) dayEl.classList.add('has-appt');
-
-                                // Is Selected?
-                                if (currentDayStr === formatDate(selectedDate)) {
-                                    dayEl.classList.add('active');
-                                }
-
-                                dayEl.addEventListener('click', () => {
-                                    selectedDate = new Date(year, month, i);
-                                    renderCalendar(currentDate); // Re-render to update active state
-                                    renderAppointments(selectedDate);
-                                });
-
-                                calendarGrid.appendChild(dayEl);
-                            }
-
-                            // Next Month Padding
-                            const totalCells = firstDayIdx + lastDay;
-                            const nextDays = 42 - totalCells;
-                            if (nextDays > 0 && nextDays < 42) {
-                                for (let i = 1; i <= nextDays; i++) {
-                                    // Stop if strict 6 rows filled? logic:
-                                    // Actually just filling remaining grid cells is cleaner
-                                    const dayEl = document.createElement('div');
-                                    dayEl.className = 'cal-day text-muted';
-                                    dayEl.textContent = i;
-                                    calendarGrid.appendChild(dayEl);
-                                }
-                            }
-                        }
-
-                        function renderAppointments(date) {
-                            const dateStr = formatDate(date);
-                            const dailyAppts = appointments.filter(a => a && a.date === dateStr);
-
-                            if (apptListEl) {
-                                apptListEl.innerHTML = '';
-
-                                if (dailyAppts.length === 0) {
-                                    apptListEl.innerHTML = `
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted py-4">
-                                                <i class="fa-regular fa-calendar-xmark mb-2 fs-4"></i>
-                                                <p class="mb-0 small">No appointments for ${date.toDateString()}</p>
-                                            </td>
-                                        </tr>`;
-                                    return;
-                                }
-
-                                dailyAppts.forEach((appt, index) => {
-                                    const tr = document.createElement('tr');
-                                    const safeToken = appt.token_number ? appt.token_number : '--';
-                                    const safeEmail = appt.patient_email ? appt.patient_email : 'No Email';
-                                    const safeSpec = appt.doctor_specialization ? appt.doctor_specialization : '';
-
-                                    tr.innerHTML = `
-                                        <td>
-                                            <div class="fw-bold">${appt.patient_name || 'Unknown'}</div>
-                                            <div class="small text-muted">${safeEmail}</div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold">${appt.doctor_name || 'Unknown'}</div>
-                                            <div class="small text-muted">${safeSpec}</div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold">${appt.date}</div>
-                                            <div class="small text-muted">${appt.time}</div>
-                                        </td>
-                                        <td><span class="badge badge-token">#${safeToken}</span></td>
-                                        <td>
-                                            <a href="#" class="btn btn-sm btn-light border text-muted">View Report</a>
-                                        </td>
-                                    `;
-                                    apptListEl.appendChild(tr);
-                                });
-                            }
-                        }
-
-                        // Event Listeners
-                        const prevBtn = document.getElementById('prevMonth');
-                        if (prevBtn) prevBtn.addEventListener('click', () => {
-                            currentDate.setMonth(currentDate.getMonth() - 1);
-                            renderCalendar(currentDate);
-                        });
-
-                        const nextBtn = document.getElementById('nextMonth');
-                        if (nextBtn) nextBtn.addEventListener('click', () => {
-                            currentDate.setMonth(currentDate.getMonth() + 1);
-                            renderCalendar(currentDate);
-                        });
-
-                        // Init
-                        renderCalendar(currentDate);
-                        // We do not call renderAppointments here to preserve server-rendered list initially
-                        // renderAppointments(selectedDate); 
-                    });
-                </script>
+                </div>
             </div>
-        </div>
-        <script>
-            // --- Top Loading Bar Logic ---
-            const loaderBar = document.getElementById('top-loading-bar');
 
-            function startLoader() {
-                loaderBar.style.opacity = '1';
-                loaderBar.style.width = '30%';
-                setTimeout(() => {
-                    if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
-                }, 500);
+            <!-- Dashboard Title & Action -->
+            <div class="dash-title-area">
+                <div>
+                    <div class="dash-title">
+                        <h2>Hospital Overview</h2>
+                    </div>
+                    <div class="dash-subtitle">Welcome back. Here is what's happening today.</div>
+                </div>
+                <a href="{% url 'appointment_widget' %}" class="btn-primary-custom"><i class="fa-solid fa-plus"></i> New
+                    Appointment</a>
+            </div>
+
+            <!-- Metrics Row -->
+            <div class="row g-3 mb-4">
+                <!-- Doctors -->
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-content-wrap">
+                            <div class="stat-icon icon-blue"><i class="fa-solid fa-user-doctor"></i></div>
+                            <div class="stat-info">
+                                <h3>{{ total_doctors }}</h3>
+                            </div>
+                            <div class="stat-subtext">Active staff members</div>
+                        </div>
+                        <div class="stat-label">DOCTORS</div>
+                    </div>
+                </div>
+
+                <!-- Departments -->
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-content-wrap">
+                            <div class="stat-icon icon-purple"><i class="fa-solid fa-building"></i></div>
+                            <div class="stat-info">
+                                <h3>{{ total_departments }}</h3>
+                            </div>
+                            <div class="stat-subtext">Specialized units</div>
+                        </div>
+                        <div class="stat-label">DEPARTMENTS</div>
+                    </div>
+                </div>
+
+                <!-- Treatments -->
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-content-wrap">
+                            <div class="stat-icon icon-green"><i class="fa-solid fa-stethoscope"></i></div>
+                            <div class="stat-info">
+                                <h3>{{ total_treatments }}</h3>
+                            </div>
+                            <div class="stat-subtext">Available procedures</div>
+                        </div>
+                        <div class="stat-label">TREATMENTS</div>
+                    </div>
+                </div>
+
+                <!-- Patients -->
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-content-wrap">
+                            <div class="stat-icon icon-orange"><i class="fa-solid fa-bed-pulse"></i></div>
+                            <div class="stat-info">
+                                <h3>{{ total_patients }}</h3>
+                            </div>
+                            <div class="stat-subtext">Registered individuals</div>
+                        </div>
+                        <div class="stat-label">PATIENTS</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="row g-4">
+                <!-- Left: Today's Appointments -->
+                <div class="col-lg-8">
+                    <div class="section-card section-padding h-100">
+                        <div class="section-header">
+                            <h4 class="section-title">Today's Appointments</h4>
+                            <a href="{% url 'hospital_appointments' %}" class="view-all">View All</a>
+                        </div>
+
+                        <div class="appointment-list">
+                            {% for appt in todays_appointments %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="user-avatar"
+                                        style="background:#f0f0f0; width:40px; height:40px; border-radius:10px;">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold" style="font-size:0.95rem;">{{ appt.patient_name }}</div>
+                                        <div class="small text-muted" style="font-size:0.8rem;">
+                                            <i class="fa-regular fa-clock me-1"></i> {{ appt.appointment_date|date:"h:i
+                                            A" }}
+                                            <span class="mx-2">•</span>
+                                            {{ appt.doctor.name }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-light text-dark border">#{{ appt.token_number|default:'--'
+                                    }}</span>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <div class="empty-icon"><i class="fa-regular fa-calendar-xmark"></i></div>
+                                <p class="mb-2 fw-medium">No appointments scheduled for today</p>
+                                <p class="small text-muted">New appointments will appear here once they are booked
+                                    through the patient portal.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Calendar & Reminders -->
+                <div class="col-lg-4">
+                    <div class="section-card section-padding h-100">
+                        <!-- Calendar -->
+                        <div class="calendar-header">
+                            <div class="current-month" id="currentMonthYear"></div>
+                            <div class="calendar-nav">
+                                <i class="fa-solid fa-chevron-left" id="prevMonth"></i>
+                                <i class="fa-solid fa-chevron-right" id="nextMonth"></i>
+                            </div>
+                        </div>
+
+                        <div class="calendar-days">
+                            <div>SU</div>
+                            <div>MO</div>
+                            <div>TU</div>
+                            <div>WE</div>
+                            <div>TH</div>
+                            <div>FR</div>
+                            <div>SA</div>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- JS generated -->
+                        </div>
+
+                        <!-- Live Queue Status -->
+                        <div class="reminder-container pt-3 mt-4">
+                            <div class="reminder-header d-flex justify-content-between align-items-center">
+                                <span>AS OF NOW LIVE STATUS</span>
+                                <span class="badge bg-success" style="font-size: 0.65rem;">LIVE</span>
+                            </div>
+
+                            <div id="queue-status-container">
+                                <div class="text-center py-3 text-muted small">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i> Loading queue status...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Calendar Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarGrid = document.getElementById('calendarGrid');
+            const monthYearEl = document.getElementById('currentMonthYear');
+            let currentDate = new Date();
+
+            function renderCalendar(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+
+                const monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+                monthYearEl.textContent = `${monthNames[month]} ${year}`;
+
+                calendarGrid.innerHTML = '';
+
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                const today = new Date();
+                const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+
+                // Empty slots
+                for (let i = 0; i < firstDay; i++) {
+                    const div = document.createElement('div');
+                    calendarGrid.appendChild(div);
+                }
+
+                // Days
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'cal-date';
+                    div.textContent = i;
+
+                    if (isCurrentMonth && i === today.getDate()) {
+                        div.classList.add('active');
+                    }
+
+                    calendarGrid.appendChild(div);
+                }
             }
 
-            function stopLoader() {
-                loaderBar.style.width = '100%';
-                setTimeout(() => {
-                    loaderBar.style.opacity = '0';
-                    setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
-                }, 500);
-            }
-
-            // Show on Page Load
-            startLoader();
-            window.addEventListener('load', stopLoader);
-
-            // Show on Submit
-            document.querySelector('form')?.addEventListener('submit', function () {
-                startLoader();
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar(currentDate);
             });
-            // -----------------------------
-        </script>
 
-    </div>
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar(currentDate);
+            });
 
-    </div>
 
-    </div>
+            // Live Queue Status Polling
+            function fetchQueueStatus() {
+                fetch('/api/hospital/queue-status/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById('queue-status-container');
+
+                        if (!data.success || !data.queue || data.queue.length === 0) {
+                            container.innerHTML = `
+                            <div class="text-center py-4 text-muted">
+                                <i class="fa-regular fa-calendar-xmark mb-2" style="font-size: 1.5rem;"></i>
+                                <p class="small mb-0">No active queues right now.</p>
+                            </div>
+                        `;
+                            return;
+                        }
+
+                        let html = '';
+                        data.queue.forEach(doc => {
+                            html += `
+                            <div class="reminder-item" style="border-left: 4px solid var(--primary);">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                            ${doc.doctor_image ? `<img src="${doc.doctor_image}">` : '<i class="fa-solid fa-user-doctor"></i>'}
+                                        </div>
+                                        <div>
+                                            <div class="reminder-title">${doc.doctor_name}</div>
+                                            <div class="reminder-time">${doc.specialization}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded">
+                                    <div class="text-center">
+                                        <div class="small text-muted" style="font-size: 0.7rem;">CURRENT</div>
+                                        <div class="fw-bold text-success" style="font-size: 1.1rem;">#${doc.current_token}</div>
+                                    </div>
+                                    <i class="fa-solid fa-arrow-right text-muted" style="font-size: 0.8rem;"></i>
+                                    <div class="text-center">
+                                        <div class="small text-muted" style="font-size: 0.7rem;">NEXT</div>
+                                        <div class="fw-bold text-primary" style="font-size: 1.1rem;">${doc.next_token}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        });
+                        container.innerHTML = html;
+                    })
+                    .catch(err => console.error('Error fetching queue:', err));
+            }
+
+            // Poll every 5 seconds
+            fetchQueueStatus();
+            setInterval(fetchQueueStatus, 5000);
+
+            renderCalendar(currentDate);
+        });
+    </script>
 
 </body>
 
