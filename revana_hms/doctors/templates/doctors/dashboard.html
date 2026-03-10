@@ -1,415 +1,288 @@
+{% extends 'doctors/doctor_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Doctor Dashboard</title>
-    <link rel="icon" type="image/png" href="{% static 'frontend/images/Favicon.png' %}">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}Doctor Dashboard - Reevana HMS{% endblock %}
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Toastr & jQuery -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+{% block extra_head %}
+<!-- Toastr & jQuery for Queue Management -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+{% endblock %}
 
-    <style>
-        body {
-            background-color: #f5ede5;
-        }
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        border-radius: 12px;
+        padding: 24px;
+        background: #ebf8ff;
+        transition: 0.2s;
+        border: 1px solid var(--card-border);
+    }
 
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            background: #1c4278;
-            padding-top: 20px;
-        }
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
 
-        .sidebar a {
-            padding: 15px 25px;
-            color: #ddd;
-            display: block;
-            text-decoration: none;
-            font-size: 16px;
-            transition: 0.2s;
-        }
+    .table-row-clickable {
+        cursor: pointer;
+        transition: background 0.1s;
+    }
 
-        .sidebar .active {
-            background: #f4ede5;
-            color: #1c4278;
-        }
+    .table-row-clickable:hover {
+        background-color: #f8f9fa;
+    }
 
-        .sidebar a:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
+    /* Top Loading Bar */
+    #top-loading-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 4px;
+        background: var(--primary-orange);
+        z-index: 99999;
+        transition: width 0.4s ease, opacity 0.4s ease;
+        width: 0%;
+        opacity: 1;
+    }
+</style>
+{% endblock %}
 
-        .content {
-            margin-left: 270px;
-            padding: 20px;
-        }
+{% block topbar_title %}Dashboard Overview{% endblock %}
 
-        .dashboard-card {
-            border-radius: 10px;
-            padding: 25px;
-            background: #d0e8ff;
-            transition: 0.2s;
-        }
+{% block content %}
+<div id="top-loading-bar"></div>
 
-        .dashboard-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark">Welcome back, Dr. {{ doctor.name }}</h2>
+</div>
 
-        /* Table Styles */
-        .table-row-clickable {
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-
-        .btn.disabled,
-        .btn:disabled,
-        fieldset:disabled .btn {
-            background-color: #24437a;
-            border-color: #24437a;
-        }
-
-        .table-row-clickable:hover {
-            background-color: #f8f9fa;
-        }
-
-        .table-primary {
-            background-color: #cfe2ff !important;
-        }
-
-        /* BS Override */
-
-        /* Top Loading Bar */
-        #top-loading-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background: #1c4278;
-            /* App brown color */
-            z-index: 99999;
-            transition: width 0.4s ease, opacity 0.4s ease;
-            width: 0%;
-            opacity: 1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- Sidebar -->
-    <div id="top-loading-bar"></div>
-    <div class="sidebar">
-        <a href="{% url 'doctor_dashboard' %}" class="active"><i class="bi bi-grid-1x2 me-2"></i> Dashboard</a>
-        <a href="{% url 'doctor_availability_list' %}"><i class="bi bi-calendar-month me-2"></i> Set Monthly
-            Availability</a>
-        <a href="{% url 'my_patients' %}"><i class="bi bi-people me-2"></i> My Patients</a>
-        <a href="#"><i class="bi bi-file-medical me-2"></i> Patient Reports</a>
-        <a href="{% url 'doctor_profile_edit' %}"><i class="bi bi-person-lines-fill me-2"></i> Profile</a>
-        <a href="/logout/"><i class="bi bi-box-arrow-right me-2"></i> Logout</a>
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card text-center">
+            <i class="bi bi-calendar-check fs-1 mb-2 text-primary"></i>
+            <h6 class="text-muted text-uppercase fw-bold small">Today's Appointments</h6>
+            <h3 class="fw-bold mb-0 text-dark">{{ today_appointments }}</h3>
+        </div>
     </div>
-
-    <!-- MAIN CONTENT -->
-    <div class="content">
-        {% load static %}
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-dark">Doctor Dashboard</h2>
-            <a href="{% url 'doctor_profile_edit' %}" class="d-flex align-items-center text-decoration-none">
-                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
-                    style="width: 40px; height: 40px; font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                    {% if doctor.user.doctorprofile.passport_photo %}
-                    <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt="Profile"
-                        style="width: 100%; height: 100%; object-fit: cover;">
-                    {% else %}
-                    {{ doctor.name|slice:":2"|upper }}
-                    {% endif %}
-                </div>
-            </a>
+    <div class="col-md-4">
+        <div class="dashboard-card text-center" style="background: #fdf0e9;">
+            <i class="bi bi-people fs-1 mb-2 text-warning"></i>
+            <h6 class="text-muted text-uppercase fw-bold small">Total Patients</h6>
+            <h3 class="fw-bold mb-0 text-dark">{{ total_patients }}</h3>
         </div>
-
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="dashboard-card text-center">
-                    <i class="bi bi-calendar-check fs-1 mb-2"></i>
-                    <h6>Today's Appointments</h6>
-                    <h3 class="fw-bold">{{ today_appointments }}</h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="dashboard-card text-center">
-                    <i class="bi bi-people fs-1 mb-2"></i>
-                    <h6>Total Patients</h6>
-                    <h3 class="fw-bold">{{ total_patients }}</h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="dashboard-card text-center">
-                    <i class="bi bi-file-earmark-medical fs-1 mb-2"></i>
-                    <h6>Total Reports</h6>
-                    <h3 class="fw-bold">{{ reports_count }}</h3>
-                </div>
-            </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card text-center" style="background: #f0fff4;">
+            <i class="bi bi-file-earmark-medical fs-1 mb-2 text-success"></i>
+            <h6 class="text-muted text-uppercase fw-bold small">Total Reports</h6>
+            <h3 class="fw-bold mb-0 text-dark">{{ reports_count }}</h3>
         </div>
+    </div>
+</div>
 
-        <!-- MAIN TWO-COLUMN LAYOUT -->
-        <div class="row">
-
-            <!-- LEFT COLUMN: APPOINTMENT LIST -->
-            <div class="col-lg-8 mb-4">
-                <div class="card shadow-sm h-100 border-0">
-                    <!-- CURRENT SERVING SECTION (Always Visible) -->
-                    <div id="currentServingSection" class="p-4"
-                        style="background-color: #d0e8ff; border-radius: 10px 10px 0 0;">
-                        <small class="text-secondary fw-bold text-uppercase ls-1">Current Serving</small>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <div class="d-flex align-items-center gap-3">
-                                <!-- Big Token Number -->
-                                <div class="display-3 fw-bold text-primary lh-1" id="servingTokenDisplay">--</div>
-                                <div>
-                                    <h3 class="fw-bold mb-0 text-dark" id="servingPatientName">No Active Patient</h3>
-                                    <span class="badge bg-warning text-dark mt-2 d-none" id="servingPatientBadge">New
-                                        Patient</span>
-                                </div>
-                            </div>
-
-                            <!-- Main Action Buttons -->
-                            <div class="d-flex align-items-center">
-                                <!-- START BUTTON (Visible when Idle) -->
-                                <button id="startQueueBtn" class="btn btn-success px-4 py-2 shadow-sm fw-bold d-none"
-                                    onclick="startQueue()" {% if not appointments %}disabled{% endif %}>
-                                    <i class="bi bi-play-circle-fill me-2"></i> Start List
-                                </button>
-
-                                <!-- ACTION DROPDOWN (Visible when Serving) -->
-                                <div class="dropdown d-none" id="actionDropdownWrapper">
-                                    <button class="btn btn-primary dropdown-toggle px-4 py-2 shadow-sm" type="button"
-                                        data-bs-toggle="dropdown">
-                                        <i class="bi bi-lightning-fill me-1"></i> Actions
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                        <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
-                                                data-bs-target="#notesModal">
-                                                Add Notes & Call Next</a></li>
-                                        <li><a class="dropdown-item py-2" href="#" onclick="quickCallNext()">
-                                                Quick Complete (No Notes)</a></li>
-                                    </ul>
-                                </div>
-                            </div>
+<!-- MAIN TWO-COLUMN LAYOUT -->
+<div class="row">
+    <!-- LEFT COLUMN: APPOINTMENT LIST -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm h-100 border-0" style="border-radius: 12px; overflow: hidden;">
+            <!-- CURRENT SERVING SECTION -->
+            <div id="currentServingSection" class="p-4" style="background-color: #ebf8ff;">
+                <small class="text-secondary fw-bold text-uppercase ls-1">Current Serving</small>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="display-3 fw-bold text-primary lh-1" id="servingTokenDisplay">--</div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-dark" id="servingPatientName">No Active Patient</h3>
+                            <span class="badge bg-warning text-dark mt-2 d-none" id="servingPatientBadge">New
+                                Patient</span>
                         </div>
                     </div>
 
-                    <div class="card-body p-0">
-                        {% if appointments %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-3">Patient Name</th>
-                                        <th>Contact</th>
-                                        <th>Time</th>
-                                        <th>Token</th>
-                                        <th>Type</th>
-                                        <th class="text-end pe-3">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for appt in appointments %}
-                                    <tr id="appt-row-{{ appt.id }}" data-token="{{ appt.token_number }}"
-                                        class="table-row-clickable border-bottom">
-                                        <td class="ps-3 fw-bold text-dark patient-name">
-                                            {{ appt.patient_name }}
-                                        </td>
-                                        <td>{{ appt.patient_phone|default:"-" }}</td>
-                                        <td>{{ appt.appointment_date|date:"h:i A" }}</td>
-                                        <td>
-                                            <span class="badge bg-light text-dark border rounded-pill px-3">
-                                                {{ appt.token_number|default:"-" }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="badge {% if appt.visit_status == 'Returning' %}bg-info text-dark{% else %}bg-info text-dark{% endif %} visit-type">
-                                                {{ appt.visit_status|default:"General" }}
-                                            </span>
-                                        </td>
-                                        <td class="text-end pe-3">
-                                            <!-- View History Button (Yellow) -->
-                                            {% if appt.has_history %}
-                                            <button class="btn btn-warning btn-sm text-white fw-bold px-3"
-                                                onclick="loadPatientHistory('{{ appt.patient_name }}')">
-                                                History
-                                            </button>
-                                            {% else %}
-                                            <button class="btn btn-warning btn-sm text-white fw-bold px-3" disabled
-                                                style="opacity: 0.5; cursor: not-allowed;" title="No History">
-                                                History
-                                            </button>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <div class="p-5 text-center text-muted">
-                            <p class="mb-0">No appointments scheduled for today.</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+                    <div class="d-flex align-items-center">
+                        <button id="startQueueBtn" class="btn btn-success px-4 py-2 shadow-sm fw-bold d-none"
+                            onclick="startQueue()" {% if not appointments %}disabled{% endif %}>
+                            <i class="bi bi-play-circle-fill me-2"></i> Start List
+                        </button>
 
-            <!-- RIGHT COLUMN: PATIENT HISTORY -->
-            <div class="col-lg-4 mb-4">
-                <div class="card shadow-sm h-100 border-0" style="background-color: #fff;">
-                    <div class="card-body" id="patientHistoryContainer">
-                        <!-- Default Placeholder -->
-                        <div
-                            class="h-100 d-flex flex-column justify-content-center align-items-center text-muted opacity-50 p-4">
-                            <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
-                            <p class="text-center">Select a patient from the list to view their history & reports.</p>
+                        <div class="dropdown d-none" id="actionDropdownWrapper">
+                            <button class="btn btn-primary dropdown-toggle px-4 py-2 shadow-sm" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="bi bi-lightning-fill me-1"></i> Actions
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
+                                        data-bs-target="#notesModal">Add Notes & Call Next</a></li>
+                                <li><a class="dropdown-item py-2" href="#" onclick="quickCallNext()">Quick Complete (No
+                                        Notes)</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
 
-        </div> <!-- End Row -->
-
-    </div>
-
-
-    <!-- NOTES MODAL -->
-    <div class="modal fade" id="notesModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Consultation Notes</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="card-body p-0">
+                {% if appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Patient Name</th>
+                                <th>Contact</th>
+                                <th>Time</th>
+                                <th>Token</th>
+                                <th>Type</th>
+                                <th class="text-end pe-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appt in appointments %}
+                            <tr id="appt-row-{{ appt.id }}" data-token="{{ appt.token_number }}"
+                                class="table-row-clickable border-bottom">
+                                <td class="ps-3 fw-bold text-dark patient-name">{{ appt.patient_name }}</td>
+                                <td>{{ appt.patient_phone|default:"-" }}</td>
+                                <td>{{ appt.appointment_date|date:"h:i A" }}</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border rounded-pill px-3">{{
+                                        appt.token_number|default:"-" }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark">{{ appt.visit_status|default:"General"
+                                        }}</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    {% if appt.has_history %}
+                                    <button class="btn btn-warning btn-sm text-white fw-bold px-3"
+                                        onclick="loadPatientHistory('{{ appt.patient_name }}')">History</button>
+                                    {% else %}
+                                    <button class="btn btn-warning btn-sm text-white fw-bold px-3" disabled
+                                        style="opacity: 0.5; cursor: not-allowed;" title="No History">History</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted small">Adding notes for: <strong id="modalPatientName">Current Patient</strong>
-                    </p>
-                    <form id="notesForm">
-                        <div class="mb-3">
-                            <label class="form-label">Doctor's Notes <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="consultationNotes" rows="4"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Upload Report (Optional)</label>
-                            <input class="form-control" type="file" id="reportFile">
-                        </div>
-                    </form>
+                {% else %}
+                <div class="p-5 text-center text-muted">
+                    <p class="mb-0">No appointments scheduled for today.</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="submitNotesAndCallNext()">Submit &
-                        Complete</button>
-                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 
+    <!-- RIGHT COLUMN: PATIENT HISTORY -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm h-100 border-0" style="background-color: #fff; border-radius: 12px;">
+            <div class="card-body" id="patientHistoryContainer">
+                <div
+                    class="h-100 d-flex flex-column justify-content-center align-items-center text-muted opacity-50 p-4">
+                    <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
+                    <p class="text-center">Select a patient from the list to view their history & reports.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- NOTES MODAL -->
+<div class="modal fade" id="notesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Consultation Notes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Adding notes for: <strong id="modalPatientName">Current Patient</strong></p>
+                <form id="notesForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Doctor's Notes <span
+                                class="text-danger">*</span></label>
+                        <textarea class="form-control bg-light border-0" id="consultationNotes" rows="4"
+                            placeholder="Enter diagnosis and treatment notes..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Upload Report (Optional)</label>
+                        <input class="form-control bg-light border-0" type="file" id="reportFile">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary fw-bold px-4"
+                    style="background: var(--primary-orange); border: none;" onclick="submitNotesAndCallNext()">Submit &
+                    Complete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-    <script>
-        // --- 1. History Loader ---
-        function loadPatientHistory(patientName) {
-            const container = document.getElementById('patientHistoryContainer');
-            container.innerHTML = '<div class="text-center p-5"><span class="spinner-border text-primary"></span></div>';
+{% block extra_js %}
+<script>
+    // --- 1. History Loader ---
+    function loadPatientHistory(patientName) {
+        const container = document.getElementById('patientHistoryContainer');
+        container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div></div>';
 
-            // Encode name for URL
-            // Use dummy '000' to generate base URL then replace it
-            const urlPattern = "{% url 'patient_history_partial' '000' %}";
-            const url = urlPattern.replace('000', encodeURIComponent(patientName));
+        const urlPattern = "{% url 'patient_history_partial' '000' %}";
+        const url = urlPattern.replace('000', encodeURIComponent(patientName));
 
-            fetch(url)
-                .then(res => {
-                    if (!res.ok) throw new Error("Failed to load");
-                    return res.text();
-                })
-                .then(html => {
-                    container.innerHTML = html;
-                })
-                .catch(err => {
-                    container.innerHTML = `<div class="alert alert-danger">Error loading history.</div>`;
-                    console.error(err);
+        fetch(url)
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to load");
+                return res.text();
+            })
+            .then(html => {
+                container.innerHTML = html;
+            })
+            .catch(err => {
+                container.innerHTML = `<div class="alert alert-danger mx-3 my-3">Error loading history.</div>`;
+                console.error(err);
+            });
+    }
+
+    // --- 3. Queue Logic ---
+    let currentServingToken = null;
+
+    function updateQueueDisplay() {
+        fetch('/api/appointments/doctor/queue/status/')
+            .then(res => res.json())
+            .then(data => {
+                const servingTokenDisplay = document.getElementById('servingTokenDisplay');
+                const servingPatientName = document.getElementById('servingPatientName');
+                const servingPatientBadge = document.getElementById('servingPatientBadge');
+                const modalPatientName = document.getElementById('modalPatientName');
+
+                const startBtn = document.getElementById('startQueueBtn');
+                const actionDropdown = document.getElementById('actionDropdownWrapper');
+
+                document.querySelectorAll('tr[data-token]').forEach(row => {
+                    row.classList.remove('table-primary');
                 });
-        }
 
-        // --- 2. Modal Helper ---
-        function setModalPatient(name) {
-            document.getElementById('modalPatientName').innerText = name;
-            // Also open modal
-            const modal = new bootstrap.Modal(document.getElementById('notesModal'));
-            modal.show();
-        }
-
-        // --- 3. Queue Logic ---
-        let currentServingToken = null; // Track triggering history load only when patient changes
-
-        function updateQueueDisplay() {
-            fetch('/api/appointments/doctor/queue/status/')
-                .then(res => res.json())
-                .then(data => {
-                    const servingSection = document.getElementById('currentServingSection');
-                    const servingTokenDisplay = document.getElementById('servingTokenDisplay');
-                    const servingPatientName = document.getElementById('servingPatientName');
-                    const servingPatientBadge = document.getElementById('servingPatientBadge');
-                    const modalPatientName = document.getElementById('modalPatientName');
-
-                    const startBtn = document.getElementById('startQueueBtn');
-                    const actionDropdown = document.getElementById('actionDropdownWrapper');
-
-                    // Reset Rows
-                    document.querySelectorAll('tr[data-token]').forEach(row => {
-                        row.classList.remove('table-primary');
-                    });
-
-                    if (data.current_token > 0) {
-                        // === ACTIVE STATE ===
-
-                        // Check if patient changed (Active -> New Active)
-                        if (currentServingToken !== data.current_token) {
-                            currentServingToken = data.current_token;
-                            // Auto-Load History
-                            if (data.patient_name) {
-                                loadPatientHistory(data.patient_name);
-                            }
-                        }
-
-                        // Show "Current Serving", Hide Start Button, Show Actions
-                        servingTokenDisplay.innerText = data.current_token;
-                        if (servingPatientBadge) servingPatientBadge.classList.remove('d-none');
-
-                        if (startBtn) startBtn.classList.add('d-none');
-                        if (actionDropdown) actionDropdown.classList.remove('d-none');
-
-                        // Use API Data Directly
+                if (data.current_token > 0) {
+                    if (currentServingToken !== data.current_token) {
+                        currentServingToken = data.current_token;
                         if (data.patient_name) {
-                            servingPatientName.innerText = data.patient_name;
-                            if (modalPatientName) modalPatientName.innerText = data.patient_name;
+                            loadPatientHistory(data.patient_name);
+                        }
+                    }
 
-                            // Show Badge properly
-                            if (servingPatientBadge) servingPatientBadge.classList.remove('d-none');
+                    servingTokenDisplay.innerText = data.current_token;
+                    if (startBtn) startBtn.classList.add('d-none');
+                    if (actionDropdown) actionDropdown.classList.remove('d-none');
 
+                    if (data.patient_name) {
+                        servingPatientName.innerText = data.patient_name;
+                        if (modalPatientName) modalPatientName.innerText = data.patient_name;
+                        if (servingPatientBadge) {
+                            servingPatientBadge.classList.remove('d-none');
                             if (data.visit_status === 'Returning') {
                                 servingPatientBadge.className = 'badge bg-info text-dark mt-2';
                                 servingPatientBadge.innerText = 'Returning Patient';
@@ -417,199 +290,126 @@
                                 servingPatientBadge.className = 'badge bg-warning text-dark mt-2';
                                 servingPatientBadge.innerText = 'New Patient';
                             }
-                        } else {
-                            // Token active, but no patient (Gap or End of Queue)
-                            servingPatientName.innerText = "Queue Finished / No Patient";
-                            if (modalPatientName) modalPatientName.innerText = "No Patient";
-                            if (servingPatientBadge) servingPatientBadge.classList.add('d-none');
                         }
-
-                        // Hide Row if it exists
-                        const activeRow = document.querySelector(`tr[data-token="${data.current_token}"]`);
-                        if (activeRow) activeRow.classList.add('d-none');
-
-                    } else {
-                        // === IDLE STATE ===
-                        currentServingToken = 0; // Reset tracking
-
-                        // Show "Start Queue", Hide Actions
-                        servingTokenDisplay.innerText = "--";
-                        servingPatientName.innerText = "No Active Patient";
-                        if (servingPatientBadge) servingPatientBadge.classList.add('d-none');
-                        if (modalPatientName) modalPatientName.innerText = "Next Patient";
-
-                        if (startBtn) startBtn.classList.remove('d-none');
-                        if (actionDropdown) actionDropdown.classList.add('d-none');
-
-                        // Optional: Clear history panel or show default state
-                        document.getElementById('patientHistoryContainer').innerHTML = `
-                            <div class="text-center p-5 top-50 start-50">
-                                <i class="bi bi-arrow-left-circle display-4 text-secondary opacity-25"></i>
-                                <p class="text-secondary mt-3 small">Select a patient from the list or start the queue to view history &
-                                    reports.</p>
-                            </div>`;
                     }
-                })
-                .catch(err => console.error("Queue Poll Error", err));
-        }
 
-        // --- 4. Submit Notes ---
-        function submitNotesAndCallNext() {
-            const btn = document.querySelector('button[onclick="submitNotesAndCallNext()"]');
-            const notes = document.getElementById('consultationNotes').value.trim();
-            const fileInput = document.getElementById('reportFile');
+                    const activeRow = document.querySelector(`tr[data-token="${data.current_token}"]`);
+                    if (activeRow) activeRow.classList.add('d-none');
 
-            if (!notes) {
-                toastr.error("Doctor's Notes are required!");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = 'Processing...';
-
-            const formData = new FormData();
-            formData.append('notes', notes);
-            if (fileInput.files.length > 0) formData.append('report_file', fileInput.files[0]);
-
-            fetch('/api/appointments/doctor/queue/next/', {
-                method: 'POST',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        toastr.success(data.message);
-                        updateQueueDisplay();
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('notesModal'));
-                        modal.hide();
-
-                    } else {
-                        toastr.info(data.message);
-                    }
-                })
-                .catch(err => toastr.error("Error submitting"))
-                .finally(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = 'Submit & Complete';
-                });
-        }
-
-        // --- 5. Quick Complete ---
-        function quickCallNext() {
-            if (!confirm("Complete current patient without notes?")) return;
-
-            fetch('/api/appointments/doctor/queue/next/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ notes: 'Quick Complete' })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        toastr.success("Completed");
-                        updateQueueDisplay();
-
-                    }
-                });
-        }
-
-        // --- 6. Start Queue (New) ---
-        function startQueue() {
-            // Directly calls next patient without confirmation since we are idle
-            fetch('/api/appointments/doctor/queue/next/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ notes: 'Queue Started' })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        toastr.success("Queue Started!");
-                        updateQueueDisplay();
-
-                    } else {
-                        toastr.info(data.message);
-                    }
-                })
-                .catch(err => console.error(err));
-        }
-
-        // Init
-        updateQueueDisplay();
-        setInterval(updateQueueDisplay, 30000); // 30s poll
-    </script>
-    <!-- Notification Script -->
-    <script>
-        // Toastr Options
-        toastr.options = {
-            "closeButton": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "timeOut": "5000"
-        };
-
-        // Display Django Messages
-        /* {% if messages %} */
-        /* {% for message in messages %} */
-        toastr["{{ message.tags }}"]("{{ message|escapejs }}");
-        /* {% endfor %} */
-        /* {% endif %} */
-
-        // Poll for Notifications
-        function fetchNotifications() {
-            // Count
-            $.get("{% url 'notifications:live_unread_notification_count' %}", function (data) {
-                if (data.unread_count > 0) {
-                    $('.notification-badge').text(data.unread_count).show();
                 } else {
-                    $('.notification-badge').hide();
+                    currentServingToken = 0;
+                    servingTokenDisplay.innerText = "--";
+                    servingPatientName.innerText = "No Active Patient";
+                    if (servingPatientBadge) servingPatientBadge.classList.add('d-none');
+                    if (startBtn) startBtn.classList.remove('d-none');
+                    if (actionDropdown) actionDropdown.classList.add('d-none');
+
+                    document.getElementById('patientHistoryContainer').innerHTML = `
+                        <div class="h-100 d-flex flex-column justify-content-center align-items-center text-muted opacity-50 p-4">
+                            <i class="bi bi-arrow-left-circle display-4 mb-3"></i>
+                            <p class="text-center small">Select a patient from the list or start the queue to view history & reports.</p>
+                        </div>`;
+                }
+            })
+            .catch(err => console.error("Queue Poll Error", err));
+    }
+
+    function submitNotesAndCallNext() {
+        const btn = document.querySelector('button[onclick="submitNotesAndCallNext()"]');
+        const notes = document.getElementById('consultationNotes').value.trim();
+        const fileInput = document.getElementById('reportFile');
+
+        if (!notes) {
+            toastr.error("Doctor's Notes are required!");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = 'Processing...';
+
+        const formData = new FormData();
+        formData.append('notes', notes);
+        if (fileInput.files.length > 0) formData.append('report_file', fileInput.files[0]);
+
+        fetch('/api/appointments/doctor/queue/next/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success(data.message);
+                    updateQueueDisplay();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('notesModal'));
+                    modal.hide();
+                    document.getElementById('notesForm').reset();
+                } else {
+                    toastr.info(data.message);
+                }
+            })
+            .catch(err => toastr.error("Error submitting"))
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = 'Submit & Complete';
+            });
+    }
+
+    function quickCallNext() {
+        if (!confirm("Complete current patient without notes?")) return;
+
+        fetch('/api/appointments/doctor/queue/next/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ notes: 'Quick Complete' })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success("Completed");
+                    updateQueueDisplay();
                 }
             });
-        }
+    }
 
-        // Initial Fetch
-        fetchNotifications();
+    function startQueue() {
+        fetch('/api/appointments/doctor/queue/next/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ notes: 'Queue Started' })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success("Queue Started!");
+                    updateQueueDisplay();
+                } else {
+                    toastr.info(data.message);
+                }
+            })
+            .catch(err => console.error(err));
+    }
 
-        // Poll every 60s (1 min)
-        setInterval(fetchNotifications, 60000);
-    </script>
-    <script>
-        // --- Top Loading Bar Logic ---
-        const loaderBar = document.getElementById('top-loading-bar');
+    updateQueueDisplay();
+    setInterval(updateQueueDisplay, 30000);
 
-        function startLoader() {
-            loaderBar.style.opacity = '1';
-            loaderBar.style.width = '30%';
-            setTimeout(() => {
-                if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%';
-            }, 500);
-        }
-
-        function stopLoader() {
-            loaderBar.style.width = '100%';
-            setTimeout(() => {
-                loaderBar.style.opacity = '0';
-                setTimeout(() => { loaderBar.style.width = '0%'; }, 400);
-            }, 500);
-        }
-
-        // Show on Page Load
-        startLoader();
-        window.addEventListener('load', stopLoader);
-
-        // Show on Submit
-        document.querySelector('form').addEventListener('submit', function () {
-            startLoader();
-        });
-        // -----------------------------
-    </script>
-</body>
-
-</html>
+    const loaderBar = document.getElementById('top-loading-bar');
+    function startLoader() {
+        loaderBar.style.opacity = '1';
+        loaderBar.style.width = '30%';
+        setTimeout(() => { if (loaderBar.style.width !== '100%') loaderBar.style.width = '70%'; }, 500);
+    }
+    function stopLoader() {
+        loaderBar.style.width = '100%';
+        setTimeout(() => { loaderBar.style.opacity = '0'; setTimeout(() => { loaderBar.style.width = '0%'; }, 400); }, 500);
+    }
+    startLoader();
+    window.addEventListener('load', stopLoader);
+</script>
+{% endblock %}

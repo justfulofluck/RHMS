@@ -1,665 +1,386 @@
+{% extends 'doctors/doctor_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Doctor Dashboard</title>
+{% block title %}Advanced Scheduler - Reevana HMS{% endblock %}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block topbar_title %}Advanced Scheduler{% endblock %}
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% block extra_css %}
+<style>
+    .calendar-container {
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+    }
 
-    <!-- Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 700;
+        text-align: center;
+        padding: 12px 0;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: #718096;
+    }
 
-    <style>
-        body {
-            background-color: #f4ede5;
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .calendar-day {
+        aspect-ratio: 1;
+        border-right: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+        padding: 8px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .calendar-day:nth-child(7n) {
+        border-right: none;
+    }
+
+    .calendar-day:hover:not(.empty) {
+        background-color: #f7fafc;
+    }
+
+    .calendar-day.selected {
+        background-color: #ebf8ff;
+        color: #3182ce;
+        font-weight: 700;
+    }
+
+    .calendar-day.scheduled {
+        background-color: #fffaf0;
+        color: #dd6b20;
+    }
+
+    .calendar-day.selected.scheduled {
+        background-color: #e6fffa;
+        color: #319795;
+    }
+
+    .calendar-day.empty {
+        background-color: #f8f9fa;
+        cursor: default;
+    }
+
+    .day-number {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .has-availability-indicator {
+        width: 6px;
+        height: 6px;
+        background-color: var(--primary-orange);
+        border-radius: 50%;
+        position: absolute;
+        bottom: 8px;
+    }
+
+    .scheduler-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        height: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .scheduler-card-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .scheduler-card-header h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1rem;
+        color: #2d3748;
+    }
+
+    /* Custom Toast - Integration */
+    .custom-toast-success,
+    .custom-toast-error {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .custom-toast-success {
+        background: #38a169;
+    }
+
+    .custom-toast-error {
+        background: #e53e3e;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
         }
 
-        .mb-0 {
-            color: #1c4278;
+        to {
+            transform: translateX(0);
+            opacity: 1;
         }
+    }
 
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            background: #1c4278;
-            padding-top: 20px;
-        }
+    .custom-toast-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        .sidebar a {
-            padding: 15px;
-            color: #ddd;
-            display: block;
-            text-decoration: none;
-            font-size: 16px;
-        }
+    .custom-toast-modal-content {
+        background: white;
+        padding: 32px;
+        border-radius: 16px;
+        max-width: 450px;
+        text-align: center;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
 
-        .sidebar .active {
-            background: #f4ede5;
-            color: #1c4278;
-        }
-
-
-        .sidebar a:hover {
-            background: #f4ede5;
-            color: #1c4278;
-        }
-
-
-        .content {
-            margin-left: 270px;
-            padding: 20px;
-        }
-
-        .profile-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-        }
-
-        .dashboard-card {
-            border-radius: 10px;
-            padding: 25px;
-            background: white;
-            transition: 0.2s;
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .appointment-list {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-        }
-    </style>
-</head>
-
-<body>
-
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-
-
-        <a href="{% url 'doctor_dashboard' %}" class="active"><i class="bi bi-grid-1x2 me-2"></i> Dashboard</a>
-        <a href="{% url 'doctor_todays_appointments' %}"><i class="bi bi-calendar-check me-2"></i> Today's
-            Appointments</a>
-
-        <!-- Availability Management -->
-        <a href="{% url 'monthly_availability' %}"><i class="bi bi-calendar-month me-2"></i> Set Monthly
-            Availability</a>
-        <a href="{% url 'doctor_availability_list' %}"><i class="bi bi-calendar3 me-2"></i> My Availability</a>
-
-        <a href="{% url 'my_patients' %}"><i class="bi bi-people me-2"></i> My Patients</a>
-        <a href="#"><i class="bi bi-file-medical me-2"></i> Patient Reports</a>
-        <a href="{% url 'doctor_profile_edit' %}"><i class="bi bi-person-lines-fill me-2"></i> Profile</a>
-        <a href="/logout/"><i class="bi bi-box-arrow-right me-2"></i> Logout</a>
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h1 class="fw-800" style="letter-spacing: -1px;">Advanced Scheduler</h1>
+        <p class="text-muted">Select specific dates and configure your daily time slots.</p>
     </div>
+</div>
 
-
-
-    <!-- MAIN CONTENT -->
-
-
-
-    <div class="content">
-
-
-
-        {% load static %}
-
-        {% block content %}
-        <div class="container mt-4">
-            <div class="row">
-                <div class="col-md-12">
-                    <h2><i class="bi bi-calendar-event"></i> Advanced Scheduler</h2>
-                    <p class="text-muted">Select specific dates and configure multiple time slots (e.g., Morning &
-                        Evening).</p>
-                    <hr>
-                </div>
+<div class="row g-4">
+    <!-- Calendar Column -->
+    <div class="col-lg-4">
+        <div class="scheduler-card">
+            <div class="scheduler-card-header" style="background: #f7fafc;">
+                <h5><i class="bi bi-calendar3 me-2"></i> Select Dates</h5>
+                <input type="month" id="month-selector"
+                    class="form-control form-control-sm w-auto border-0 bg-white shadow-sm">
             </div>
-
-            <div class="row">
-                <!-- Calendar Column -->
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-header text-white d-flex justify-content-between align-items-center"
-                            style="color:#fff; background: #def3c2; padding: 10px;border-radius: 8px;border-bottom: #f8d8ad;">
-                            <h5 style="color: #1c4278;" class="mb-0"><i class="bi bi-calendar3"></i> Select Dates</h5>
-                            <div>
-                                <input type="month" id="month-selector" class="form-control form-control-sm"
-                                    style="max-width: 150px;">
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <!-- Calendar Controls -->
-                            <div class="mb-3 d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-secondary"
-                                    onclick="calendar.selectWeekdays()">Select
-                                    Weekdays</button>
-                                <button class="btn btn-sm btn-outline-secondary"
-                                    onclick="calendar.selectWeekends()">Select
-                                    Weekends</button>
-                                <button class="btn btn-sm btn-outline-secondary" onclick="calendar.selectAll()">Select
-                                    All</button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="calendar.clearSelection()">Clear
-                                    Selection</button>
-                            </div>
-
-                            <!-- Calendar Grid -->
-                            <div class="calendar-container">
-                                <div class="calendar-header">
-                                    <div>Mon</div>
-                                    <div>Tue</div>
-                                    <div>Wed</div>
-                                    <div>Thu</div>
-                                    <div>Fri</div>
-                                    <div>Sat</div>
-                                    <div>Sun</div>
-                                </div>
-                                <div id="calendar-grid" class="calendar-grid">
-                                    <!-- Days generated by JS -->
-                                </div>
-                            </div>
-
-                            <div class="mt-3">
-                                <small class="text-muted"><i class="bi bi-info-circle"></i> Click dates to
-                                    select/deselect.
-                                    Yellow dates are already scheduled.</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <button class="btn btn-sm btn-outline-primary border-0 bg-light text-dark fw-600"
+                        onclick="calendar.selectWeekdays()">Weekdays</button>
+                    <button class="btn btn-sm btn-outline-primary border-0 bg-light text-dark fw-600"
+                        onclick="calendar.selectWeekends()">Weekends</button>
+                    <button class="btn btn-sm btn-outline-danger border-0 bg-light text-danger fw-600"
+                        onclick="calendar.clearSelection()">Clear</button>
                 </div>
 
-                <!-- Configuration Column -->
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-header  text-white"
-                            style="color:#000;background: #def3c2; padding: 10px;border-radius: 8px;border-bottom: #def3c2;">
-                            <h5 class="mb-0"><i class="bi bi-clock"></i> Configure Schedule</h5>
-                        </div>
-                        <div class="card-body">
-                            <form id="schedule-form">
-                                {% csrf_token %}
-
-                                <div class="alert " id="selection-summary"
-                                    style="background:#f4ede5; color: #24437a; padding: 10px; border-radius: 8px; border-bottom: #6b3f21;">
-                                    No dates selected.
-                                </div>
-
-                                <h6 class="border-bottom pb-2 mb-3">Time Slot</h6>
-                                <div id="slots-container">
-                                    <!-- Single Slot Row -->
-                                    <div class="slot-row row mb-2 g-2">
-                                        <div class="col-6">
-                                            <label class="small text-muted">Start</label>
-                                            <input type="time" class="form-control" name="start_time" value="09:00"
-                                                required>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small text-muted">End</label>
-                                            <input type="time" class="form-control" name="end_time" value="17:00"
-                                                required>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Add Split Shift Button Removed -->
-
-                                <div class="mb-4">
-                                    <label class="form-label">Slot Duration</label>
-                                    <select class="form-select" id="slot_duration">
-                                        <option value="15">15 minutes</option>
-                                        <option value="30" selected>30 minutes</option>
-                                        <option value="45">45 minutes</option>
-                                        <option value="60">60 minutes</option>
-                                    </select>
-                                </div>
-
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn  btn-lg"
-                                        style="background:#24437a;color: #def3c2;padding: 10px;border-radius: 8px;border-bottom: #6b3f21;">
-                                        <i class="bi bi-check-circle"></i> Apply Schedule
-                                    </button>
-                                    <a href="{% url 'doctor_dashboard' %}" class="btn "
-                                        style="background: #def3c2;color: #24437a; padding: 10px;border-radius: 8px; ; border-bottom: #6b3f21;">
-                                        Back to Dashboard
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                        <div>Sun</div>
                     </div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
                 </div>
-
-
-                <!-- Availability List Column -->
-                <div class="col-md-4">
-
-                    <div class="card">
-                        <div class="card-body">
-                            {% if availabilities %}
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Time Slot</th>
-                                            <th>Slot Duration</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for slot in availabilities %}
-                                        <tr>
-                                            <td>
-                                                <i class="bi bi-calendar"></i> {{ slot.date|date:"M d, Y" }}
-                                            </td>
-                                            <td>
-                                                <span class="badge"
-                                                    style="color:#fff;background: #6b3f21; padding:10px;border-radius: 8px;border-bottom: #6b3f21;">
-                                                    {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
-                                                </span>
-                                            </td>
-                                            <td>{{ slot.slot_duration }} mins</td>
-                                            <td>
-                                                <form method="post" action="{% url 'delete_availability' slot.id %}"
-                                                    onsubmit="return confirm('Are you sure you want to delete this availability slot?');"
-                                                    style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                        title="Delete">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
-                            <div class="text-center py-5">
-                                <p class="text-muted mb-3"><i class="bi bi-calendar-x display-4"></i></p>
-                                <p class="lead">No availability scheduled yet.</p>
-
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-
-
-
             </div>
         </div>
+    </div>
 
-    <!-- Custom Toast Styles -->
-    <style>
-        /* Success Toast - Top Right */
-        .custom-toast-success {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
-            z-index: 9999;
-            animation: slideInRight 0.3s ease-out;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-            max-width: 400px;
-            font-size: 14px;
-        }
+    <!-- Configuration Column -->
+    <div class="col-lg-4">
+        <div class="scheduler-card">
+            <div class="scheduler-card-header" style="background: #f7fafc;">
+                <h5><i class="bi bi-clock me-2"></i> Configure Schedule</h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="schedule-form">
+                    {% csrf_token %}
+                    <div class="alert mb-4 border-0 text-center py-3" id="selection-summary"
+                        style="background: var(--bg-light); color: var(--text-muted); border-radius: 10px;">
+                        No dates selected.
+                    </div>
 
-        .custom-toast-success::before {
-            content: '✓';
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
+                    <div class="mb-4">
+                        <label class="form-label fw-700 small text-uppercase text-muted mb-3">Time Range</label>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="small fw-600 text-muted mb-1">Start Time</label>
+                                <input type="time" class="form-control border-0 bg-light py-2" name="start_time"
+                                    value="09:00" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="small fw-600 text-muted mb-1">End Time</label>
+                                <input type="time" class="form-control border-0 bg-light py-2" name="end_time"
+                                    value="17:00" required>
+                            </div>
+                        </div>
+                    </div>
 
-        /* Error Toast - Top Right */
-        .custom-toast-error {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #dc3545, #fd7e14);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(220, 53, 69, 0.3);
-            z-index: 9999;
-            animation: slideInRight 0.3s ease-out;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-            max-width: 400px;
-            font-size: 14px;
-        }
+                    <div class="mb-4">
+                        <label class="form-label fw-700 small text-uppercase text-muted mb-3">Slot Duration</label>
+                        <select class="form-select border-0 bg-light py-2" id="slot_duration">
+                            <option value="15">15 minutes</option>
+                            <option value="30" selected>30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
+                    </div>
 
-        .custom-toast-error::before {
-            content: '✕';
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 fw-700"
+                            style="background: var(--primary-orange); border: none;">
+                            Apply Schedule
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-        /* Modal Toast - Center with Blur */
-        .custom-toast-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: modalFadeIn 0.3s ease-out;
-        }
+    <!-- Active List Column -->
+    <div class="col-lg-4">
+        <div class="scheduler-card">
+            <div class="scheduler-card-header" style="background: #f7fafc;">
+                <h5><i class="bi bi-list-ul me-2"></i> Active Schedule</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if availabilities %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr class="small text-uppercase text-muted">
+                                <th class="px-4 py-3">Date</th>
+                                <th class="py-3">Time</th>
+                                <th class="py-3 text-end px-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for slot in availabilities %}
+                            <tr>
+                                <td class="px-4 py-3 fw-600">{{ slot.date|date:"M d, Y" }}</td>
+                                <td class="py-3">
+                                    <span class="badge bg-light text-dark border-0 fw-600 px-3 py-2"
+                                        style="border-radius: 6px;">
+                                        {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                                    </span>
+                                </td>
+                                <td class="text-end px-4 py-3">
+                                    <form method="post" action="{% url 'delete_availability' slot.id %}"
+                                        onsubmit="return confirm('Delete this slot?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-link text-danger p-0"><i
+                                                class="bi bi-trash3"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-calendar-x display-4 text-light mb-3 d-block"></i>
+                    <p class="text-muted">No availability scheduled.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-        .custom-toast-modal-content {
-            background: white;
-            padding: 32px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            text-align: center;
-            animation: modalContentFadeIn 0.3s ease-out;
-            margin: 20px;
-        }
+{% block extra_js %}
+<script>
+    const calendar = {
+        currentMonth: new Date(),
+        selectedDates: new Set(),
+        scheduledDates: new Set(),
 
-        .custom-toast-modal-icon {
-            width: 60px;
-            height: 60px;
-            background: #fff3cd;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 24px;
-            color: #856404;
-        }
+        init() {
+            const today = new Date();
+            this.currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const yearStr = this.currentMonth.getFullYear();
+            const monthStr = String(this.currentMonth.getMonth() + 1).padStart(2, '0');
+            document.getElementById('month-selector').value = `${yearStr}-${monthStr}`;
+            document.getElementById('month-selector').min = `${yearStr}-${monthStr}`;
 
-        .custom-toast-modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 12px;
-        }
+            this.fetchAvailability();
 
-        .custom-toast-modal-message {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 24px;
-            white-space: pre-line;
-        }
+            document.getElementById('month-selector').addEventListener('change', (e) => {
+                const [y, m] = e.target.value.split('-');
+                this.currentMonth = new Date(parseInt(y), parseInt(m) - 1, 1);
+                this.selectedDates.clear();
+                this.fetchAvailability();
+                updateSelectionSummary();
+            });
+        },
 
-        .custom-toast-modal-btn {
-            background: #1c4278;
-            color: white;
-            border: none;
-            padding: 12px 32px;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
+        fetchAvailability() {
+            const year = this.currentMonth.getFullYear();
+            const month = this.currentMonth.getMonth() + 1;
+            fetch(`{% url 'get_booked_dates' %}?year=${year}&month=${month}`)
+                .then(res => res.json())
+                .then(data => {
+                    this.scheduledDates = new Set(data.dates || []);
+                    this.render();
+                });
+        },
 
-        .custom-toast-modal-btn:hover {
-            background: #152d55;
-        }
+        render() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            const year = this.currentMonth.getFullYear();
+            const month = this.currentMonth.getMonth();
+            const firstDay = new Date(year, month, 1);
+            let startDay = firstDay.getDay() - 1; if (startDay === -1) startDay = 6;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        /* Animations */
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes modalContentFadeIn {
-            from {
-                transform: scale(0.9);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes modalFadeOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
-
-        .calendar-container {
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-        }
-
-
-            .calendar-header {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-                background: #f8f9fa;
-                border-bottom: 1px solid #dee2e6;
-                font-weight: bold;
-                text-align: center;
-                padding: 5px 0;
+            for (let i = 0; i < startDay; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day empty';
+                grid.appendChild(cell);
             }
 
-            .calendar-grid {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day';
+                if (this.scheduledDates.has(dateStr)) cell.classList.add('scheduled');
+                if (this.selectedDates.has(dateStr)) cell.classList.add('selected');
 
-            .calendar-day {
-                aspect-ratio: 1;
-                border-right: 1px solid #dee2e6;
-                border-bottom: 1px solid #dee2e6;
-                padding: 5px;
-                cursor: pointer;
-                position: relative;
-                transition: background-color 0.2s;
-            }
-
-            .calendar-day:nth-child(7n) {
-                border-right: none;
-            }
-
-            .calendar-day:hover {
-                background-color: #e9ecef;
-            }
-
-            .calendar-day.selected {
-                background-color: #cfe2ff;
-                /* Bootstrap primary-subtle */
-                border-color: #b6d4fe;
-            }
-
-            .calendar-day.scheduled {
-                background-color: #f8d8ad;
-                /* Bootstrap warning-subtle */
-                border-color: #f8d8ad;
-            }
-
-            .calendar-day.selected.scheduled {
-                background-color: #cff4fc;
-                /* Mixed state */
-                border-color: #b6effb;
-            }
-
-            .calendar-day.empty {
-                background-color: #f8f9fa;
-                cursor: default;
-            }
-
-            .day-number {
-                font-weight: bold;
-            }
-
-            .has-availability-indicator {
-                width: 8px;
-                height: 8px;
-                background-color: #198754;
-                border-radius: 50%;
-                position: absolute;
-                bottom: 5px;
-                right: 5px;
-            }
-        </style>
-
-        <script>
-            // --- Calendar Logic ---
-            const calendar = {
-                currentMonth: new Date(),
-                selectedDates: new Set(),
-                scheduledDates: new Set(),
-
-                init() {
-                    const today = new Date();
-                    this.currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-                    // Set month selector to current month
-                    const yearStr = this.currentMonth.getFullYear();
-                    const monthStr = String(this.currentMonth.getMonth() + 1).padStart(2, '0');
-                    document.getElementById('month-selector').value = `${yearStr}-${monthStr}`;
-                    document.getElementById('month-selector').min = `${yearStr}-${monthStr}`;
-
-                    this.fetchAvailability();
-
-                    // Event listener for month change
-                    document.getElementById('month-selector').addEventListener('change', (e) => {
-                        const [y, m] = e.target.value.split('-');
-                        this.currentMonth = new Date(parseInt(y), parseInt(m) - 1, 1);
-                        this.selectedDates.clear();
-                        this.fetchAvailability();
-                        updateSelectionSummary();
-                    });
-                },
-
-                fetchAvailability() {
-                    const year = this.currentMonth.getFullYear();
-                    const month = this.currentMonth.getMonth() + 1;
-
-                    fetch(`{% url 'get_booked_dates' %}?year=${year}&month=${month}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            this.scheduledDates = new Set(data.dates || []);
-                            this.render();
-                        })
-                        .catch(err => {
-                            console.error('Error fetching availability:', err);
-                            this.scheduledDates.clear();
-                            this.render();
-                        });
-                },
-
-                render() {
-                    const grid = document.getElementById('calendar-grid');
-                    grid.innerHTML = '';
-
-                    const year = this.currentMonth.getFullYear();
-                    const month = this.currentMonth.getMonth();
-
-                    const firstDay = new Date(year, month, 1);
-                    let startDay = firstDay.getDay() - 1;
-                    if (startDay === -1) startDay = 6;
-
-                    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                    // Empty cells
-                    for (let i = 0; i < startDay; i++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'calendar-day empty';
-                        grid.appendChild(cell);
-                    }
-
-                    // Days
-                    for (let d = 1; d <= daysInMonth; d++) {
-                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                        const cell = document.createElement('div');
-                        cell.className = 'calendar-day';
-                        cell.dataset.date = dateStr;
-
-                        let html = `<div class="day-number">${d}</div>`;
-
-                        if (this.scheduledDates.has(dateStr)) {
-                            cell.classList.add('scheduled');
-                            html += `<div class="has-availability-indicator"></div>`;
-                        }
-
-                        if (this.selectedDates.has(dateStr)) {
-                            cell.classList.add('selected');
-                        }
-
-                        cell.innerHTML = html;
-                        cell.addEventListener('click', () => this.toggleDate(dateStr, cell));
-                        grid.appendChild(cell);
-                    }
-                },
-
-                toggleDate(dateStr, cell) {
+                cell.innerHTML = `<div class="day-number">${d}</div>${this.scheduledDates.has(dateStr) ? '<div class="has-availability-indicator"></div>' : ''}`;
+                cell.addEventListener('click', () => {
                     if (this.selectedDates.has(dateStr)) {
                         this.selectedDates.delete(dateStr);
                         cell.classList.remove('selected');
@@ -668,225 +389,104 @@
                         cell.classList.add('selected');
                     }
                     updateSelectionSummary();
-                },
+                });
+                grid.appendChild(cell);
+            }
+        },
 
-                selectWeekdays() {
-                    this.massSelect(d => d !== 0 && d !== 6);
-                },
-                selectWeekends() {
-                    this.massSelect(d => d === 0 || d === 6);
-                },
-                selectAll() {
-                    this.massSelect(() => true);
-                },
-                massSelect(conditionFn) {
-                    const year = this.currentMonth.getFullYear();
-                    const month = this.currentMonth.getMonth();
-                    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                    for (let d = 1; d <= daysInMonth; d++) {
-                        const date = new Date(year, month, d);
-                        if (conditionFn(date.getDay())) {
-                            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                            this.selectedDates.add(dateStr);
-                        }
-                    }
-                    this.render();
-                    updateSelectionSummary();
-                },
-                clearSelection() {
-                    this.selectedDates.clear();
-                    this.render();
-                    updateSelectionSummary();
-                }
-            };
-
-            // --- Slots Logic (Removed Single Slot Only) ---
-            // const slotsManager = { ... };
-
-            function updateSelectionSummary() {
-                const count = calendar.selectedDates.size;
-                const el = document.getElementById('selection-summary');
-                if (count === 0) {
-                    el.textContent = 'No dates selected.';
-                    el.className = 'alert alert-info';
-                } else {
-                    el.textContent = `${count} date(s) selected.`;
-                    el.className = 'alert alert-success fw-bold';
+        selectWeekdays() { this.massSelect(d => d !== 0 && d !== 6); },
+        selectWeekends() { this.massSelect(d => d === 0 || d === 6); },
+        massSelect(conditionFn) {
+            const year = this.currentMonth.getFullYear();
+            const month = this.currentMonth.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let d = 1; d <= daysInMonth; d++) {
+                const date = new Date(year, month, d);
+                if (conditionFn(date.getDay())) {
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    this.selectedDates.add(dateStr);
                 }
             }
-
-            // --- Form Submission ---
-
-document.getElementById('schedule-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    
-    // Enhanced configuration with URL validation
-    const APP_CONFIG = {
-        AVAILABILITY_LIST_URL: "{% url 'doctor_availability_list' %}",
-        MONTHLY_AVAILABILITY_URL: "{% url 'monthly_availability' %}",
-        GET_BOOKED_DATES_URL: "{% url 'get_booked_dates' %}",
-        FALLBACK_AVAILABILITY_URL: "/hospital/doctors/availability/"
+            this.render();
+            updateSelectionSummary();
+        },
+        clearSelection() {
+            this.selectedDates.clear();
+            this.render();
+            updateSelectionSummary();
+        }
     };
-    
-    // Debug: Log URL configuration
-    console.log('DEBUG: URL Configuration:', APP_CONFIG);
-    console.log('DEBUG: Availability List URL:', APP_CONFIG.AVAILABILITY_LIST_URL);
-    console.log('DEBUG: Form submission started');
 
-    if (calendar.selectedDates.size === 0) {
-        CustomToast.modal('Please click on updates in the calendar to SELECT them (they will turn blue).
-
-Yellow dates are just showing what is already scheduled.
-Blue dates are the ones you are about to change.');
-        return;
+    function updateSelectionSummary() {
+        const count = calendar.selectedDates.size;
+        const el = document.getElementById('selection-summary');
+        if (count === 0) {
+            el.textContent = 'No dates selected.';
+            el.style.background = 'var(--bg-light)';
+            el.style.color = 'var(--text-muted)';
+        } else {
+            el.textContent = `${count} date(s) selected Ready to apply.`;
+            el.style.background = '#e6fffa';
+            el.style.color = '#2c7a7b';
+        }
     }
 
-    const slots = [];
-    document.querySelectorAll('.slot-row').forEach(row => {
-        slots.push({
-            start_time: row.querySelector('[name="start_time"]').value,
-            end_time: row.querySelector('[name="end_time"]').value
-        });
-    });
-
-    const data = {
-        dates: Array.from(calendar.selectedDates),
-        slots: slots,
-        duration: document.getElementById('slot_duration').value
-    };
-
-    console.log('DEBUG: Form data:', data);
-    console.log('DEBUG: Submitting to:', APP_CONFIG.MONTHLY_AVAILABILITY_URL);
-    console.log('DEBUG: Dates selected:', data.dates.length);
-
-    fetch(APP_CONFIG.MONTHLY_AVAILABILITY_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        console.log('DEBUG: Response status:', response.status);
-        console.log('DEBUG: Response OK:', response.ok);
-        
-        if (!response.ok) {
-            console.error('DEBUG: HTTP Error:', response.statusText);
-            throw new Error();
+    document.getElementById('schedule-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (calendar.selectedDates.size === 0) {
+            CustomToast.modal("Please select at least one date on the calendar.");
+            return;
         }
-        
-        return response.json();
-    })
-    .then(result => {
-        console.log('DEBUG: Parsed result:', result);
-        
-        if (result.success) {
-            console.log('DEBUG: Success path triggered');
-            console.log('DEBUG: Success message:', result.message);
-            CustomToast.success(result.message);
-            calendar.clearSelection();
-            calendar.fetchAvailability(); // Refresh highlights
-            
-            // Redirect to availability list after toast message
-            setTimeout(() => {
-                console.log('DEBUG: Redirect timer executed');
-                console.log('DEBUG: Attempting redirect to:', APP_CONFIG.AVAILABILITY_LIST_URL);
-                
-                // Enhanced URL validation and redirect logic
-                const targetUrl = APP_CONFIG.AVAILABILITY_LIST_URL;
-                if (targetUrl && targetUrl !== 'None' && targetUrl !== '' && targetUrl.includes('availability')) {
-                    console.log('DEBUG: Using primary URL:', targetUrl);
-                    window.location.href = targetUrl;
+
+        const data = {
+            dates: Array.from(calendar.selectedDates),
+            slots: [{
+                start_time: document.querySelector('[name="start_time"]').value,
+                end_time: document.querySelector('[name="end_time"]').value
+            }],
+            duration: document.getElementById('slot_duration').value
+        };
+
+        fetch("{% url 'monthly_availability' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success) {
+                    CustomToast.success(result.message);
+                    calendar.clearSelection();
+                    calendar.fetchAvailability();
+                    setTimeout(() => window.location.href = "{% url 'doctor_availability_list' %}", 1500);
                 } else {
-                    console.log('DEBUG: Using fallback URL:', APP_CONFIG.FALLBACK_AVAILABILITY_URL);
-                    window.location.href = APP_CONFIG.FALLBACK_AVAILABILITY_URL;
+                    CustomToast.error(result.error || "Execution failed");
                 }
-            }, 3500);
-        } else {
-            console.log('DEBUG: Error path triggered:', result.error);
-            CustomToast.error('Error: ' + result.error);
-        }
-    })
-    .catch(err => {
-        console.error('DEBUG: Fetch error:', err);
-        console.error('DEBUG: Error stack:', err.stack);
-        CustomToast.error('An error occurred: ' + err.message);
+            });
     });
-});
-                });
 
-                const data = {
-                    dates: Array.from(calendar.selectedDates),
-                    slots: slots,
-                    duration: document.getElementById('slot_duration').value
-                };
+    class CustomToast {
+        static success(msg) { this.show(msg, 'success'); }
+        static error(msg) { this.show(msg, 'error'); }
+        static show(msg, type) {
+            const toast = document.createElement('div');
+            toast.className = `custom-toast-${type}`;
+            toast.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> <span>${msg}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        static modal(msg) {
+            const modal = document.createElement('div');
+            modal.className = 'custom-toast-modal';
+            modal.innerHTML = `<div class="custom-toast-modal-content">
+                <i class="bi bi-info-circle fs-1 text-primary mb-3 d-block"></i>
+                <p>${msg}</p>
+                <button class="btn btn-primary mt-3" onclick="this.closest('.custom-toast-modal').remove()">Understood</button>
+            </div>`;
+            document.body.appendChild(modal);
+        }
+    }
 
-                console.log('DEBUG: Form data:', data);
-                console.log('DEBUG: Submitting to:', APP_CONFIG.MONTHLY_AVAILABILITY_URL);
-                console.log('DEBUG: Dates selected:', data.dates.length);
-
-
-
-
-            // Custom Toast System
-            class CustomToast {
-                static success(message) {
-                    const toast = document.createElement('div');
-                    toast.className = 'custom-toast-success';
-                    toast.textContent = message;
-                    document.body.appendChild(toast);
-                    
-                    // Auto-close after 3 seconds
-                    setTimeout(() => {
-                        toast.style.animation = 'slideOutRight 0.3s ease-out';
-                        setTimeout(() => toast.remove(), 300);
-                    }, 3000);
-                }
-                
-                static error(message) {
-                    const toast = document.createElement('div');
-                    toast.className = 'custom-toast-error';
-                    toast.textContent = message;
-                    document.body.appendChild(toast);
-                    
-                    // Auto-close after 5 seconds for errors
-                    setTimeout(() => {
-                        toast.style.animation = 'slideOutRight 0.3s ease-out';
-                        setTimeout(() => toast.remove(), 300);
-                    }, 5000);
-                }
-                
-                static modal(message) {
-                    const modal = document.createElement('div');
-                    modal.className = 'custom-toast-modal';
-                    modal.innerHTML = `
-                        <div class="custom-toast-modal-content">
-                            <div class="custom-toast-modal-icon">!</div>
-                            <div class="custom-toast-modal-title">Information</div>
-                            <div class="custom-toast-modal-message">${message}</div>
-                            <button class="custom-toast-modal-btn">OK</button>
-                        </div>
-                    `;
-                    document.body.appendChild(modal);
-                    
-                    // Add event listener for OK button
-                    modal.querySelector('.custom-toast-modal-btn').addEventListener('click', () => {
-                        modal.style.animation = 'modalFadeOut 0.3s ease-out';
-                        setTimeout(() => modal.remove(), 300);
-                    });
-                }
-            }
-        </script>
-        {% endblock %}
-    </div>
-    
-
-
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></scrip>
-</body>
-
-</html>
+    calendar.init();
+</script>
+{% endblock %}

@@ -1,0 +1,259 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Doctor Dashboard - Reevana HMS{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
+
+    <style>
+        :root {
+            --sidebar-bg: #131d2e;
+            --sidebar-hover: rgba(255, 255, 255, 0.05);
+            --primary-orange: #f26b21;
+            --accent-orange-bg: #fdf0e9;
+            --text-main: #333;
+            --text-muted: #6c757d;
+            --bg-light: #f8f9fc;
+            --card-border: #edf2f9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: var(--sidebar-bg);
+            color: white;
+            z-index: 1000;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-brand span {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 2px 16px;
+            margin-bottom: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            color: #a0aec0;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+        }
+
+        .nav-link:hover {
+            background: var(--sidebar-hover);
+            color: white;
+        }
+
+        .nav-link.active {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Topbar Styling */
+        .main-content {
+            margin-left: 240px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 70px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .topbar-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #1a202c;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #edf2f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--primary-orange);
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .content-body {
+            padding: 32px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <span>Doctor Dashboard</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="{% url 'doctor_dashboard' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'doctor_dashboard' %}active{% endif %}">
+                    <i class="bi bi-layout-sidebar-inset"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'monthly_availability' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'monthly_availability' %}active{% endif %}">
+                    <i class="bi bi-calendar3"></i>
+                    <span>Set Monthly Availability</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'my_patients' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'my_patients' %}active{% endif %}">
+                    <i class="bi bi-people"></i>
+                    <span>My Patients</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{% url 'doctor_profile_edit' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'doctor_profile_edit' %}active{% endif %}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="mt-3">
+                <a href="/logout/" class="nav-link" style="color: #cbd5e0;">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>LOGOUT</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="topbar-title">{% block topbar_title %}Management{% endblock %}</div>
+
+            {% block topbar_search %}{% endblock %}
+
+            <div class="topbar-actions">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {% if doctor.user.doctorprofile.passport_photo %}
+                        <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt="Profile">
+                        {% else %}
+                        {{ doctor.name|slice:":1"|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="user-name">Dr. {{ doctor.name }}</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="content-body">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -655,6 +655,9 @@ def my_patients_view(request):
     
     # Aggregate patients based on name
     from django.db.models import Count, Max, Q
+    from django.utils import timezone
+    import hashlib
+    import random
     
     # Filtering Logic
     start_date = request.GET.get('start_date')
@@ -686,7 +689,6 @@ def my_patients_view(request):
         writer.writerow(['Patient Name', 'Last Visit', 'Total Visits', 'Pseudo ID'])
         
         for p in all_patients_qs:
-            import hashlib
             pseudo_id = f"PT-{int(hashlib.md5(p['patient_name'].encode()).hexdigest(), 16) % 10000:04d}"
             writer.writerow([
                 p['patient_name'], 
@@ -703,10 +705,9 @@ def my_patients_view(request):
     from django.core.paginator import Paginator
     paginator = Paginator(all_patients_qs, 5) # Show 5 patients per page
     page_number = request.GET.get('page')
-    patients = paginator.get_page(page_number)
+    patients_page = paginator.get_page(page_number)
     
     # Simple growth calculation
-    from django.utils import timezone
     thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
     current_month_count = Appointment.objects.filter(doctor=doctor, appointment_date__gte=thirty_days_ago).count()
     prev_month_count = Appointment.objects.filter(
@@ -726,10 +727,26 @@ def my_patients_view(request):
     completed_appts = Appointment.objects.filter(doctor=doctor, status='completed').count()
     completion_rate = (completed_appts / total_appts * 100) if total_appts > 0 else 0
 
-    # Add extra info for UI
-    for p in patients:
-        import hashlib
-        p['pseudo_id'] = f"PT-{int(hashlib.md5(p['patient_name'].encode()).hexdigest(), 16) % 10000:04d}"
+    # Colors for avatars
+    bg_colors = ['#ebf8ff', '#fef3c7', '#f1f1f1', '#eef2ff', '#fdf2f2', '#f0fdf4']
+    text_colors = ['#3182ce', '#d97706', '#4a5568', '#4f46e5', '#9b1c1c', '#166534']
+
+    # Transform patients for template
+    patients_list = []
+    for p in patients_page:
+        # Generate hash id
+        h = hashlib.md5(p['patient_name'].encode()).hexdigest()
+        p['hash_id'] = f"{int(h, 16) % 10000:04d}"
+        
+        # Initials
+        name_parts = p['patient_name'].split()
+        p['initials'] = (name_parts[0][0] + (name_parts[-1][0] if len(name_parts) > 1 else "")) if name_parts else "P"
+        p['initials'] = p['initials'].upper()
+        
+        # Random but consistent color based on name
+        color_idx = int(h, 16) % len(bg_colors)
+        p['avatar_bg'] = bg_colors[color_idx]
+        p['avatar_color'] = text_colors[color_idx]
         
         # Check for history to determine New/Returning status
         has_history = Appointment.objects.filter(
@@ -738,18 +755,19 @@ def my_patients_view(request):
             status='completed'
         ).count() > 1
         
-        p['last_visit_status'] = "Returning" if has_history else "New"
-        
-        # Optionally, if you want the status (Scheduled/Completed)
+        # Optionally, get status of last appointment
         last_appt = Appointment.objects.filter(doctor=doctor, patient_name=p['patient_name'], appointment_date=p['last_visit']).first()
-        if last_appt and last_appt.status != 'completed':
-            p['last_visit_status'] = last_appt.status.title()
+        p['last_visit_status'] = last_appt.status.title() if last_appt else ("Returning" if has_history else "New")
+        
+        patients_list.append(p)
 
     return render(request, 'doctors/my_patients.html', {
         'doctor': doctor,
-        'patients': patients,
+        'patients': patients_page, # Page object for pagination
+        'patients_data': patients_list, # List for table
         'total_active': total_active,
-        'growth': round(growth, 1),
+        'total_patients': total_active, # Support both names
+        'monthly_growth': round(growth, 1),
         'completion_rate': round(completion_rate, 1),
         'start_date': start_date,
         'end_date': end_date,

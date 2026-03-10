@@ -1,1273 +1,486 @@
+{% extends 'doctors/doctor_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Doctor Dashboard</title>
+{% block title %}Availability Management - Reevana HMS{% endblock %}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block topbar_title %}Availability Management{% endblock %}
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
 
-    <!-- Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+{% block extra_css %}
+<style>
+    :root {
+        --primary-brown: #24437a;
+        --light-brown: #bfddfd;
+        --active-bg: #bfddfd;
+        --text-muted: #757575;
+    }
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    .scheduler-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        height: 100%;
+    }
 
-    <style>
-        body {
-            background-color: #f4ede5;
-        }
+    .scheduler-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--card-border);
+        background: #f8fafc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 12px 12px 0 0;
+    }
 
-        .mb-0 {
-            color: #1c4278;
-        }
+    .calendar-container {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+    }
 
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            background: #1c4278;
-            padding-top: 20px;
-        }
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 700;
+        text-align: center;
+        padding: 10px 0;
+        font-size: 0.75rem;
+        color: #718096;
+    }
 
-        .sidebar a {
-            padding: 15px 25px;
-            color: #ddd;
-            display: block;
-            text-decoration: none;
-            font-size: 16px;
-        }
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
 
-        .sidebar .active {
-            background: #f4ede5;
-            color: #1c4278;
-        }
+    .calendar-day {
+        aspect-ratio: 1;
+        border-right: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+        padding: 5px;
+        cursor: pointer;
+        position: relative;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
+    .calendar-day:nth-child(7n) {
+        border-right: none;
+    }
 
-        .sidebar a:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
+    .calendar-day:hover:not(.empty) {
+        background-color: #f7fafc;
+    }
 
-        .content {
-            margin-left: 270px;
-            padding: 20px;
-        }
+    .calendar-day.selected {
+        background-color: #ebf8ff;
+        color: #3182ce;
+        font-weight: 700;
+    }
 
-        .profile-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-        }
+    .calendar-day.scheduled {
+        background-color: #fffaf0;
+    }
 
-        .dashboard-card {
-            border-radius: 10px;
-            padding: 25px;
-            background: white;
-            transition: 0.2s;
-        }
+    .calendar-day.empty {
+        background-color: #f8f9fa;
+        cursor: default;
+    }
 
-        .dashboard-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+    .has-availability-indicator {
+        width: 6px;
+        height: 6px;
+        background-color: var(--primary-orange);
+        border-radius: 50%;
+        position: absolute;
+        bottom: 5px;
+    }
 
-        .appointment-list {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-        }
+    /* Clock Picker Styles Preserved */
+    .time-picker-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
 
-        /* Top Loading Bar */
-        #top-loading-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 4px;
-            background: #1c4278;
-            /* App brown color */
-            z-index: 99999;
-            transition: width 0.4s ease, opacity 0.4s ease;
-            width: 0%;
-            opacity: 1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-</head>
+    .time-picker-modal.show {
+        display: flex;
+    }
 
-<body>
-    <div id="top-loading-bar"></div>
+    .time-picker-card {
+        background: #fff;
+        border-radius: 16px;
+        width: 600px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
 
-    <!-- Sidebar -->
-    <div class="sidebar">
+    .time-display {
+        padding: 12px 16px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        font-weight: 600;
+        width: 100%;
+    }
 
+    .time-trigger {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--primary-orange);
+    }
 
-        <a href="{% url 'doctor_dashboard' %}"><i class="bi bi-grid-1x2 me-2"></i> Dashboard</a>
+    .clock-face {
+        width: 250px;
+        height: 250px;
+        background: #ebf8ff;
+        position: relative;
+        border-radius: 50%;
+        margin: auto;
+    }
 
+    .clock-center {
+        width: 10px;
+        height: 10px;
+        background: #2b6cb0;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+    }
 
-        <!-- Availability Management -->
-        <a href="{% url 'doctor_availability_list' %}" class="active"><i class="bi bi-calendar-month me-2"></i> Set
-            Monthly
-            Availability</a>
-        <a href="{% url 'my_patients' %}"><i class="bi bi-people me-2"></i> My Patients</a>
-        <a href="#"><i class="bi bi-file-medical me-2"></i> Patient Reports</a>
-        <a href="{% url 'doctor_profile_edit' %}"><i class="bi bi-person-lines-fill me-2"></i> Profile</a>
-        <a href="/logout/"><i class="bi bi-box-arrow-right me-2"></i> Logout</a>
+    .clock-hand {
+        position: absolute;
+        bottom: 50%;
+        left: 50%;
+        width: 3px;
+        height: 100px;
+        background: #2b6cb0;
+        transform-origin: bottom center;
+        z-index: 5;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateX(-50%) rotate(0deg);
+    }
+
+    .clock-hand-tip {
+        position: absolute;
+        top: -15px;
+        left: -19px;
+        width: 40px;
+        height: 40px;
+        background: #2b6cb0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .clock-number {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        line-height: 30px;
+        cursor: pointer;
+        font-weight: 700;
+        color: #4a5568;
+        font-size: 0.85rem;
+    }
+
+    .time-box {
+        background: #ebf8ff;
+        color: #2b6cb0;
+        font-size: 3rem;
+        padding: 10px 20px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 800;
+    }
+
+    .time-box.active {
+        background: #bee3f8;
+        color: #2c5282;
+    }
+
+    .btn-am,
+    .btn-pm {
+        border: none;
+        background: #f1f5f9;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .btn-am.active,
+    .btn-pm.active {
+        background: #ebf8ff;
+        color: #2b6cb0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="fw-800" style="letter-spacing: -1px;">Availability Management</h1>
+        <p class="text-muted">Plan your schedule and manage appointment slots.</p>
     </div>
+</div>
 
-
-
-    <!-- MAIN CONTENT -->
-
-
-
-    <div class="content">
-
-
-
-        {% load static %}
-
-        {% block content %}
-        <div class=" mt-4">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2><i class="bi bi-calendar-event"></i> Advanced Scheduler</h2>
-                            <p class="text-muted mb-0">Select specific dates and configure multiple time slots (e.g.,
-                                Morning &
-                                Evening).</p>
-                        </div>
-                        <a href="{% url 'doctor_profile_edit' %}"
-                            class="d-flex align-items-center text-decoration-none">
-                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
-                                style="width: 40px; height: 40px; font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                {% if request.user.doctorprofile.passport_photo %}
-                                <img src="{{ request.user.doctorprofile.passport_photo.url }}" alt="Profile"
-                                    style="width: 100%; height: 100%; object-fit: cover;">
-                                {% else %}
-                                {{ request.user.doctor.name|slice:":2"|upper }}
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <hr>
-                </div>
+<div class="row g-4">
+    <!-- Calendar Section -->
+    <div class="col-lg-4">
+        <div class="scheduler-card">
+            <div class="scheduler-header">
+                <h5 class="mb-0 fw-700">Select Dates</h5>
+                <input type="month" id="month-selector" class="form-control form-control-sm w-auto border-0 shadow-sm">
             </div>
-
-            <div class="row">
-                <!-- Calendar Column -->
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-header text-white d-flex justify-content-between align-items-center"
-                            style="color:#fff; background: #bfddfd; padding: 10px;border-radius: 8px;border-bottom: #bfddfd;">
-                            <h5 style="color: #1c4278;" class="mb-0"><i class="bi bi-calendar3"></i> Select Dates</h5>
-                            <div>
-                                <input type="month" id="month-selector" class="form-control form-control-sm"
-                                    style="max-width: 150px;">
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <!-- Calendar Controls -->
-                            <div class="mb-3 d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-secondary"
-                                    onclick="calendar.selectWeekdays()">Select
-                                    Weekdays</button>
-                                <button class="btn btn-sm btn-outline-secondary"
-                                    onclick="calendar.selectWeekends()">Select
-                                    Weekends</button>
-                                <button class="btn btn-sm btn-outline-secondary" onclick="calendar.selectAll()">Select
-                                    All</button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="calendar.clearSelection()">Clear
-                                    Selection</button>
-                            </div>
-
-                            <!-- Calendar Grid -->
-                            <div class="calendar-container">
-                                <div class="calendar-header">
-                                    <div>Mon</div>
-                                    <div>Tue</div>
-                                    <div>Wed</div>
-                                    <div>Thu</div>
-                                    <div>Fri</div>
-                                    <div>Sat</div>
-                                    <div>Sun</div>
-                                </div>
-                                <div id="calendar-grid" class="calendar-grid">
-                                    <!-- Days generated by JS -->
-                                </div>
-                            </div>
-
-                            <div class="mt-3">
-                                <small class="text-muted"><i class="bi bi-info-circle"></i> Click dates to
-                                    select/deselect.
-                                    Yellow dates are already scheduled.</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-sm btn-light fw-600 border"
+                        onclick="calendar.selectWeekdays()">Weekdays</button>
+                    <button class="btn btn-sm btn-light fw-600 border"
+                        onclick="calendar.selectWeekends()">Weekends</button>
+                    <button class="btn btn-sm btn-light fw-600 border text-danger"
+                        onclick="calendar.clearSelection()">Clear</button>
                 </div>
-
-                <!-- Configuration Column -->
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-header  text-white"
-                            style="color:#000;background: #bfddfd; padding: 10px;border-radius: 8px;border-bottom: #bfddfd;">
-                            <h5 class="mb-0"><i class="bi bi-clock"></i> Configure Schedule</h5>
-                        </div>
-                        <div class="card-body">
-                            <form id="schedule-form">
-                                {% csrf_token %}
-
-                                <div class="alert " id="selection-summary"
-                                    style="background:#f4ede5; color: #24437a; padding: 10px; border-radius: 8px; border-bottom: #6b3f21;">
-                                    No dates selected.
-                                </div>
-
-
-                                <div class="row ">
-                                    <div class="col-md-8 col-lg-12">
-                                        <h6 class="border-bottom pb-2 mb-4 text-brown">Time Slots</h6>
-
-                                        <div class="row g-4">
-                                            <div class="col-md-6">
-                                                <label class="small text-muted d-block mb-2">Start</label>
-                                                <div class="position-relative">
-                                                    <input type="text" class="form-control time-display" id="startTime"
-                                                        value="09:12 AM" readonly>
-                                                    <button type="button" class="time-trigger" data-target="start">
-                                                        <i class="fas fa-clock"></i>
-                                                    </button>
-                                                    <input type="hidden" name="start_time" id="startHidden"
-                                                        value="09:12">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="small text-muted d-block mb-2">End</label>
-                                                <div class="position-relative">
-                                                    <input type="text" class="form-control time-display" id="endTime"
-                                                        value="05:00 PM" readonly>
-                                                    <button type="button" class="time-trigger" data-target="end">
-                                                        <i class="fas fa-clock"></i>
-                                                    </button>
-                                                    <input type="hidden" name="end_time" id="endHidden" value="17:00">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- EXACT CLOCK PICKER FROM YOUR CODE -->
-                                <div id="timePickerModal" class="time-picker-modal">
-                                    <div class="time-picker-card">
-                                        <div class="header p-3 border-bottom">
-                                            <span class="text-uppercase small fw-bold text-muted"
-                                                id="header-label">Select Time</span>
-                                        </div>
-
-                                        <!-- Clock Picker View -->
-                                        <div id="clock-view" class="content1 d-flex p-4">
-                                            <div class="time-display-section d-flex flex-column  me-5">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="time-box hour-box active" id="display-hour">9</div>
-                                                    <div class="time-separator mx-2">:</div>
-                                                    <div class="time-box minute-box" id="display-minute">12</div>
-                                                </div>
-
-                                                <div class="am-pm-toggle d-flex border rounded">
-                                                    <button type="button" class="btn am-btn active btn-am">AM</button>
-                                                    <button type="button" class="btn pm-btn btn-pm">PM</button>
-                                                </div>
-                                            </div>
-
-                                            <div class="clock-face-section position-relative">
-                                                <div
-                                                    class="clock-face rounded-circle d-flex align-items-center justify-content-center">
-                                                    <div class="clock-center"></div>
-                                                    <div class="clock-hand" id="clock-hand">
-                                                        <div class="clock-hand-tip"></div>
-                                                    </div>
-                                                    <div id="clock-numbers"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="footer p-3 border-top text-end">
-                                            <button type="button" class="btn text-brown btn-text me-2" id="btn-cancel">
-                                                <i class="fas fa-times me-1"></i>CANCEL
-                                            </button>
-                                            <button type="button" class="btn text-brown fw-bold px-4" id="btn-ok">
-                                                <i class="fas fa-check me-1"></i>OK
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Add Split Shift Button Removed -->
-
-                                <div class="mb-4">
-                                    <label class="form-label">Slot Duration</label>
-                                    <select class="form-select" id="slot_duration">
-                                        <option value="15">15 minutes</option>
-                                        <option value="30" selected>30 minutes</option>
-                                        <option value="45">45 minutes</option>
-                                        <option value="60">60 minutes</option>
-                                    </select>
-                                </div>
-
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn  btn-lg"
-                                        style="background:#24437a;color: #fff;padding: 10px;    font-size: 15px; border-radius: 8px;width: 100%;border-bottom: #6b3f21;">
-                                        <i class="bi bi-check-circle"></i> Apply Schedule
-                                    </button>
-
-                                </div>
-                            </form>
-                        </div>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                        <div>Sun</div>
                     </div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
                 </div>
-
-
-
-                <!-- khushi-->
-                <style>
-                    :root {
-                        --primary-brown: #24437a;
-                        --light-brown: #bfddfd;
-                        --active-bg: #bfddfd;
-                        --text-muted: #757575;
-                    }
-
-                    .footer .btn {
-                        padding: 8px 24px;
-                        margin-left: 8px;
-                        border-radius: 6px;
-                        font-weight: 500;
-                        transition: all 0.2s;
-                    }
-
-                    .footer .btn:hover {
-                        transform: translateY(-1px);
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                    }
-
-                    .time-picker-card {
-                        background: #fff;
-                        border-radius: 8px;
-                        width: 640px;
-                        overflow: hidden;
-                        transition: width 0.3s ease;
-                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                    }
-
-                    .time-box {
-                        background: #bfddfd !important;
-                        color: var(--primary-brown);
-                        font-size: 4rem;
-                        padding: 10px 20px;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        min-width: 100px;
-                        text-align: center;
-                        line-height: 1;
-                    }
-
-                    .time-box.active {
-                        background: #F5EBE4;
-                    }
-
-                    .minute-box {
-                        background: #E8E2DE;
-                        color: #333;
-                    }
-
-                    .time-separator {
-                        font-size: 3rem;
-                        font-weight: bold;
-                    }
-
-                    .am-pm-toggle {
-                        overflow: hidden;
-                    }
-
-                    .am-pm-toggle .btn {
-                        flex: 1;
-                        border: none;
-                        border-radius: 0;
-                        padding: 12px;
-                        font-weight: 500;
-                        color: var(--text-muted);
-                    }
-
-                    .am-pm-toggle .btn.active {
-                        background: var(--active-bg);
-                        color: var(--primary-brown);
-                    }
-
-                    .clock-face {
-                        width: 250px;
-                        height: 250px;
-                        background: #c3ddfe;
-                        position: relative;
-                        border-radius: 50%;
-                        margin: auto;
-                    }
-
-                    .clock-center {
-                        width: 8px;
-                        height: 8px;
-                        background: var(--primary-brown);
-                        border-radius: 50%;
-                        z-index: 10;
-                    }
-
-                    .clock-hand {
-                        position: absolute;
-                        bottom: 50%;
-                        left: 50%;
-                        width: 2px;
-                        height: 105px;
-                        background: var(--primary-brown);
-                        transform-origin: bottom center;
-                        z-index: 5;
-                        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    }
-
-                    .clock-hand.no-transition {
-                        transition: none !important;
-                    }
-
-                    .clock-hand-tip {
-                        position: absolute;
-                        top: -15px;
-                        left: -19px;
-                        width: 40px;
-                        height: 40px;
-                        background: var(--primary-brown);
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: white;
-                        font-weight: 600;
-                        font-size: 1rem;
-                        transform: rotate(0deg);
-                    }
-
-                    .clock-hand-tip::after {
-                        content: '';
-                        display: none;
-                        position: absolute;
-                        width: 4px;
-                        height: 4px;
-                        background: white;
-                        border-radius: 50%;
-                        bottom: 5px;
-                    }
-
-                    .clock-tick {
-                        position: absolute;
-                        width: 2px;
-                        display: none;
-                        height: 2px;
-                        background: #BDBDBD;
-                        border-radius: 50%;
-                        z-index: 4;
-                    }
-
-                    .clock-tick.major {
-                        width: 4px;
-                        height: 4px;
-                        background: #9E9E9E;
-                    }
-
-                    .clock-number {
-                        position: absolute;
-                        width: 30px;
-                        height: 30px;
-                        text-align: center;
-                        line-height: 30px;
-                        cursor: pointer;
-                        font-weight: 600;
-                        font-size: 1rem;
-                        color: #333;
-
-                    }
-
-                    .clock-number.active {
-                        color: white;
-                    }
-
-                    .time-picker-modal {
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100vw;
-                        height: 100vh;
-                        background: rgba(0, 0, 0, 0.5);
-                        z-index: 9999;
-                        display: none;
-                        align-items: center;
-                        justify-content: center;
-                    }
-
-                    .time-picker-modal.show {
-                        display: flex;
-                    }
-
-                    .time-display {
-                        padding-right: 50px !important;
-                        background: #f8f9fa;
-                        border-radius: 10px;
-                        cursor: pointer;
-                    }
-
-                    .time-trigger {
-                        position: absolute;
-                        right: 12px;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        background: none;
-                        border: none;
-                        color: #24437a;
-                        font-size: 1.2rem;
-                    }
-                </style>
-
-
-                <script>
-                    class ClockPicker {
-                        constructor() {
-                            this.currentMode = 'hour';
-                            this.selectedHour = 9;
-                            this.selectedMinute = 12;
-                            this.isAm = true;
-                            this.isDragging = false;
-                            this.targetInput = null;
-                            this.targetHidden = null;
-
-                            this.init();
-                        }
-
-                        init() {
-                            this.bindTriggers();
-                            this.bindClockEvents();
-                        }
-
-                        bindTriggers() {
-                            document.querySelectorAll('.time-trigger').forEach(btn => {
-                                btn.addEventListener('click', (e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-
-                                    this.targetInput = btn.parentNode.querySelector('.time-display');
-                                    this.targetHidden = this.targetInput.nextElementSibling;
-
-                                    this.parseCurrentTime();
-                                    this.openPicker();
-                                });
-                            });
-                        }
-
-                        parseCurrentTime() {
-                            if (this.targetInput.value) {
-                                const [time, period] = this.targetInput.value.split(' ');
-                                const [h, m] = time.split(':');
-                                this.selectedHour = parseInt(h) || 12;
-                                this.selectedMinute = parseInt(m) || 0;
-                                this.isAm = period === 'AM';
-                            }
-                        }
-
-                        openPicker() {
-                            const modal = document.getElementById('timePickerModal');
-                            modal.classList.add('show');
-                            this.renderNumbers();
-                            this.updateDisplay();
-                            this.updateHand();
-                        }
-
-                        closePicker() {
-                            document.getElementById('timePickerModal').classList.remove('show');
-                        }
-
-                        bindClockEvents() {
-                            // Modal controls
-                            document.getElementById('btn-cancel').onclick = () => this.closePicker();
-                            document.getElementById('btn-ok').onclick = () => this.confirmSelection();
-                            document.getElementById('timePickerModal').onclick = (e) => {
-                                if (e.target.id === 'timePickerModal') {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    this.closePicker();
-                                }
-                            };
-
-                            // AM/PM - Single event delegation to prevent race conditions
-                            document.querySelector('.am-pm-toggle').addEventListener('click', (e) => {
-                                if (e.target.classList.contains('btn-am')) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    this.isAm = true;
-                                    e.target.classList.add('active');
-                                    document.querySelector('.btn-pm').classList.remove('active');
-                                } else if (e.target.classList.contains('btn-pm')) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    this.isAm = false;
-                                    e.target.classList.add('active');
-                                    document.querySelector('.btn-am').classList.remove('active');
-                                }
-                            });
-
-                            // Hour/Minute click
-                            document.getElementById('display-hour').onclick = (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                this.currentMode = 'hour';
-                                this.renderNumbers();
-                                this.updateDisplay();
-                                this.updateHand();
-                            };
-
-                            document.getElementById('display-minute').onclick = (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                this.currentMode = 'minute';
-                                this.renderNumbers();
-                                this.updateDisplay();
-                                this.updateHand();
-                            };
-
-                            this.setupDragging();
-                        }
-
-                        setupDragging() {
-                            const clockFace = document.querySelector('.clock-face');
-                            const clockHand = document.getElementById('clock-hand');
-
-                            const handleMove = (e) => {
-                                if (!this.isDragging) return;
-                                e.preventDefault();
-
-                                const rect = clockFace.getBoundingClientRect();
-                                const centerX = rect.left + rect.width / 2;
-                                const centerY = rect.top + rect.height / 2;
-
-                                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-                                // Validate click is within clock face bounds
-                                const distance = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
-                                if (distance > rect.width / 2) return; // Ignore clicks outside clock face
-
-                                const dx = clientX - centerX;
-                                const dy = clientY - centerY;
-
-                                let angle = Math.atan2(dx, -dy) * (180 / Math.PI);
-                                if (angle < 0) angle += 360;
-
-                                const total = this.currentMode === 'hour' ? 12 : 60;
-                                let val = Math.round((angle / 360) * total);
-
-                                if (this.currentMode === 'hour') {
-                                    if (val === 0) val = 12;
-                                    this.selectedHour = val;
-                                } else {
-                                    if (val === 60) val = 0;
-                                    this.selectedMinute = val;
-                                }
-
-                                this.updateDisplay();
-                                this.updateHand();
-                            };
-
-                            const startDragging = (e) => {
-                                this.isDragging = true;
-                                clockHand.classList.add('no-transition');
-                                handleMove(e);
-                            };
-
-                            const stopDragging = () => {
-                                if (this.isDragging) {
-                                    clockHand.classList.remove('no-transition');
-                                    if (this.currentMode === 'hour') {
-                                        this.currentMode = 'minute';
-                                        this.renderNumbers();
-                                    }
-                                }
-                                this.isDragging = false;
-                            };
-
-                            // Mouse events
-                            clockFace.addEventListener('mousedown', startDragging);
-                            document.addEventListener('mousemove', handleMove);
-                            document.addEventListener('mouseup', stopDragging);
-
-                            // Touch events
-                            clockFace.addEventListener('touchstart', startDragging, { passive: false });
-                            document.addEventListener('touchmove', handleMove, { passive: false });
-                            document.addEventListener('touchend', stopDragging);
-                        }
-
-                        renderNumbers() {
-                            const clockNumbers = document.getElementById('clock-numbers');
-                            clockNumbers.innerHTML = '';
-                            const radius = 105;
-
-                            if (this.currentMode === 'minute') {
-                                for (let i = 0; i < 60; i++) {
-                                    const angle = (i * 6) * (Math.PI / 180);
-                                    const x = 125 + radius * Math.sin(angle) - 1;
-                                    const y = 125 - radius * Math.cos(angle) - 1;
-
-                                    const tick = document.createElement('div');
-                                    tick.className = `clock-tick ${i % 5 === 0 ? 'major' : ''}`;
-                                    tick.style.left = `${x}px`;
-                                    tick.style.top = `${y}px`;
-                                    clockNumbers.appendChild(tick);
-                                }
-                            }
-
-                            for (let i = 1; i <= 12; i++) {
-                                const val = this.currentMode === 'hour' ? i : (i * 5) % 60;
-                                const displayVal = (this.currentMode === 'minute' && val === 0) ? '00' : val;
-
-                                const angle = (i * 30) * (Math.PI / 180);
-                                const x = 125 + radius * Math.sin(angle) - 15;
-                                const y = 125 - radius * Math.cos(angle) - 15;
-
-                                const numDiv = document.createElement('div');
-                                numDiv.className = 'clock-number';
-                                numDiv.style.left = `${x}px`;
-                                numDiv.style.top = `${y}px`;
-                                numDiv.textContent = displayVal;
-
-                                numDiv.addEventListener('click', (e) => {
-                                    e.stopPropagation();
-                                    if (this.currentMode === 'hour') {
-                                        this.selectedHour = val;
-                                        this.currentMode = 'minute';
-                                        this.renderNumbers();
-                                    } else {
-                                        this.selectedMinute = val;
-                                    }
-                                    this.updateDisplay();
-                                    this.updateHand();
-                                });
-
-                                clockNumbers.appendChild(numDiv);
-                            }
-                        }
-
-                        updateDisplay() {
-                            document.getElementById('display-hour').textContent = this.selectedHour;
-                            document.getElementById('display-minute').textContent =
-                                this.selectedMinute.toString().padStart(2, '0');
-
-                            if (this.currentMode === 'hour') {
-                                document.getElementById('display-hour').classList.add('active');
-                                document.getElementById('display-minute').classList.remove('active');
-                            } else {
-                                document.getElementById('display-hour').classList.remove('active');
-                                document.getElementById('display-minute').classList.add('active');
-                            }
-                        }
-
-                        updateHand() {
-                            const val = this.currentMode === 'hour' ? this.selectedHour : this.selectedMinute;
-                            const total = this.currentMode === 'hour' ? 12 : 60;
-                            const angle = (val / total) * 360;
-
-                            const clockHand = document.getElementById('clock-hand');
-                            clockHand.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-
-                            const tip = clockHand.querySelector('.clock-hand-tip');
-                            tip.textContent = this.currentMode === 'hour' ?
-                                this.selectedHour : this.selectedMinute.toString().padStart(2, '0');
-                            tip.style.transform = `rotate(${-angle}deg)`;
-                        }
-
-                        confirmSelection() {
-                            const displayHour = this.selectedHour === 12 && !this.isAm ? 12 : this.selectedHour;
-                            const displayTime = `${displayHour.toString().padStart(2, '0')}:${this.selectedMinute.toString().padStart(2, '0')} ${this.isAm ? 'AM' : 'PM'}`;
-
-                            const hour24 = this.selectedHour === 12 ?
-                                (this.isAm ? 0 : 12) :
-                                (this.isAm ? this.selectedHour : this.selectedHour + 12);
-                            const formTime = `${hour24.toString().padStart(2, '0')}:${this.selectedMinute.toString().padStart(2, '0')}`;
-
-                            this.targetInput.value = displayTime;
-                            this.targetHidden.value = formTime;
-
-                            this.closePicker();
-                        }
-                    }
-
-                    // Initialize
-                    document.addEventListener('DOMContentLoaded', () => {
-                        new ClockPicker();
-                    });
-                </script>
-
-                <!-- khushi-->
-
-
-
-
-
-
-
-
-
-                <!-- Availability List Column -->
-                <div class="col-md-4">
-                    <div class="card-header  text-white"
-                        style="color:#000;background: #bfddfd; padding: 10px;border-radius: 8px;border-bottom: #bfddfd;">
-                        <h5 class="mb-0"><i class="bi bi-clock"></i> My Availability</h5>
-                    </div>
-                    <div class="card">
-                        <div class="card-body  my-availability-scroll">
-                            {% if availabilities %}
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Time Slot</th>
-                                            <th>Slot Duration</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for slot in availabilities %}
-                                        <tr>
-                                            <td>
-                                                <i class="bi bi-calendar"></i> {{ slot.date|date:"M d, Y" }}
-                                            </td>
-                                            <td>
-                                                <span class="badge"
-                                                    style="color:#fff;background: #1c4278; padding:10px;border-radius: 8px;border-bottom: #1c4278;">
-                                                    {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
-                                                </span>
-                                            </td>
-                                            <td>{{ slot.slot_duration }} mins</td>
-                                            <td>
-                                                <form method="post" action="{% url 'delete_availability' slot.id %}"
-                                                    onsubmit="handleDeleteConfirm(event, '{% url 'delete_availability' slot.id %}')"
-                                                    style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                        title="Delete">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
-                            <div class="text-center py-5">
-                                <p class="text-muted mb-3"><i class="bi bi-calendar-x display-4"></i></p>
-                                <p class="lead">No availability scheduled yet.</p>
-
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-
-
             </div>
         </div>
+    </div>
 
-        <style>
-            .calendar-container {
-                border: 1px solid #dee2e6;
-                border-radius: 0.25rem;
+    <!-- Time Config Section -->
+    <div class="col-lg-4">
+        <div class="scheduler-card">
+            <div class="scheduler-header">
+                <h5 class="mb-0 fw-700">Time Configuration</h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="schedule-form">
+                    {% csrf_token %}
+                    <div class="alert mb-4 text-center py-2 fw-700" id="selection-summary"
+                        style="background:#f7fafc; color:#718096; border:0; border-radius:10px;">
+                        No dates selected.
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <label class="form-label small fw-700 text-muted text-uppercase">Start Time</label>
+                            <div class="position-relative">
+                                <input type="text" class="form-control time-display" id="startTime" value="09:00 AM"
+                                    readonly>
+                                <button type="button" class="time-trigger" data-target="start"><i
+                                        class="fas fa-clock"></i></button>
+                                <input type="hidden" name="start_time" id="startHidden" value="09:00">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-700 text-muted text-uppercase">End Time</label>
+                            <div class="position-relative">
+                                <input type="text" class="form-control time-display" id="endTime" value="05:00 PM"
+                                    readonly>
+                                <button type="button" class="time-trigger" data-target="end"><i
+                                        class="fas fa-clock"></i></button>
+                                <input type="hidden" name="end_time" id="endHidden" value="17:00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-700 text-muted text-uppercase">Slot Duration</label>
+                        <select class="form-select border-0 bg-light py-2" id="slot_duration">
+                            <option value="15">15 mins</option>
+                            <option value="30" selected>30 mins</option>
+                            <option value="45">45 mins</option>
+                            <option value="60">60 mins</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-700"
+                        style="background: var(--primary-orange); border:none;">
+                        Apply Schedule
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Slots Section -->
+    <div class="col-lg-4">
+        <div class="scheduler-card">
+            <div class="scheduler-header">
+                <h5 class="mb-0 fw-700">Scheduled Slots</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if availabilities %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr class="small fw-700 text-muted text-uppercase">
+                                <th class="ps-4 py-3">Date</th>
+                                <th class="py-3">Range</th>
+                                <th class="text-end pe-4 py-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for slot in availabilities %}
+                            <tr>
+                                <td class="ps-4 py-3 fw-700 text-dark">{{ slot.date|date:"M d" }}</td>
+                                <td class="py-3"><span class="badge bg-light text-dark border-0 fw-600 px-2 py-2">{{
+                                        slot.start_time|time:"H:i" }}-{{ slot.end_time|time:"H:i" }}</span></td>
+                                <td class="text-end pe-4 py-3">
+                                    <form method="post" action="{% url 'delete_availability' slot.id %}"
+                                        onsubmit="return confirm('Delete this slot?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm text-danger p-0"><i
+                                                class="bi bi-trash3"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-5 text-center">
+                    <i class="bi bi-calendar-x display-4 text-light mb-2 d-block"></i>
+                    <p class="text-muted small">No availability set.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clock Picker Modal -->
+<div id="timePickerModal" class="time-picker-modal">
+    <div class="time-picker-card">
+        <div class="p-4 d-flex justify-content-between align-items-center border-bottom bg-light">
+            <h6 class="mb-0 fw-800 text-dark">Select Time</h6>
+            <div class="am-pm-toggle d-flex rounded border bg-white overflow-hidden">
+                <button class="btn btn-sm btn-am active py-2 px-3 fw-700">AM</button>
+                <button class="btn btn-sm btn-pm py-2 px-3 fw-700">PM</button>
+            </div>
+        </div>
+        <div class="p-4 d-flex align-items-center justify-content-center gap-5">
+            <div class="text-center">
+                <div class="d-flex align-items-center justify-content-center">
+                    <div class="time-box active" id="display-hour">9</div>
+                    <div class="h2 mx-2 mb-0 fw-800">:</div>
+                    <div class="time-box" id="display-minute">00</div>
+                </div>
+            </div>
+            <div class="clock-face">
+                <div class="clock-center"></div>
+                <div class="clock-hand" id="clock-hand">
+                    <div class="clock-hand-tip"></div>
+                </div>
+                <div id="clock-numbers"></div>
+            </div>
+        </div>
+        <div class="p-3 border-top text-end bg-light">
+            <button class="btn btn-link text-muted fw-700 me-2 text-decoration-none" id="btn-cancel">Cancel</button>
+            <button class="btn btn-primary fw-700 px-4" id="btn-ok"
+                style="background:var(--primary-orange); border:none;">Confirm</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- Calendar Logic ---
+    const calendar = {
+        currentMonth: new Date(),
+        selectedDates: new Set(),
+        scheduledDates: new Set(),
+
+        init() {
+            const today = new Date();
+            this.currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            document.getElementById('month-selector').value = `${this.currentMonth.getFullYear()}-${String(this.currentMonth.getMonth() + 1).padStart(2, '0')}`;
+            this.fetchAvailability();
+
+            document.getElementById('month-selector').addEventListener('change', (e) => {
+                const [y, m] = e.target.value.split('-');
+                this.currentMonth = new Date(parseInt(y), parseInt(m) - 1, 1);
+                this.selectedDates.clear();
+                this.fetchAvailability();
+                updateSelectionSummary();
+            });
+        },
+
+        fetchAvailability() {
+            const year = this.currentMonth.getFullYear();
+            const month = this.currentMonth.getMonth() + 1;
+            fetch(`{% url 'get_booked_dates' %}?year=${year}&month=${month}`)
+                .then(res => res.json())
+                .then(data => {
+                    this.scheduledDates = new Set(data.dates || []);
+                    this.render();
+                });
+        },
+
+        render() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            const year = this.currentMonth.getFullYear();
+            const month = this.currentMonth.getMonth();
+            const firstDay = new Date(year, month, 1);
+            let startDay = firstDay.getDay() - 1; if (startDay === -1) startDay = 6;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < startDay; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day empty';
+                grid.appendChild(cell);
             }
 
-            /* Scrollbar for availability list */
-            .my-availability-scroll {
-                max-height: 520px;
-                /* vertical scroll */
-                overflow-y: auto;
-                /* right scrollbar */
-                overflow-x: auto;
-                /* bottom scrollbar */
-            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day';
+                if (this.scheduledDates.has(dateStr)) cell.classList.add('scheduled');
+                if (this.selectedDates.has(dateStr)) cell.classList.add('selected');
 
-            /* Keep table wide for horizontal scroll */
-            .my-availability-scroll table {
-                min-width: 700px;
-            }
-
-            /* Sticky table header (optional but recommended) */
-            .my-availability-scroll thead th {
-                position: sticky;
-                top: 0;
-                background: #fff;
-                z-index: 2;
-            }
-
-            .calendar-header {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-                background: #f8f9fa;
-                border-bottom: 1px solid #dee2e6;
-                font-weight: bold;
-                text-align: center;
-                padding: 5px 0;
-            }
-
-            .calendar-grid {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-            }
-
-            .calendar-day {
-                aspect-ratio: 1;
-                border-right: 1px solid #dee2e6;
-                border-bottom: 1px solid #dee2e6;
-                padding: 5px;
-                cursor: pointer;
-                position: relative;
-                transition: background-color 0.2s;
-            }
-
-            .calendar-day:nth-child(7n) {
-                border-right: none;
-            }
-
-            .calendar-day:hover {
-                background-color: #e9ecef;
-            }
-
-            .calendar-day.selected {
-                background-color: #cfe2ff;
-                /* Bootstrap primary-subtle */
-                border-color: #b6d4fe;
-            }
-
-            .calendar-day.scheduled {
-                background-color: #f8d8ad;
-                /* Bootstrap warning-subtle */
-                border-color: #f8d8ad;
-            }
-
-            .calendar-day.selected.scheduled {
-                background-color: #cff4fc;
-                /* Mixed state */
-                border-color: #b6effb;
-            }
-
-            .calendar-day.empty {
-                background-color: #f8f9fa;
-                cursor: default;
-            }
-
-            .day-number {
-                font-weight: bold;
-            }
-
-            .has-availability-indicator {
-                width: 8px;
-                height: 8px;
-                background-color: #1c4278;
-                border-radius: 50%;
-                position: absolute;
-                bottom: 5px;
-                right: 5px;
-            }
-
-            /* Custom Toast Styles */
-            .custom-toast-success {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, #28a745, #20c997);
-                color: white;
-                padding: 16px 24px;
-                border-radius: 12px;
-                box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
-                z-index: 9999;
-                animation: slideInRight 0.3s ease-out;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                font-weight: 500;
-                max-width: 400px;
-                font-size: 14px;
-            }
-
-            .custom-toast-success::before {
-                content: '✓';
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: 24px;
-                height: 24px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 50%;
-                font-weight: bold;
-                flex-shrink: 0;
-            }
-
-            .custom-toast-error {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, #dc3545, #fd7e14);
-                color: white;
-                padding: 16px 24px;
-                border-radius: 12px;
-                box-shadow: 0 8px 32px rgba(220, 53, 69, 0.3);
-                z-index: 9999;
-                animation: slideInRight 0.3s ease-out;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                font-weight: 500;
-                max-width: 400px;
-                font-size: 14px;
-            }
-
-            .custom-toast-error::before {
-                content: '✕';
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: 24px;
-                height: 24px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 50%;
-                font-weight: bold;
-                flex-shrink: 0;
-            }
-
-            @keyframes slideInRight {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-
-            @keyframes slideOutRight {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-
-            /* Modal Toast Styles */
-            .custom-toast-modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.6);
-                backdrop-filter: blur(5px);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                animation: modalFadeIn 0.3s ease-out;
-            }
-
-            .custom-toast-modal-content {
-                background: white;
-                padding: 32px;
-                border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-                max-width: 500px;
-                text-align: center;
-                animation: modalContentFadeIn 0.3s ease-out;
-                margin: 20px;
-            }
-
-            .custom-toast-modal-icon {
-                width: 60px;
-                height: 60px;
-                background: #fff3cd;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 0 auto 20px;
-                font-size: 24px;
-                color: #856404;
-            }
-
-            .custom-toast-modal-title {
-                font-size: 18px;
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 12px;
-            }
-
-            .custom-toast-modal-message {
-                color: #666;
-                line-height: 1.6;
-                margin-bottom: 24px;
-                white-space: pre-line;
-            }
-
-            .custom-toast-modal-btn {
-                color: white;
-                border: none;
-                padding: 12px 32px;
-                border-radius: 8px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: background 0.2s;
-            }
-
-            .custom-toast-modal-btn:hover {
-                opacity: 0.9;
-            }
-
-            @keyframes modalFadeIn {
-                from {
-                    opacity: 0;
-                }
-
-                to {
-                    opacity: 1;
-                }
-            }
-
-            @keyframes modalContentFadeIn {
-                from {
-                    transform: scale(0.9);
-                    opacity: 0;
-                }
-
-                to {
-                    transform: scale(1);
-                    opacity: 1;
-                }
-            }
-
-            @keyframes modalFadeOut {
-                from {
-                    opacity: 1;
-                }
-
-                to {
-                    opacity: 0;
-                }
-            }
-        </style>
-
-        <script>
-            // --- Calendar Logic ---
-            const calendar = {
-                currentMonth: new Date(),
-                selectedDates: new Set(),
-                scheduledDates: new Set(),
-
-                init() {
-                    const today = new Date();
-                    this.currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-                    // Set month selector to current month
-                    const yearStr = this.currentMonth.getFullYear();
-                    const monthStr = String(this.currentMonth.getMonth() + 1).padStart(2, '0');
-                    document.getElementById('month-selector').value = `${yearStr}-${monthStr}`;
-                    document.getElementById('month-selector').min = `${yearStr}-${monthStr}`;
-
-                    this.fetchAvailability();
-
-                    // Event listener for month change
-                    document.getElementById('month-selector').addEventListener('change', (e) => {
-                        const [y, m] = e.target.value.split('-');
-                        this.currentMonth = new Date(parseInt(y), parseInt(m) - 1, 1);
-                        this.selectedDates.clear();
-                        this.fetchAvailability();
-                        updateSelectionSummary();
-                    });
-                },
-
-                fetchAvailability() {
-                    const year = this.currentMonth.getFullYear();
-                    const month = this.currentMonth.getMonth() + 1;
-
-                    fetch(`{% url 'get_booked_dates' %}?year=${year}&month=${month}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            this.scheduledDates = new Set(data.dates || []);
-                            this.render();
-                        })
-                        .catch(err => {
-                            console.error('Error fetching availability:', err);
-                            this.scheduledDates.clear();
-                            this.render();
-                        });
-                },
-
-                render() {
-                    const grid = document.getElementById('calendar-grid');
-                    grid.innerHTML = '';
-
-                    const year = this.currentMonth.getFullYear();
-                    const month = this.currentMonth.getMonth();
-
-                    const firstDay = new Date(year, month, 1);
-                    let startDay = firstDay.getDay() - 1;
-                    if (startDay === -1) startDay = 6;
-
-                    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                    // Empty cells
-                    for (let i = 0; i < startDay; i++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'calendar-day empty';
-                        grid.appendChild(cell);
-                    }
-
-                    // Days
-                    for (let d = 1; d <= daysInMonth; d++) {
-                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                        const cell = document.createElement('div');
-                        cell.className = 'calendar-day';
-                        cell.dataset.date = dateStr;
-
-                        let html = `<div class="day-number">${d}</div>`;
-
-                        if (this.scheduledDates.has(dateStr)) {
-                            cell.classList.add('scheduled');
-                            html += `<div class="has-availability-indicator"></div>`;
-                        }
-
-                        if (this.selectedDates.has(dateStr)) {
-                            cell.classList.add('selected');
-                        }
-
-                        cell.innerHTML = html;
-                        cell.addEventListener('click', () => this.toggleDate(dateStr, cell));
-                        grid.appendChild(cell);
-                    }
-                },
-
-                toggleDate(dateStr, cell) {
+                cell.innerHTML = `<span>${d}</span>${this.scheduledDates.has(dateStr) ? '<div class="has-availability-indicator"></div>' : ''}`;
+                cell.onclick = () => {
                     if (this.selectedDates.has(dateStr)) {
                         this.selectedDates.delete(dateStr);
                         cell.classList.remove('selected');
@@ -1276,342 +489,178 @@
                         cell.classList.add('selected');
                     }
                     updateSelectionSummary();
-                },
-
-                selectWeekdays() {
-                    this.massSelect(d => d !== 0 && d !== 6);
-                },
-                selectWeekends() {
-                    this.massSelect(d => d === 0 || d === 6);
-                },
-                selectAll() {
-                    this.massSelect(() => true);
-                },
-                massSelect(conditionFn) {
-                    const year = this.currentMonth.getFullYear();
-                    const month = this.currentMonth.getMonth();
-                    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-                    for (let d = 1; d <= daysInMonth; d++) {
-                        const date = new Date(year, month, d);
-                        if (conditionFn(date.getDay())) {
-                            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                            this.selectedDates.add(dateStr);
-                        }
-                    }
-                    this.render();
-                    updateSelectionSummary();
-                },
-                clearSelection() {
-                    this.selectedDates.clear();
-                    this.render();
-                    updateSelectionSummary();
-                }
-            };
-
-            // --- Slots Logic ---
-            const slotsManager = {
-                container: document.getElementById('slots-container'),
-
-                addSlot() {
-                    const div = document.createElement('div');
-                    div.className = 'slot-row row mb-2 g-2';
-                    div.innerHTML = `
-               
-            `;
-                    this.container.appendChild(div);
-                    this.updateButtons();
-                },
-
-                removeSlot(btn) {
-                    btn.closest('.slot-row').remove();
-                    this.updateButtons();
-                },
-
-                updateButtons() {
-                    const rows = this.container.querySelectorAll('.slot-row');
-                    const btns = this.container.querySelectorAll('.btn-outline-danger');
-
-                    if (rows.length === 1) {
-                        btns[0].disabled = true;
-                    } else {
-                        btns.forEach(b => b.disabled = false);
-                    }
-                }
-            };
-
-            function updateSelectionSummary() {
-                const count = calendar.selectedDates.size;
-                const el = document.getElementById('selection-summary');
-                if (count === 0) {
-                    el.textContent = 'No dates selected.';
-                    el.className = 'alert alert-info';
-                } else {
-                    el.textContent = `${count} date(s) selected.`;
-                    el.className = 'alert alert-success fw-bold';
-                }
-            }
-
-            // --- Form Submission ---
-            document.getElementById('schedule-form').addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                if (calendar.selectedDates.size === 0) {
-                    CustomToast.confirm('Please click on updates in the calendar to SELECT them (they will turn blue).\n\nYellow dates are just showing what is already scheduled.\nBlue dates are the ones you are about to change.', () => { });
-                    return;
-                }
-
-                const slots = [];
-                // Fixed for Fancy Picker: grab single slot from hidden IDs
-                const startVal = document.getElementById('startHidden').value;
-                const endVal = document.getElementById('endHidden').value;
-
-                if (startVal && endVal) {
-                    slots.push({
-                        start_time: startVal,
-                        end_time: endVal
-                    });
-                }
-
-                const data = {
-                    dates: Array.from(calendar.selectedDates),
-                    slots: slots,
-                    duration: document.getElementById('slot_duration').value
                 };
-
-                fetch('{% url "monthly_availability" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => response.json())
-                    .then(result => {
-                        console.log('DEBUG: Success handler reached');
-                        console.log('DEBUG: Result:', result);
-
-                        if (result.success) {
-                            console.log('DEBUG: Success condition met');
-                            CustomToast.success(result.message);
-                            calendar.clearSelection();
-                            calendar.fetchAvailability(); // Refresh highlights
-
-                            // Immediate page reload after 3.5 seconds
-                            setTimeout(() => {
-                                console.log('DEBUG: Executing page reload...');
-                                window.location.reload(true); // true parameter bypasses cache
-                            }, 1000);
-                        } else {
-                            console.log('DEBUG: Error condition triggered');
-                            CustomToast.error('Error: ' + result.error);
-                        }
-                    })
-                    .catch(err => {
-                        console.error('DEBUG: Fetch error occurred:', err);
-                        CustomToast.error('An error occurred.');
-                    });
-            });
-
-            // Initialize
-            document.addEventListener('DOMContentLoaded', () => {
-                calendar.init();
-
-                // Display Django messages as custom toasts
-                {% if messages %}
-                {% for message in messages %}
-                {% if message.tags == 'success' %}
-                CustomToast.success('{{ message|escapejs }}');
-                {% elif message.tags == 'error' %}
-                CustomToast.error('{{ message|escapejs }}');
-                {% endif %}
-                {% endfor %}
-                {% endif %}
-
-                // Listen for cross-tab availability updates
-                window.addEventListener('storage', (e) => {
-                    if (e.key === 'availability_updated') {
-                        refreshAvailabilityList();
-                    }
-                });
-            });
-
-            // Function to refresh availability list data
-            function refreshAvailabilityList() {
-                fetch(window.location.href)
-                    .then(response => response.text())
-                    .then(html => {
-                        // Parse the HTML and extract the new table body
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const newTableBody = doc.querySelector('.table tbody');
-
-                        // Update the current table body with fresh data
-                        const currentTableBody = document.querySelector('.table tbody');
-                        if (newTableBody && currentTableBody) {
-                            currentTableBody.innerHTML = newTableBody.innerHTML;
-                        }
-                    })
-                    .catch(err => console.error('Error refreshing availability:', err));
+                grid.appendChild(cell);
             }
+        },
 
-            // Custom Toast System
-            class CustomToast {
-                static success(message) {
-                    const toast = document.createElement('div');
-                    toast.className = 'custom-toast-success';
-                    toast.textContent = message;
-                    document.body.appendChild(toast);
-
-                    // Auto-close after 3 seconds
-                    setTimeout(() => {
-                        toast.style.animation = 'slideOutRight 0.3s ease-out';
-                        setTimeout(() => toast.remove(), 300);
-                    }, 3000);
-                }
-
-                static error(message) {
-                    const toast = document.createElement('div');
-                    toast.className = 'custom-toast-error';
-                    toast.textContent = message;
-                    document.body.appendChild(toast);
-
-                    // Auto-close after 5 seconds for errors
-                    setTimeout(() => {
-                        toast.style.animation = 'slideOutRight 0.3s ease-out';
-                        setTimeout(() => toast.remove(), 300);
-                    }, 5000);
-                }
-
-                static confirm(message, onConfirm) {
-                    const modal = document.createElement('div');
-                    modal.className = 'custom-toast-modal';
-                    modal.innerHTML = `
-                        <div class="custom-toast-modal-content">
-                            <div class="custom-toast-modal-icon">?</div>
-                            <div class="custom-toast-modal-title">Confirm Action</div>
-                            <div class="custom-toast-modal-message">${message}</div>
-                            <div style="display: flex; gap: 12px; justify-content: center;">
-                                <button class="custom-toast-modal-btn" style="background: #dc3545;" id="delete-btn">Delete</button>
-                                <button class="custom-toast-modal-btn" style="background: #6c757d;" id="cancel-btn">Cancel</button>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(modal);
-
-                    // Add event listeners
-                    modal.querySelector('#cancel-btn').addEventListener('click', () => {
-                        modal.style.animation = 'modalFadeOut 0.3s ease-out';
-                        setTimeout(() => modal.remove(), 300);
-                    });
-
-                    modal.querySelector('#delete-btn').addEventListener('click', () => {
-                        modal.style.animation = 'modalFadeOut 0.3s ease-out';
-                        setTimeout(() => {
-                            modal.remove();
-                            onConfirm();
-                        }, 300);
-                    });
+        selectWeekdays() { this.massSelect(d => d !== 0 && d !== 6); },
+        selectWeekends() { this.massSelect(d => d === 0 || d === 6); },
+        massSelect(conditionFn) {
+            const year = this.currentMonth.getFullYear();
+            const month = this.currentMonth.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let d = 1; d <= daysInMonth; d++) {
+                const date = new Date(year, month, d);
+                if (conditionFn(date.getDay())) {
+                    this.selectedDates.add(`${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
                 }
             }
+            this.render(); updateSelectionSummary();
+        },
+        clearSelection() { this.selectedDates.clear(); this.render(); updateSelectionSummary(); }
+    };
 
-            // Delete confirmation handler
-            function handleDeleteConfirm(event, url) {
-                event.preventDefault();
-                CustomToast.confirm(
-                    'Are you sure you want to delete this availability slot?',
-                    () => {
-                        // Submit the form
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = url;
-                        form.innerHTML = document.querySelector('input[name="csrfmiddlewaretoken"]').outerHTML;
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-                );
-            }
-        </script>
-        {% endblock %}
-    </div>
+    function updateSelectionSummary() {
+        const count = calendar.selectedDates.size;
+        const el = document.getElementById('selection-summary');
+        el.textContent = count === 0 ? 'No dates selected.' : `${count} date(s) selected.`;
+        el.className = 'alert mb-4 text-center py-2 fw-700 ' + (count > 0 ? 'alert-success border-0' : 'alert-light border-0');
+        if (count > 0) { el.style.background = '#e6fffa'; el.style.color = '#2c7a7b'; }
+        else { el.style.background = '#f7fafc'; el.style.color = '#718096'; }
+    }
 
-
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!--Loadingbar logic-->
-    <script>
-        // Show loading immediately when script starts executing
-        const loadingBar = document.getElementById("top-loading-bar");
-        let loading = false;
-        let pageLoadStarted = false;
-
-        // Start loading immediately for page load
-        function startPageLoad() {
-            if (!pageLoadStarted && loadingBar) {
-                pageLoadStarted = true;
-                loading = true;
-                loadingBar.style.width = "0%";
-                loadingBar.style.opacity = "1";
-                setTimeout(() => {
-                    loadingBar.style.width = "80%";
-                }, 100);
-            }
+    // --- Clock Picker Logic ---
+    class ClockPicker {
+        constructor() {
+            this.currentMode = 'hour';
+            this.selectedHour = 9;
+            this.selectedMinute = 0;
+            this.isAm = true;
+            this.isDragging = false;
+            this.targetInput = null;
+            this.targetHidden = null;
+            this.init();
         }
 
-        function finishLoading() {
-            if (loading) {
-                loadingBar.style.width = "100%";
-                setTimeout(() => {
-                    loadingBar.style.opacity = "0";
-                    loading = false;
-                }, 400);
-            }
-        }
+        init() {
+            document.querySelectorAll('.time-trigger').forEach(btn => {
+                btn.onclick = () => {
+                    this.targetInput = btn.closest('.position-relative').querySelector('.time-display');
+                    this.targetHidden = btn.closest('.position-relative').querySelector('input[type="hidden"]');
+                    const [time, period] = this.targetInput.value.split(' ');
+                    const [h, m] = time.split(':');
+                    this.selectedHour = parseInt(h); this.selectedMinute = parseInt(m);
+                    this.isAm = period === 'AM';
+                    this.open();
+                };
+            });
 
-        // Start loading immediately
-        startPageLoad();
+            document.getElementById('btn-cancel').onclick = () => document.getElementById('timePickerModal').classList.remove('show');
+            document.getElementById('btn-ok').onclick = () => this.confirm();
 
-        // Hide loading when page fully loads
-        window.addEventListener("load", function () {
-            finishLoading();
-        });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            function startLoading() {
-                if (!loading) {
-                    loading = true;
-                    loadingBar.style.width = "0%";
-                    loadingBar.style.opacity = "1";
-                    setTimeout(() => {
-                        loadingBar.style.width = "80%";
-                    }, 100);
-                }
-            }
-
-            // Intercept fetch calls
-            const originalFetch = window.fetch;
-            window.fetch = function (...args) {
-                startLoading();
-                return originalFetch.apply(this, args).then(response => {
-                    finishLoading();
-                    return response;
-                }).catch(error => {
-                    finishLoading();
-                    throw error;
-                });
+            document.querySelector('.am-pm-toggle').onclick = (e) => {
+                if (e.target.classList.contains('btn-am')) { this.isAm = true; e.target.classList.add('active'); document.querySelector('.btn-pm').classList.remove('active'); }
+                else if (e.target.classList.contains('btn-pm')) { this.isAm = false; e.target.classList.add('active'); document.querySelector('.btn-am').classList.remove('active'); }
             };
-            // Intercept form submissions
-            document.querySelectorAll("form").forEach(form => {
-                form.addEventListener("submit", function () {
-                    startLoading();
-                });
+
+            document.getElementById('display-hour').onclick = () => { this.currentMode = 'hour'; this.render(); };
+            document.getElementById('display-minute').onclick = () => { this.currentMode = 'minute'; this.render(); };
+
+            this.setupDragging();
+        }
+
+        open() {
+            document.getElementById('timePickerModal').classList.add('show');
+            document.querySelector('.btn-am').classList.toggle('active', this.isAm);
+            document.querySelector('.btn-pm').classList.toggle('active', !this.isAm);
+            this.render();
+        }
+
+        render() {
+            const numContainer = document.getElementById('clock-numbers');
+            numContainer.innerHTML = '';
+            const radius = 95;
+            const total = this.currentMode === 'hour' ? 12 : 12; // Still 12 numbers for minutes (0, 5, 10...)
+
+            for (let i = 1; i <= 12; i++) {
+                const val = this.currentMode === 'hour' ? i : (i * 5) % 60;
+                const angle = (i * 30) * (Math.PI / 180);
+                const x = 125 + radius * Math.sin(angle) - 15;
+                const y = 125 - radius * Math.cos(angle) - 15;
+                const div = document.createElement('div');
+                div.className = 'clock-number';
+                div.style.left = `${x}px`; div.style.top = `${y}px`;
+                div.textContent = this.currentMode === 'minute' && val === 0 ? '00' : val;
+                div.onclick = (e) => {
+                    e.stopPropagation();
+                    if (this.currentMode === 'hour') { this.selectedHour = val; this.currentMode = 'minute'; this.render(); }
+                    else { this.selectedMinute = val; this.update(); }
+                };
+                numContainer.appendChild(div);
+            }
+            this.update();
+        }
+
+        update() {
+            document.getElementById('display-hour').textContent = this.selectedHour;
+            document.getElementById('display-minute').textContent = String(this.selectedMinute).padStart(2, '0');
+            document.getElementById('display-hour').className = this.currentMode === 'hour' ? 'time-box active' : 'time-box';
+            document.getElementById('display-minute').className = this.currentMode === 'minute' ? 'time-box active' : 'time-box';
+
+            const val = this.currentMode === 'hour' ? this.selectedHour : this.selectedMinute;
+            const total = this.currentMode === 'hour' ? 12 : 60;
+            const angle = (val / total) * 360;
+            document.getElementById('clock-hand').style.transform = `translateX(-50%) rotate(${angle}deg)`;
+            const tip = document.querySelector('.clock-hand-tip');
+            tip.textContent = this.currentMode === 'hour' ? this.selectedHour : String(this.selectedMinute).padStart(2, '0');
+            tip.style.transform = `rotate(${-angle}deg)`;
+        }
+
+        setupDragging() {
+            const face = document.querySelector('.clock-face');
+            const handle = (e) => {
+                if (!this.isDragging) return;
+                const rect = face.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - (rect.left + rect.width / 2);
+                const y = (e.clientY || e.touches[0].clientY) - (rect.top + rect.height / 2);
+                let angle = Math.atan2(x, -y) * (180 / Math.PI); if (angle < 0) angle += 360;
+                const total = this.currentMode === 'hour' ? 12 : 60;
+                let val = Math.round((angle / 360) * total);
+                if (this.currentMode === 'hour') { if (val === 0) val = 12; this.selectedHour = val; }
+                else { if (val === 60) val = 0; this.selectedMinute = val; }
+                this.update();
+            };
+            face.onmousedown = (e) => { this.isDragging = true; handle(e); };
+            face.ontouchstart = (e) => { this.isDragging = true; handle(e); };
+            window.onmousemove = handle; window.ontouchmove = handle;
+            window.onmouseup = () => { if (this.isDragging && this.currentMode === 'hour') { this.currentMode = 'minute'; this.render(); } this.isDragging = false; };
+            window.ontouchend = window.onmouseup;
+        }
+
+        confirm() {
+            const h = String(this.selectedHour).padStart(2, '0');
+            const m = String(this.selectedMinute).padStart(2, '0');
+            this.targetInput.value = `${h}:${m} ${this.isAm ? 'AM' : 'PM'}`;
+            let h24 = this.selectedHour;
+            if (this.isAm && h24 === 12) h24 = 0;
+            else if (!this.isAm && h24 !== 12) h24 += 12;
+            this.targetHidden.value = `${String(h24).padStart(2, '0')}:${m}`;
+            document.getElementById('timePickerModal').classList.remove('show');
+        }
+    }
+
+    document.getElementById('schedule-form').onsubmit = (e) => {
+        e.preventDefault();
+        if (calendar.selectedDates.size === 0) { alert("Select at least one date"); return; }
+        const data = {
+            dates: Array.from(calendar.selectedDates),
+            slots: [{ start_time: document.getElementById('startHidden').value, end_time: document.getElementById('endHidden').value }],
+            duration: document.getElementById('slot_duration').value
+        };
+        fetch("{% url 'monthly_availability' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(json => {
+                if (json.success) { location.reload(); }
+                else { alert(json.error || "Failed to apply"); }
             });
-        });
-    </script>
+    };
 
-
-</body>
-
-</html>
+    calendar.init();
+    new ClockPicker();
+</script>
+{% endblock %}

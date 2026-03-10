@@ -1,513 +1,441 @@
+{% extends 'doctors/doctor_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile - {{ doctor.name }}</title>
+{% block title %}Edit Profile - {{ doctor.name }}{% endblock %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+{% block extra_head %}
+<!-- jQuery & Toastr -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+{% endblock %}
 
-    <style>
-        body {
-            background-color: #f4f7fe;
-            font-family: 'Poppins', sans-serif;
-        }
+{% block extra_css %}
+<style>
+    /* Reset & Base Override */
+    body {
+        background-color: #fdfdfd !important;
+    }
 
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            background: #1c4278;
-            padding-top: 20px;
-        }
+    .profile-edit-container {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding-bottom: 80px;
+    }
 
-        .sidebar a {
-            padding: 15px 25px;
-            color: #ddd;
-            display: block;
-            text-decoration: none;
-            font-size: 16px;
-            transition: 0.2s;
-        }
+    /* Top Identity Card */
+    .id-card-horizontal {
+        background: #fff;
+        border: 1px solid #eef2f6;
+        border-radius: 12px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
 
-        .sidebar .active {
-            background: #f4ede5;
-            color: #1c4278;
-        }
+    .id-card-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
 
-        .sidebar a:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
+    .avatar-wrapper {
+        position: relative;
+        width: 86px;
+        height: 86px;
+        flex-shrink: 0;
+    }
 
-        /* Content Styling */
-        .content {
-            margin-left: 260px;
-            padding: 15px 25px;
-            /* Further reduced padding */
-        }
+    .avatar-image {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        object-fit: cover;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
 
-        /* Card Styling */
-        .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-            background: #fff;
-            margin-bottom: 15px;
-            /* Further reduced margin */
-        }
+    .avatar-edit-trigger {
+        position: absolute;
+        bottom: -6px;
+        right: -6px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #ea7215;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
 
-        .profile-card {
-            text-align: center;
-            padding: 20px 15px;
-            /* Further reduced padding */
-        }
+    .id-meta h1 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #1a202c;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-        .profile-img-container {
-            position: relative;
-            width: 120px;
-            /* Slightly smaller image */
-            height: 120px;
-            margin: 0 auto 10px;
-            /* Reduced margin */
-        }
+    .badge-verified {
+        background: #e6fffa;
+        color: #059669;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-        .profile-img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
+    .id-subtitle {
+        color: #64748b;
+        font-size: 14px;
+        margin: 6px 0;
+        font-weight: 500;
+    }
 
-        .camera-btn {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: #1c4278;
-            color: white;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: 2px solid white;
-            transition: 0.2s;
-        }
+    .id-info-line {
+        display: flex;
+        gap: 16px;
+        font-size: 12px;
+        color: #94a3b8;
+    }
 
-        .camera-btn:hover {
-            transform: scale(1.1);
-        }
+    .btn-public-view {
+        border: 1px solid #e2e8f0;
+        background: transparent;
+        color: #475569;
+        font-weight: 700;
+        font-size: 13px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: 0.2s;
+    }
 
-        .stat-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 10px;
-            /* Reduced padding */
-            text-align: center;
-        }
+    .btn-public-view:hover {
+        background: #f8fafc;
+        color: #1e293b;
+    }
 
-        .stat-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #888;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
+    /* Forms */
+    .section-title-custom {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #ea7215;
+        margin-bottom: 16px;
+    }
 
-        .stat-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #333;
-        }
+    .info-box {
+        background: #fff;
+        border: 1px solid #eef2f6;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
 
-        .section-title {
-            color: #1c4278;
-            font-weight: 700;
-            margin-bottom: 12px;
-            /* Reduced margin */
-            display: flex;
-            align-items: center;
-            font-size: 15px;
-            /* Slightly smaller */
-        }
+    .label-caps {
+        font-size: 10px;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+        display: block;
+    }
 
-        .section-title::before {
-            content: '';
-            display: block;
-            width: 4px;
-            height: 24px;
-            background: #1c4278;
-            margin-right: 12px;
-            border-radius: 2px;
-        }
+    .form-control-custom {
+        background: #f8fafc;
+        border: 1px solid #eef2f6;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1e293b;
+        width: 100%;
+        transition: 0.2s;
+    }
 
-        label {
-            font-size: 12px;
-            /* Smaller label */
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 5px;
-            display: block;
-        }
+    .form-control-custom:focus {
+        background: #fff;
+        border-color: #ea7215;
+        outline: none;
+    }
 
-        .form-control,
-        .form-select {
-            border: 1px solid #eee;
-            background-color: #fcfcfc;
-            border-radius: 10px;
-            padding: 8px 12px;
-            /* Reduced padding */
-            font-size: 13px;
-            /* Smaller text */
-            color: #333;
-        }
+    .form-control-custom[readonly] {
+        background: #f1f5f9;
+        color: #94a3b8;
+        cursor: not-allowed;
+    }
 
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #bfddfd;
-            box-shadow: 0 0 0 3px rgba(28, 66, 120, 0.1);
-            background-color: #fff;
-        }
+    /* Preferences */
+    .pref-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
 
-        /* Read-only inputs */
-        .form-control:disabled,
-        .form-control[readonly] {
-            background-color: #f8f9fa;
-            color: #6c757d;
-        }
+    .pref-row:last-child {
+        margin-bottom: 0;
+    }
 
-        /* Input Group Icons */
-        .input-group-text {
-            background: #fcfcfc;
-            border: 1px solid #eee;
-            border-right: none;
-            color: #1c4278;
-            border-radius: 10px 0 0 10px;
-        }
+    .pref-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+    }
 
-        .input-with-icon .form-control {
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-        }
+    /* Switch Style Override */
+    .form-check-input {
+        width: 38px !important;
+        height: 19px !important;
+        cursor: pointer;
+    }
 
-        .btn-submit {
-            background: #1c4278;
-            /* Sidebar Blue */
-            color: white;
-            padding: 10px 30px;
-            /* Compact button */
-            border-radius: 8px;
-            font-weight: 600;
-            border: none;
-            transition: 0.3s;
-        }
+    .form-check-input:checked {
+        background-color: #ea7215 !important;
+        border-color: #ea7215 !important;
+    }
 
-        .btn-submit:hover {
-            background: #15325e;
-            /* Darker Blue */
-        }
+    /* Footer */
+    .footer-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 40px;
+        padding-top: 24px;
+        border-top: 1px solid #eef2f6;
+    }
 
-        .badge-treatment {
-            background: #eef2ff;
-            color: #1c4278;
-            padding: 8px 15px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 500;
-            display: inline-block;
-            margin: 4px;
-            border: 1px solid #bfddfd;
-        }
+    .text-updated {
+        font-size: 12px;
+        color: #94a3b8;
+    }
 
-        .summary-box {
-            background: #eef5ff;
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 20px;
-        }
+    .btn-save-orange {
+        background: #ea7215;
+        color: #fff;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 14px;
+        transition: 0.2s;
+    }
 
-        .summary-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 14px;
-            color: #555;
-        }
+    .btn-save-orange:hover {
+        background: #d66512;
+        transform: translateY(-1px);
+    }
 
-        .summary-item i {
-            color: #1c4278;
-            width: 24px;
-            margin-right: 10px;
-        }
-    </style>
-</head>
+    .btn-cancel-link {
+        color: #64748b;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 14px;
+        margin-right: 24px;
+    }
 
-<body>
+    .btn-cancel-link:hover {
+        color: #1e293b;
+    }
 
-    <!-- Sidebar -->
-    <div id="top-loading-bar"></div>
-    <div class="sidebar">
-        <a href="{% url 'doctor_dashboard' %}"><i class="bi bi-grid-1x2 me-2"></i> Dashboard</a>
-        <a href="{% url 'doctor_availability_list' %}"><i class="bi bi-calendar-month me-2"></i> Set Monthly
-            Availability</a>
-        <a href="{% url 'my_patients' %}"><i class="bi bi-people me-2"></i> My Patients</a>
-        <a href="#"><i class="bi bi-file-medical me-2"></i> Patient Reports</a>
-        <a href="{% url 'doctor_profile_edit' %}" class="active"><i class="bi bi-person-lines-fill me-2"></i>
-            Profile</a>
-        <a href="/logout/"><i class="bi bi-box-arrow-right me-2"></i> Logout</a>
-    </div>
+    textarea.form-control-custom {
+        min-height: 120px;
+        line-height: 1.6;
+        resize: none;
+    }
+</style>
+{% endblock %}
 
-    <div class="content">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-2"> <!-- Further reduced margin -->
-            <div>
-                <h4 class="fw-bold mb-0" style="color: #333; font-size: 1.2rem;"><i class="bi bi-person-gear me-2"
-                        style="color:#1c4278;"></i>Edit Profile</h4>
-                <p class="text-muted small mb-0" style="font-size: 0.8rem;">Manage your personal information,
-                    specialization, and contact details.</p>
+{% block content %}
+<div class="profile-edit-container">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Horizontal Identity Section -->
+        <div class="id-card-horizontal">
+            <div class="id-card-left">
+                <div class="avatar-wrapper">
+                    {% if doctor.user.doctorprofile.passport_photo %}
+                    <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" class="avatar-image" id="profileView">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ doctor.name|urlencode }}&size=200&background=ea7215&color=fff"
+                        class="avatar-image" id="profileView">
+                    {% endif %}
+                    <label for="passport_photo" class="avatar-edit-trigger">
+                        <i class="bi bi-camera-fill"></i>
+                    </label>
+                    <input type="file" name="passport_photo" id="passport_photo" class="d-none" accept="image/*"
+                        onchange="previewAvatar(this)">
+                </div>
+                <div class="id-meta">
+                    <h1>{{ doctor.name }} <span class="badge-verified">Verified</span></h1>
+                    <div class="id-subtitle">
+                        {{ doctor.user.doctorprofile.qualification|default:'Senior Physician' }} •
+                        Specialized in {{ doctor.specialization }} •
+                        <span class="text-dark fw-bold">{{ doctor.hospital.name }}</span>
+                    </div>
+                    <div class="id-info-line">
+                        <span><i class="bi bi-person-vcard me-1"></i> ID: RH-{{ doctor.id }}-NY</span>
+                        <span><i class="bi bi-calendar-check me-1"></i> Member Since {{ doctor.user.date_joined|date:"M
+                            Y" }}</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="d-flex align-items-center">
-                <a href="{% url 'doctor_profile_edit' %}" class="d-flex align-items-center text-decoration-none">
-                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
-                        style="width: 40px; height: 40px; font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                        {% if doctor.user.doctorprofile.passport_photo %}
-                        <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt="Profile"
-                            style="width: 100%; height: 100%; object-fit: cover;">
-                        {% else %}
-                        {{ doctor.name|slice:":2"|upper }}
-                        {% endif %}
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-6">
+                <!-- Personal Information -->
+                <div class="section-title-custom"><i class="bi bi-person-circle"></i> Personal Information</div>
+                <div class="info-box">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="label-caps">First Name</label>
+                            <input type="text" class="form-control-custom" name="name" value="{{ doctor.name }}"
+                                placeholder="Alexander">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="label-caps">Last Name</label>
+                            <input type="text" class="form-control-custom" placeholder="Smith">
+                        </div>
+                        <div class="col-12">
+                            <label class="label-caps">Email Address</label>
+                            <input type="email" class="form-control-custom" value="{{ doctor.user.email }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="label-caps">Phone Number</label>
+                            <input type="text" class="form-control-custom" name="contact_number"
+                                value="{{ doctor.user.doctorprofile.contact_number }}" placeholder="+1 (555) 012-3456">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="label-caps">Date of Birth</label>
+                            <input type="date" class="form-control-custom" name="date_of_birth"
+                                value="{{ doctor.user.doctorprofile.date_of_birth|date:'Y-m-d' }}">
+                        </div>
                     </div>
-                </a>
+                </div>
+
+                <!-- Contact & Address -->
+                <div class="section-title-custom"><i class="bi bi-geo-alt-fill"></i> Contact & Address</div>
+                <div class="info-box">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="label-caps">Street Address</label>
+                            <input type="text" class="form-control-custom" name="address"
+                                value="{{ doctor.user.doctorprofile.address }}" placeholder="742 Medical Center Dr.">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="label-caps">City</label>
+                            <input type="text" class="form-control-custom" placeholder="New York">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="label-caps">State / Province</label>
+                            <input type="text" class="form-control-custom" placeholder="NY">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-6">
+                <!-- Professional Details -->
+                <div class="section-title-custom"><i class="bi bi-briefcase-fill"></i> Professional Details</div>
+                <div class="info-box">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="label-caps">Primary Specialty</label>
+                            <select class="form-control-custom">
+                                <option>{{ doctor.specialization }}</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="label-caps">Job Title</label>
+                            <input type="text" class="form-control-custom"
+                                value="{{ doctor.user.doctorprofile.qualification|default:'Senior Specialist' }}"
+                                name="qualification">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="label-caps">License Number</label>
+                            <input type="text" class="form-control-custom" placeholder="MD-209384-B">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="label-caps">Years of Experience</label>
+                            <input type="number" class="form-control-custom" name="year_of_experience"
+                                value="{{ doctor.user.doctorprofile.year_of_experience }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="label-caps">Professional Summary</label>
+                            <textarea class="form-control-custom"
+                                placeholder="Share your professional background...">{{ doctor.name }} is a dedicated {{ doctor.specialization }} with extensive experience in the field.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences -->
+                <div class="section-title-custom"><i class="bi bi-sliders"></i> Preferences</div>
+                <div class="info-box">
+                    <div class="pref-row">
+                        <div class="pref-text">Available for Consultations</div>
+                        <div class="form-check form-switch p-0">
+                            <input class="form-check-input ms-0" type="checkbox" checked>
+                        </div>
+                    </div>
+                    <div class="pref-row">
+                        <div class="pref-text">Public Profile Visible</div>
+                        <div class="form-check form-switch p-0">
+                            <input class="form-check-input ms-0" type="checkbox" checked>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <form id="editProfileForm" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            <div class="row">
-                <!-- LEFT COLUMN: Profile Card -->
-                <div class="col-lg-4 mb-3">
-                    <div class="card profile-card h-55">
-                        <div class="card-body p-2">
-                            <!-- Image Upload -->
-                            <div class="profile-img-container">
-                                {% if doctor.user.doctorprofile.passport_photo %}
-                                <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt="Profile"
-                                    class="profile-img" id="profilePreview">
-                                {% else %}
-                                <img src="https://via.placeholder.com/150" alt="Profile" class="profile-img"
-                                    id="profilePreview">
-                                {% endif %}
-                                <label for="passport_photo" class="camera-btn">
-                                    <i class="bi bi-camera-fill" style="font-size: 12px;"></i>
-                                </label>
-                                <input type="file" name="passport_photo" id="passport_photo" style="display: none;"
-                                    accept="image/*" onchange="previewImage(this)">
-                            </div>
-
-                            <h5 class="fw-bold mb-1" style="font-size: 1rem;">{{ doctor.name }}</h5>
-                            <p class="text-primary fw-medium mb-3 small">
-                                <i class="bi bi-stethoscope me-1"></i>{{ doctor.specialization }}
-                            </p>
-
-                            <div class="summary-box text-start p-3" style="margin-top: 10px;"> <!-- Compact Summary -->
-                                <h6 class="fw-bold mb-2 small" style="color: #1c4278;"><i
-                                        class="bi bi-globe me-2"></i>Professional Summary</h6>
-                                <div class="summary-item mb-1 small">
-                                    <i class="bi bi-check-circle-fill" style="width: 20px;"></i>
-                                    <span>Specialization: {{ doctor.specialization }}</span>
-                                </div>
-                                <div class="summary-item mb-1 small">
-                                    <i class="bi bi-mortarboard-fill" style="width: 20px;"></i>
-                                    <span>{{ doctor.user.doctorprofile.qualification|default:'MBBS' }}</span>
-                                </div>
-                                <div class="summary-item mb-0 small">
-                                    <i class="bi bi-building-fill" style="width: 20px;"></i>
-                                    <span>Dept: {{ doctor.department.name|default:'General' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RIGHT COLUMN: Form Fields -->
-                <div class="col-lg-8">
-                    <div class="card" style="padding: 15px;"> <!-- Further Reduced Padding -->
-                        <!-- Section 1: Personal Information -->
-                        <div class="section-title">Personal Information</div>
-
-                        <div class="row g-2 mb-3"> <!-- Compact Gap & Margin -->
-                            <div class="col-md-6">
-                                <label>First Name</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                    <input type="text" class="form-control" name="name" value="{{ doctor.name }}"
-                                        required>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Email (Read-only)</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                    <input type="email" class="form-control" value="{{ doctor.user.email }}" readonly
-                                        disabled>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Mobile Number</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                                    <input type="text" class="form-control" name="contact_number"
-                                        value="{{ doctor.user.doctorprofile.contact_number|default:'' }}">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Gender</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
-                                    <select class="form-select" name="gender" id="genderSelect">
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6"> <!-- NOW HALF WIDTH -->
-                                <label>Date Of Birth</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                                    <input type="date" class="form-control" name="date_of_birth"
-                                        value="{{ doctor.user.doctorprofile.date_of_birth|date:'Y-m-d' }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Section 2: Professional Details -->
-                        <div class="section-title">Professional Details</div>
-
-                        <div class="row g-2 mb-3"> <!-- Compact Gap & Margin -->
-                            <div class="col-md-6">
-                                <label>Specialization</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-briefcase-medical"></i></span>
-                                    <input type="text" class="form-control" name="specialization"
-                                        value="{{ doctor.specialization }}">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Department (Admin Only)</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-hospital"></i></span>
-                                    <input type="text" class="form-control"
-                                        value="{{ doctor.department.name|default:'Not Assigned' }}" readonly disabled>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Qualification</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-award"></i></span>
-                                    <input type="text" class="form-control" name="qualification"
-                                        value="{{ doctor.user.doctorprofile.qualification|default:'' }}">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Years of Experience</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
-                                    <input type="number" class="form-control" name="year_of_experience"
-                                        value="{{ doctor.user.doctorprofile.year_of_experience|default:'' }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Section 3: Professional Details -->
-                        <div class="section-title">Contact & Address</div>
-
-                        <div class="row g-2 mb-2"> <!-- Compact Gap & Margin -->
-                            <div class="col-12">
-                                <label>Detailed Address</label>
-                                <div class="input-group input-with-icon">
-                                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                                    <input type="text" class="form-control" name="address"
-                                        value="{{ doctor.user.doctorprofile.address|default:'' }}"
-                                        placeholder="Street Name, Area, City, Zip Code">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="d-flex justify-content-end mt-2">
-                            <button type="submit" class="btn btn-submit">Save Changes</button>
-                        </div>
-
-                    </div>
-                </div>
+        <!-- Sticky Bottom Actions -->
+        <div class="footer-controls">
+            <div class="text-updated">Last updated: {{ doctor.user.date_joined|date:"M d, Y" }} at 09:15 AM</div>
+            <div class="d-flex align-items-center">
+                <a href="{% url 'doctor_dashboard' %}" class="btn-cancel-link">Cancel</a>
+                <button type="submit" class="btn-save-orange shadow-sm">Save All Changes</button>
             </div>
-        </form>
+        </div>
+    </form>
+</div>
+{% endblock %}
 
-    </div>
+{% block extra_js %}
+<script>
+    // Toastr Notifications
+    {% if messages %}
+    {% for message in messages %}
+    toastr.{ { message.tags } } ("{{ message }}");
+    {% endfor %}
+    {% endif %}
 
-
-    <!-- Toastr & jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        toastr.options = {
-            "closeButton": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "timeOut": "3000",
-        };
-
-        {% if messages %}
-        {% for message in messages %}
-        toastr.{ { message.tags } } ("{{ message }}");
-        {% endfor %}
-        {% endif %}
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize Gender Selection
-            const gender = "{{ doctor.user.doctorprofile.gender|default:''|escapejs }}";
-            const genderSelect = document.getElementById('genderSelect');
-            if (genderSelect && gender) {
-                genderSelect.value = gender;
+    // Image Preview
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('profileView').src = e.target.result;
             }
-        });
-
-        // Image Preview Logic
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('profilePreview').src = e.target.result;
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
+            reader.readAsDataURL(input.files[0]);
         }
-    </script>
-</body>
-
-</html>
+    }
+</script>
+{% endblock %}
