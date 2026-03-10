@@ -61,7 +61,7 @@ def create_admins(hospitals, count=20):
         
         user = User.objects.create_user(
             email=email,
-            password="password123",
+            password="admin123",
             role="hospital_admin",
             is_active=True,
             is_staff=True
@@ -97,7 +97,7 @@ def create_doctors(hospitals, count=50):
             # Create User
             user = User.objects.create_user(
                 email=email,
-                password="password123",
+                password="doctor123",
                 role="doctor",
                 is_active=True
             )
@@ -138,7 +138,7 @@ def create_patients(hospitals, count=60):
             
             user = User.objects.create_user(
                 email=email,
-                password="password123",
+                password="patient123",
                 role="patient",
                 is_active=True
             )

@@ -653,18 +653,107 @@ def my_patients_view(request):
     """List patients who have booked appointments with this doctor"""
     doctor = Doctor.objects.get(user=request.user)
     
-    # Aggregate patients based on name (since we don't have a direct Patient FK in Appointment currently)
-    # We want: Name, Last Visit, Total Visits
-    from django.db.models import Count, Max
+    # Aggregate patients based on name
+    from django.db.models import Count, Max, Q
     
-    patients = Appointment.objects.filter(doctor=doctor).values('patient_name').annotate(
+    # Filtering Logic
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    search_query = request.GET.get('search')
+    
+    query = Q(doctor=doctor)
+    if start_date:
+        query &= Q(appointment_date__date__gte=start_date)
+    if end_date:
+        query &= Q(appointment_date__date__lte=end_date)
+    if search_query:
+        query &= Q(patient_name__icontains=search_query)
+        
+    all_patients_qs = Appointment.objects.filter(query).values('patient_name').annotate(
         total_visits=Count('id'),
         last_visit=Max('appointment_date')
     ).order_by('-last_visit')
+
+    # Handle Export CSV
+    if request.GET.get('export') == 'csv':
+        import csv
+        from django.http import HttpResponse
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="patients_{timezone.now().strftime("%Y%m%d")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Patient Name', 'Last Visit', 'Total Visits', 'Pseudo ID'])
+        
+        for p in all_patients_qs:
+            import hashlib
+            pseudo_id = f"PT-{int(hashlib.md5(p['patient_name'].encode()).hexdigest(), 16) % 10000:04d}"
+            writer.writerow([
+                p['patient_name'], 
+                p['last_visit'].strftime('%Y-%m-%d %H:%M'), 
+                p['total_visits'],
+                pseudo_id
+            ])
+        return response
+
+    # Total unique patients count for stats
+    total_active = all_patients_qs.count()
+
+    # Pagination Logic
+    from django.core.paginator import Paginator
+    paginator = Paginator(all_patients_qs, 5) # Show 5 patients per page
+    page_number = request.GET.get('page')
+    patients = paginator.get_page(page_number)
     
+    # Simple growth calculation
+    from django.utils import timezone
+    thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
+    current_month_count = Appointment.objects.filter(doctor=doctor, appointment_date__gte=thirty_days_ago).count()
+    prev_month_count = Appointment.objects.filter(
+        doctor=doctor, 
+        appointment_date__lt=thirty_days_ago, 
+        appointment_date__gte=thirty_days_ago - timezone.timedelta(days=30)
+    ).count()
+    
+    growth = 0
+    if prev_month_count > 0:
+        growth = ((current_month_count - prev_month_count) / prev_month_count) * 100
+    else:
+        growth = 100 if current_month_count > 0 else 0
+        
+    # Visit completion
+    total_appts = Appointment.objects.filter(doctor=doctor).count()
+    completed_appts = Appointment.objects.filter(doctor=doctor, status='completed').count()
+    completion_rate = (completed_appts / total_appts * 100) if total_appts > 0 else 0
+
+    # Add extra info for UI
+    for p in patients:
+        import hashlib
+        p['pseudo_id'] = f"PT-{int(hashlib.md5(p['patient_name'].encode()).hexdigest(), 16) % 10000:04d}"
+        
+        # Check for history to determine New/Returning status
+        has_history = Appointment.objects.filter(
+            doctor=doctor,
+            patient_name__iexact=p['patient_name'],
+            status='completed'
+        ).count() > 1
+        
+        p['last_visit_status'] = "Returning" if has_history else "New"
+        
+        # Optionally, if you want the status (Scheduled/Completed)
+        last_appt = Appointment.objects.filter(doctor=doctor, patient_name=p['patient_name'], appointment_date=p['last_visit']).first()
+        if last_appt and last_appt.status != 'completed':
+            p['last_visit_status'] = last_appt.status.title()
+
     return render(request, 'doctors/my_patients.html', {
         'doctor': doctor,
-        'patients': patients
+        'patients': patients,
+        'total_active': total_active,
+        'growth': round(growth, 1),
+        'completion_rate': round(completion_rate, 1),
+        'start_date': start_date,
+        'end_date': end_date,
+        'search_query': search_query
     })
 
 @login_required
