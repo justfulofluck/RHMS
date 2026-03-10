@@ -8,9 +8,16 @@
 {% block content %}
 <div class="page-header mb-4">
     <div class="d-flex justify-content-between align-items-center w-100">
-        <div>
-            <h1 class="fw-800" style="letter-spacing: -1px;">{{ patient_name }}</h1>
-            <p class="text-muted">Complete medical history and diagnostic reports.</p>
+        <div class="d-flex align-items-center gap-3">
+            <div class="patient-initial-avatar"
+                style="width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; background: {{ patient_meta.avatar_bg }}; color: {{ patient_meta.avatar_color }};">
+                {{ patient_meta.initials }}
+            </div>
+            <div>
+                <h1 class="fw-800 mb-0" style="letter-spacing: -1px; font-size: 2rem;">{{ patient_name }}</h1>
+                <div class="patient-id text-muted small" style="font-weight: 600;">ID: #{{ patient_meta.hash_id }} •
+                    Complete medical history</div>
+            </div>
         </div>
         <a href="{% url 'my_patients' %}" class="btn btn-outline-secondary fw-700 px-4">
             <i class="bi bi-arrow-left me-2"></i> Back to Patients

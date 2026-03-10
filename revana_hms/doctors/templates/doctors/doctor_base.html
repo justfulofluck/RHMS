@@ -149,12 +149,12 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #edf2f7;
+            background: var(--primary-orange);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            color: var(--primary-orange);
+            color: white;
             overflow: hidden;
         }
 
@@ -238,10 +238,16 @@
                         {% if doctor.user.doctorprofile.passport_photo %}
                         <img src="{{ doctor.user.doctorprofile.passport_photo.url }}" alt="Profile">
                         {% else %}
-                        {{ doctor.name|slice:":1"|upper }}
+                        {{ doctor.name|slice:":1"|upper|default:"D" }}
                         {% endif %}
                     </div>
-                    <div class="user-name">Dr. {{ doctor.name }}</div>
+                    <div class="user-name">
+                        {% if doctor.name %}
+                        {% if "Dr." not in doctor.name %}Dr. {% endif %}{{ doctor.name }}
+                        {% else %}
+                        {{ request.user.email|truncatechars:20 }}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </header>

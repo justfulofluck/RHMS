@@ -784,8 +784,30 @@ def patient_history_view(request, patient_name):
         patient_name=patient_name
     ).order_by('-appointment_date')
     
+    # Calculate patient metadata for head/avatar
+    import hashlib
+    h = hashlib.md5(patient_name.encode()).hexdigest()
+    hash_id = f"{int(h, 16) % 10000:04d}"
+    
+    name_parts = patient_name.split()
+    initials = (name_parts[0][0] + (name_parts[-1][0] if len(name_parts) > 1 else "")) if name_parts else "P"
+    initials = initials.upper()
+    
+    bg_colors = ['#ebf8ff', '#fef3c7', '#f1f1f1', '#eef2ff', '#fdf2f2', '#f0fdf4']
+    text_colors = ['#3182ce', '#d97706', '#4a5568', '#4f46e5', '#9b1c1c', '#166534']
+    color_idx = int(h, 16) % len(bg_colors)
+    
+    patient_meta = {
+        'hash_id': hash_id,
+        'initials': initials,
+        'avatar_bg': bg_colors[color_idx],
+        'avatar_color': text_colors[color_idx]
+    }
+    
     return render(request, 'doctors/patient_history.html', {
+        'doctor': doctor,
         'patient_name': patient_name,
+        'patient_meta': patient_meta,
         'appointments': appointments
     })
 
@@ -903,6 +925,7 @@ def patient_history_partial(request, patient_name):
     ).order_by('-appointment_date')
     
     return render(request, 'doctors/partials/patient_history_partial.html', {
+        'doctor': doctor,
         'patient_name': patient_name,
         'appointments': appointments
     })
