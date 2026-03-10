@@ -8,6 +8,8 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.utils import timezone
 from django.urls import reverse
 from datetime import timedelta, datetime, date
@@ -53,13 +55,22 @@ class PasswordResetRequestView(generics.GenericAPIView):
         current_site = request.get_host()
         reset_link = f"http://{current_site}/reset-password-confirm/?uid={uid}&token={token}"
         
+        # HTML Email Context
+        context = {
+            'reset_link': reset_link,
+        }
+        
+        html_message = render_to_string('doctors/emails/password_reset_email.html', context)
+        plain_message = strip_tags(html_message)
+
         print(f"DEBUG: Attempting to send email to {email}...")
         try:
             send_mail(
                 subject="Password Reset Request",
-                message=f"Click the link to reset your password: {reset_link}",
-                from_email=None,
+                message=plain_message,
+                from_email='blueglobalcloud@gmail.com',
                 recipient_list=[email],
+                html_message=html_message,
                 fail_silently=False,
             )
             print("DEBUG: Mail sent successfully via SMTP.")

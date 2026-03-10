@@ -362,8 +362,11 @@
                             {% for slot in availabilities %}
                             <tr>
                                 <td class="ps-4 py-3 fw-700 text-dark">{{ slot.date|date:"M d" }}</td>
-                                <td class="py-3"><span class="badge bg-light text-dark border-0 fw-600 px-2 py-2">{{
-                                        slot.start_time|time:"H:i" }}-{{ slot.end_time|time:"H:i" }}</span></td>
+                                <td class="py-3">
+                                    <span class="badge bg-light text-dark border-0 fw-600 px-2 py-2">
+                                        {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                                    </span>
+                                </td>
                                 <td class="text-end pe-4 py-3">
                                     <form method="post" action="{% url 'delete_availability' slot.id %}"
                                         onsubmit="return confirm('Delete this slot?');">

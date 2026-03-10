@@ -1,4 +1,6 @@
 from rest_framework import viewsets, permissions, decorators, response, status
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -82,21 +84,23 @@ def register_doctor(request):
 
                 # Send registration email with login credentials
                 login_url = request.build_absolute_uri(reverse('doctor_login'))
+                
+                # HTML Email Context
+                context = {
+                    'email': user.email,
+                    'password': password,
+                    'login_url': login_url,
+                }
+                
+                html_message = render_to_string('doctors/emails/doctor_registration_email.html', context)
+                plain_message = strip_tags(html_message)
+                
                 send_mail(
                     subject='Doctor Registration - Login Credentials',
-                    message=f'Welcome to RHMS!\n\n'
-                            f'Your doctor account has been registered successfully.\n\n'
-                            f'Login Credentials:\n'
-                            f'Email: {user.email}\n'
-                            f'Password: {password}\n\n'
-                            f'Login URL: {login_url}\n\n'
-                            f'IMPORTANT: Your profile is currently in DRAFT MODE.\n'
-                            f'You can login and set your availability, but you will be visible '
-                            f'to patients only after hospital admin approval.\n\n'
-                            f'Please complete your profile and wait for approval.\n\n'
-                            f'Thank you for joining RHMS!',
+                    message=plain_message,
                     from_email='blueglobalcloud@gmail.com',
                     recipient_list=[user.email],
+                    html_message=html_message,
                     fail_silently=False,
                 )
 

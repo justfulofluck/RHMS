@@ -95,9 +95,15 @@ def create_monthly_availability(request):
             return JsonResponse({'success': False, 'error': str(e)})
     
     # GET request - show form
+    availabilities = DoctorAvailability.objects.filter(
+        doctor=doctor,
+        date__gte=timezone.now().date()
+    ).order_by('date', 'start_time')
+
     return render(request, 'doctors/monthly_availability.html', {
         'doctor': doctor,
-        'today': timezone.now().date()
+        'today': timezone.now().date(),
+        'availabilities': availabilities
     })
 
 
@@ -137,7 +143,7 @@ def delete_availability(request, availability_id):
         except Exception as e:
             messages.error(request, f'Error deleting availability: {str(e)}')
             
-    return redirect('doctor_availability_list')
+    return redirect('monthly_availability')
 
 
 @login_required
