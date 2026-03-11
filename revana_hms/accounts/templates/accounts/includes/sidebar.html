@@ -184,6 +184,14 @@
             <span>Appointments</span>
         </a>
 
+        <div class="nav-category">MOBILE APP</div>
+
+        <a href="{% url 'mobile_advertisements' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'mobile_advertisements' %}active{% endif %}">
+            <i class="fas fa-mobile-alt"></i>
+            <span>Mobile Advertising</span>
+        </a>
+
         <div class="nav-category">SETTINGS</div>
 
         <a href="#" class="nav-link">

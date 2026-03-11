@@ -1,0 +1,513 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mobile Advertising{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f5f5f5;
+        font-family: "Poppins", sans-serif;
+    }
+
+    .main-content {
+        margin-left: 280px;
+        padding: 30px;
+        min-height: 100vh;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background-color: #ea580c;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #c2410c;
+    }
+
+    .btn-danger {
+        background-color: #dc2626;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #b91c1c;
+    }
+
+    .btn-success {
+        background-color: #16a34a;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #15803d;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e5e5e5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .card-body {
+        padding: 24px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    th {
+        font-weight: 600;
+        color: #525252;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+
+    td {
+        font-size: 14px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-active {
+        background-color: #dcfce7;
+        color: #16a34a;
+    }
+
+    .badge-inactive {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .ad-image {
+        width: 80px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        width: 1000px;
+        max-width: 95%;
+    }
+
+    .modal-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e5e5e5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8fafc;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: stretch;
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fdfdfd;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-group:focus-within {
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+    }
+
+    .input-group-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 15px;
+        background-color: #f3f4f6;
+        color: #6b7280;
+        border-right: 1px solid #d1d5db;
+        min-width: 50px;
+    }
+
+    .input-group .form-control {
+        border: none;
+        border-radius: 0;
+        margin-bottom: 0;
+    }
+
+    .input-group .form-control:focus {
+        box-shadow: none;
+        border-color: transparent;
+    }
+
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e5e5e5;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -10px;
+        margin-left: -10px;
+    }
+
+    .col-md-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .col-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6b7280;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px;
+        color: #6b7280;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+</style>
+
+{% include 'accounts/includes/sidebar.html' %}
+
+<div class="main-content">
+    <div class="page-header">
+        <h1 class="page-title">Mobile Advertising</h1>
+        <button class="btn btn-primary" onclick="showModal()">
+            <i class="fas fa-plus"></i> Add New Advertisement
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Advertisements List</span>
+            <span style="color: #6b7280; font-size: 14px;">{{ advertisements.count }} total</span>
+        </div>
+        <div class="card-body">
+            {% if advertisements %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Display Order</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ad in advertisements %}
+                    <tr>
+                        <td>
+                            {% if ad.banner_image %}
+                            <img src="{{ ad.banner_image.url }}" alt="{{ ad.title }}" class="ad-image">
+                            {% else %}
+                            <div
+                                style="width: 80px; height: 50px; background: #e5e5e5; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 12px;">
+                                No Image</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ ad.title|default:"Untitled" }}</td>
+                        <td>
+                            <span class="badge {% if ad.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                                {{ ad.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </td>
+                        <td>{{ ad.display_order }}</td>
+                        <td>{{ ad.start_date|date:"M d, Y"|default:"-" }}</td>
+                        <td>{{ ad.end_date|date:"M d, Y"|default:"-" }}</td>
+                        <td>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="ad_id" value="{{ ad.id }}">
+                                <button type="submit" name="action" value="toggle"
+                                    class="btn btn-sm {% if ad.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                    {{ ad.is_active|yesno:"Deactivate,Activate" }}
+                                </button>
+                            </form>
+                            <form method="POST" style="display: inline;"
+                                onsubmit="return confirm('Are you sure you want to delete this advertisement?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="ad_id" value="{{ ad.id }}">
+                                <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-ad"></i>
+                </div>
+                <p>No advertisements yet. Click "Add New Advertisement" to create one.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Advertisement Modal -->
+<div class="modal" id="adModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="card-title"><i class="fas fa-plus-circle me-2"></i>Add New Advertisement</h3>
+            <button class="close-modal" onclick="hideModal()">&times;</button>
+        </div>
+        <form method="POST" enctype="multipart/form-data" action="{% url 'mobile_advertisement_create' %}">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Row 1 -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Title</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                                <input type="text" name="title" class="form-control"
+                                    placeholder="Enter Advertisement Title" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Link URL (Optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                <input type="text" name="link_url" class="form-control"
+                                    placeholder="https://example.com">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Display Order</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-sort-numeric-down"></i></span>
+                                <input type="number" name="display_order" class="form-control" value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Start Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-plus"></i></span>
+                                <input type="date" name="start_date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">End Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-minus"></i></span>
+                                <input type="date" name="end_date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <div class="input-group" style="background: transparent; border: none;">
+                                <label
+                                    style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; width: 100%;">
+                                    <input type="checkbox" name="is_active" checked style="width: 18px; height: 18px;">
+                                    <span style="font-size: 14px; font-weight: 500;">Active</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Description -->
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                <textarea name="description" class="form-control" rows="2"
+                                    placeholder="Enter Advertisement Description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: Banner Image -->
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label class="form-label">Banner Image</label>
+                            <div class="p-3 border rounded bg-light" style="border-style: dashed !important;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div
+                                        style="width: 50px; height: 50px; background: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6b7280;">
+                                        <i class="fas fa-image fa-lg"></i>
+                                    </div>
+                                    <div style="flex-grow: 1;">
+                                        <input type="file" name="banner_image" class="form-control" accept="image/*"
+                                            required style="background: white;">
+                                        <small class="text-muted mt-1 d-block">Recommended size: 1200x600px (Max
+                                            2MB)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: #f8fafc; border-radius: 0 0 12px 12px;">
+                <button type="button" class="btn" style="background: #e5e7eb; color: #374151;"
+                    onclick="hideModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 40px;">Create Advertisement</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showModal() {
+        document.getElementById('adModal').classList.add('show');
+    }
+
+    function hideModal() {
+        document.getElementById('adModal').classList.remove('show');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('adModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            hideModal();
+        }
+    });
+</script>
+{% endblock %}

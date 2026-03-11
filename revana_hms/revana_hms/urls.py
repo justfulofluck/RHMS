@@ -31,13 +31,13 @@ from doctors.views import (
     DoctorAvailabilityViewSet as DoctorAvailabilityFromDoctors,
     DoctorAvailabilityViewSet as DoctorAvailabilityFromDoctors,
     PublicAvailabilityViewSet,
-    doctor_login_view
+    doctor_login_view,
 )
 from appointments.views import (
     AppointmentViewSet,
     DoctorAvailabilityViewSet as DoctorAvailabilityFromAppointments,
     CalendarView,
-    MobileBookingView
+    MobileBookingView,
 )
 from hospitals.views import DepartmentViewSet, TreatmentViewSet, RegisterView
 from core.views import test_auth, universal_search
@@ -45,59 +45,61 @@ from accounts.views import logout_view, universal_login_view
 
 # DRF Router setup
 router = DefaultRouter()
-router.register(r'doctors', DoctorViewSet, basename='doctor')
-router.register(r'availability', DoctorAvailabilityFromDoctors, basename='availability')
-router.register(r'public-availability', PublicAvailabilityViewSet, basename='public-availability')
-router.register(r'appointments', AppointmentViewSet, basename='appointment')
-router.register(r'doctor-availabilities', DoctorAvailabilityFromAppointments, basename='doctor-availability')
-router.register(r'departments', DepartmentViewSet, basename='department')
-router.register(r'treatments', TreatmentViewSet, basename='treatment')
+router.register(r"doctors", DoctorViewSet, basename="doctor")
+router.register(r"availability", DoctorAvailabilityFromDoctors, basename="availability")
+router.register(
+    r"public-availability", PublicAvailabilityViewSet, basename="public-availability"
+)
+router.register(r"appointments", AppointmentViewSet, basename="appointment")
+router.register(
+    r"doctor-availabilities",
+    DoctorAvailabilityFromAppointments,
+    basename="doctor-availability",
+)
+router.register(r"departments", DepartmentViewSet, basename="department")
+router.register(r"treatments", TreatmentViewSet, basename="treatment")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('frontend/images/Favicon.png'))),
-
+    path("admin/", admin.site.urls),
+    path(
+        "favicon.ico",
+        RedirectView.as_view(
+            url=staticfiles_storage.url("frontend/images/Favicon.png")
+        ),
+    ),
     # JWT Auth
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # Core API
-    path('api/test-auth/', test_auth),
-    path('api/universal-search/', universal_search, name='universal_search'),
-    
+    path("api/test-auth/", test_auth),
+    path("api/universal-search/", universal_search, name="universal_search"),
     # Global Login/Logout (prevents 500 and 404 errors)
-    path('login/', universal_login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
-
+    path("login/", universal_login_view, name="login"),
+    path("logout/", logout_view, name="logout"),
     # App-specific routes
-    path('hospitals/', include('hospitals.urls')),
-    path('api/admin/', include('accounts.admin_urls')),
-    path('api/accounts/', include('accounts.api_urls')),
-    path('api/hospitals/', include('hospitals.api_urls')),
-    path('accounts/', include('accounts.urls')),
-    path('inbox/notifications/', include('notifications.urls', namespace='notifications')),
-    path('api/appointments/', include('appointments.urls')),
-    path('appointments/', include('appointments.urls')),
-
+    path("hospitals/", include("hospitals.urls")),
+    path("api/admin/", include("accounts.admin_urls")),
+    path("api/accounts/", include("accounts.api_urls")),
+    path("api/hospitals/", include("hospitals.api_urls")),
+    path("api/advertisements/", include("advertisements.api_urls")),
+    path("accounts/", include("accounts.urls")),
+    path("api/appointments/", include("appointments.urls")),
+    path("appointments/", include("appointments.urls")),
     # DRF router endpoints
-    path('api/', include(router.urls)),
-
+    path("api/", include(router.urls)),
     # Other views
-    path('register/', RegisterView.as_view(), name='register'),
-    path('calendar/', CalendarView.as_view(), name='calendar-view'),
-    path('mobile/book/', MobileBookingView.as_view(), name='mobile-booking'),
-
+    path("register/", RegisterView.as_view(), name="register"),
+    path("calendar/", CalendarView.as_view(), name="calendar-view"),
+    path("mobile/book/", MobileBookingView.as_view(), name="mobile-booking"),
     # Frontend and doctor modules
-    path('', include('frontend.urls')),
-    path('patients/', include('patients.urls')),
-    path('hospital/doctors/', include('doctors.urls')),
-
+    path("", include("frontend.urls")),
+    path("patients/", include("patients.urls")),
+    path("hospital/doctors/", include("doctors.urls")),
     # Homepage
-    path('', include('frontend.urls')),
-    path('', include('appointments.urls')),
-    path('admin/', admin.site.urls),
+    path("", include("frontend.urls")),
+    path("", include("appointments.urls")),
+    path("admin/", admin.site.urls),
 ]
 
 # Media files
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
