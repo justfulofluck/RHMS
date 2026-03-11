@@ -38,8 +38,11 @@ def patient_register_page(request):
 def register_patient(request):
     if request.method == "POST":
         try:
-            print(f"DEBUG: Register API Body: {request.body}")
-            data = json.loads(request.body.decode("utf-8"))
+            # Handle both JSON and Form Data
+            if request.content_type == 'application/json':
+                data = json.loads(request.body.decode("utf-8"))
+            else:
+                data = request.POST
 
             email = data.get("email")
             password = data.get("password")
@@ -50,12 +53,12 @@ def register_patient(request):
             phone = data.get("phone") or data.get("phone_number")
             address = data.get("address")
 
+            print(f"DEBUG: Registering patient {email} with name {name}")
+
             if not email:
-                print("DEBUG: Email missing in request")
                 return JsonResponse({"message": "Email is required."}, status=400)
 
             if User.objects.filter(email=email).exists():
-                print(f"DEBUG: Email {email} already registered")
                 return JsonResponse({"message": "Email already registered!"}, status=400)
 
             # Create User

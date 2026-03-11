@@ -91,14 +91,11 @@ urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path("calendar/", CalendarView.as_view(), name="calendar-view"),
     path("mobile/book/", MobileBookingView.as_view(), name="mobile-booking"),
-    # Frontend and doctor modules
+    # Frontend and modules
     path("", include("frontend.urls")),
     path("patients/", include("patients.urls")),
     path("hospital/doctors/", include("doctors.urls")),
-    # Homepage
-    path("", include("frontend.urls")),
     path("", include("appointments.urls")),
-    path("admin/", admin.site.urls),
 ]
 
 # Media files
